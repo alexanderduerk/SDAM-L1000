@@ -7,6 +7,7 @@ const sqlite = require('sqlite');
 const sqlite3 = require('sqlite3');
 
 const Cells = require('./cells');
+const Mainviews = require('./mainviews');
 
 // Set the view engine to EJS
 app.set('view engine', 'ejs');
@@ -39,6 +40,32 @@ app.post('/cells', async (req, res) => {
     const newCell = await CellInfo.createOne(db);
     console.log(`Created new Cell record:\n${newCell}`);
     res.json(newCell);
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+app.post('/mainviews', async (req, res) => {
+  let db;
+  try {
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+    console.log('Connected successfully');
+    // Log the request body to check its contents
+    console.log('Request Body:', req.body);
+    // Create a new instance of the Cell class
+    const MViews = new Mainviews(req.body);
+    // Call Create One on the instance
+    const newMainviews = await MViews.createOne(db);
+    console.log(`Created new Cell record:\n${newMainviews}`);
+    res.json(newMainviews);
   } catch (err) {
     console.log(err);
     res.status(400).send('Internal server error');

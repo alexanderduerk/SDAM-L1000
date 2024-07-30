@@ -7,20 +7,27 @@ This project aims to create a proper sql implementation of the L1000 dataset, av
 ## SQL Table structure
 
 ### Main search table:
+
 #### instinfo
+
 - pert_id
 - cell_iname
 - pert_type
 
-
 #### siginfo
+
 - ss_ngene
 - tas
 
 #### foreign keys
+
 - cell_iname --> cell_info
 
 #### primary key
-- cell_iname = primary key
-Test
 
+- cell_iname = primary key
+  Test
+
+# Dataclasses for every table
+
+The dataclasses created for this RESTApi will be located in

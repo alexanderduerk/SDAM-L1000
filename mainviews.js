@@ -16,24 +16,22 @@ class Mainviews {
     this.ss_ngene = keyValuePairs.ss_ngene;
   }
 
-  async createOne(keyValuePairs, db_connection) {
+  async createOne(db_connection) {
     // Prepare the SQL statement:
     const sql =
-      'INSERT INTO DATABASE ' +
-      '(cell_iname, pert_id, gene_symbol, ss_ngene) VALUES ' +
-      '(?, ?, ?, ?)';
+      'INSERT INTO mainviews (cell_iname, pert_id, gene_symbol, ss_ngene) VALUES(?, ?, ?, ?)';
     // Execute the SQL statement with the argument values:
     const db_res = await db_connection.run(
       sql,
-      keyValuePairs.cell_iname,
-      keyValuePairs.pert_id,
-      keyValuePairs.gene_symbol,
-      keyValuePairs.ss_ngene
+      this.cell_iname,
+      this.pert_id,
+      this.gene_symbol,
+      this.ss_ngene
     );
     // Read out the just inserted new city record and return it:
     const new_pert = await db_connection.get(
-      'SELECT * FROM pert_id WHERE pert_id = ?',
-      keyValuePairs.city_ID
+      'SELECT * FROM mainviews WHERE pert_id = ?',
+      this.pert_id
     );
     return new_pert;
   }
@@ -86,3 +84,5 @@ class Mainviews {
     return new Mainviews(db_res);
   }
 }
+
+module.exports = Mainviews;

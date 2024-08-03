@@ -134,6 +134,7 @@ config.json
 
 # ignore the db
 l1000.db
+database.db
 *.sql
 
 # ignore the jupyter notebook

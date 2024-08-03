@@ -22,20 +22,24 @@ const cellinfotypes = {
   cell_alias: 'text',
 };
 
-// Check if the Field is a text field
 function isTextField(field) {
   const fieldType = cellinfotypes[field];
   return fieldType === 'text';
 }
 
-// Translate a search triplet to SQL
-function translateSearchTripletToSQL(triplet) {
-  const encapsulateVal = isTextField(triplet.field);
-  if (isTextField(triplet.val)) {
-    return `(${triplet.field} ${triplet.op} "${triplet.val}")`;
+function escapeValue(value, isText) {
+  if (isText) {
+    // Implement proper escaping for text values (e.g., using parameterized queries)
+    return `'${value}'`;
   } else {
-    return `(${triplet.field} ${triplet.op} ${triplet.val})`;
+    return value;
   }
+}
+
+function translateSearchTripletToSQL(triplet) {
+  const isText = isTextField(triplet.field);
+  const escapedVal = escapeValue(triplet.val, isText);
+  return `(${triplet.field} ${triplet.op} ${escapedVal})`;
 }
 
 // Translate the search argument to SQL

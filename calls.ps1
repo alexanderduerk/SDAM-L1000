@@ -7,7 +7,7 @@ $DATA = @{
     donorAgeDeath = 72
     donorDiseaseAgeOnset = 67
     doublingTime = 72
-    growthMedium = "EMEM; 10% FBS ;.01mg/ml Bovine Insulin"
+    growthMedium = "EMEM"
     providerCatalogId = "XYZ123"
     featureId = "c-438"
     cellType = "tumor"
@@ -31,11 +31,3 @@ Write-Output $response
 
 $apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_iname&op==&val=MCF7"
 $response = Invoke-RestMethod -Method Get -Uri $apiUrl
-
-if ($response.StatusCode -eq 200) {
-    Write-Host "Request successful"
-    $data = ConvertFrom-Json $response.Content
-    Write-Host $data
-} else {
-    Write-Host "Request failed: $($response.StatusCode)"
-}

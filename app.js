@@ -78,6 +78,7 @@ app.get('/cells/search', async (req, res) => {
     // Query the db
     const cells = await Cells.search(searchArg, undefined, undefined, db);
 
+    console.log(`Found Cells:`);
     console.log(cells);
 
     res.json(cells);

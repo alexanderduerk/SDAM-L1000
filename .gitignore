@@ -136,6 +136,7 @@ config.json
 l1000.db
 database.db
 *.sql
+.DS_Store
 
 # ignore the jupyter notebook
 load_table.ipynb

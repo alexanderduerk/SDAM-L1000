@@ -31,3 +31,7 @@ Write-Output $response
 
 $apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_iname&op==&val=MCF7"
 $response = Invoke-RestMethod -Method Get -Uri $apiUrl
+
+# Make a delete request
+$API_URL = "http://127.0.0.1:3000/cells/MCF7"
+$response = Invoke-RestMethod -Method Delete -Uri $API_URL 

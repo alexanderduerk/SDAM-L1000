@@ -77,9 +77,9 @@ class CellInfos {
    * @param {dbconnection, celliname}
    */
   // sql statement
-  async deleteOne(dbconnection, celliname) {
+  static async deleteOne(dbconnection, celliname) {
     const sql = 'DELETE FROM cellinfos WHERE cell_iname = ?';
-    const dbres = await dbconnection.run(celliname);
+    const dbres = await dbconnection.run(sql, `${celliname}`);
     // return a console.log that the given cell was deleted
     console.log(`Cell with ${celliname} was deleted`);
   }
@@ -88,9 +88,9 @@ class CellInfos {
    * Update Function for the cellinfos table
    * @param {dbconnection, celliname, column, newvalue}
    */
-  async updateOne(dbconnection, celliname, column, newvalue) {
-    const sql = `UPDATE cellinfos SET ${column} = ? WHERE ${column} = ${celliname}`;
-    const dbres = await dbconnection.run(newvalue);
+  static async updateOne(dbconnection, celliname, column, newvalue) {
+    const sql = `UPDATE cellinfos SET ${column} = ? WHERE ${column} = "${celliname}"`;
+    const dbres = await dbconnection.run(sql, newvalue);
     // return the newly updated Row
     const updatedCell = await dbconnection.get(
       'SELECT * FROM cellinfos WHERE cell_iname = ?',

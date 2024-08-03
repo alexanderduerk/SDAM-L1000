@@ -1,11 +1,5 @@
-# Start the Node.js application in the background
-Start-Process -NoNewWindow -FilePath "node" -ArgumentList "app.js"
-
-# Give the server a moment to start
-Start-Sleep -Seconds 5
-
-# Define the API URL and data
-$API_URL = "http://localhost:3000/cells"
+# Define the API URL and data for creating a cell record
+$API_URL = "http://127.0.0.1:3000/cells"  # Use 127.0.0.1 instead of localhost
 $DATA = @{
     cell_iname = "MCF7"
     cellosaurusId = "CVCL_0031"
@@ -31,7 +25,26 @@ $DATA = @{
 
 # Make a POST request to create a new cell record
 $response = Invoke-RestMethod -Method Post -Uri $API_URL -ContentType "application/json" -Body $DATA
-
-# Output the response to the terminal
 Write-Output "Response from POST /cells:"
 Write-Output $response
+
+# Replace with your actual API URL
+$apiUrl = "http://localhost:3000/cells"
+
+# Sample search query
+$searcharg = @{
+    field = "cell_iname"
+    op = "=="
+    val = "MCF7"
+} | ConvertTo-Json
+
+# Send the POST request
+$response = Invoke-RestMethod -Method Post -Uri $apiUrl -ContentType "application/json" -Body $searcharg
+
+# Check the response status code
+if ($response.StatusCode -eq 200) {
+    Write-Host "Search successful"
+    # Parse the response body to verify the results
+} else {
+    Write-Host "Search failed: $($response.StatusCode) $($response.StatusDescription)"
+}

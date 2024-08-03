@@ -1,3 +1,4 @@
+const searchArg = require('./searchargs.js');
 /**
  * Datamodel defines all data for the cellinfos table
  */
@@ -36,11 +37,11 @@ class CellInfos {
    * @param {instance}
    */
 
-  async createOne(db_connection) {
+  async createOne(dbconnection) {
     const sql =
       'INSERT INTO cellinfos (cell_iname, cellosaurus_id, donor_age, donor_age_death, donor_disease_age_onset, doubling_time, growth_medium, provider_catalog_id, feature_id, cell_type, donor_ethnicity, donor_sex, donor_tumor_phase, cell_lineage, primary_disease, subtype, provider_name, growth_pattern, ccle_name, cell_alias) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     // Execute SQL statement with the instanced values
-    const db_res = await db_connection.run(
+    const dbres = await dbconnection.run(
       sql,
       this.cell_iname,
       this.cellosaurus_id,
@@ -64,11 +65,11 @@ class CellInfos {
       this.cell_alias
     );
     // return the newly inserted cell
-    const new_cell = await db_connection.get(
+    const newcell = await dbconnection.get(
       'SELECT * FROM cellinfos WHERE cell_iname = ?',
       this.cell_iname
     );
-    return new_cell;
+    return newcell;
   }
 
   /**
@@ -91,13 +92,30 @@ class CellInfos {
     const sql = `UPDATE cellinfos SET ${column} = ? WHERE ${column} = ${celliname}`;
     const dbres = await dbconnection.run(newvalue);
     // return the newly updated Row
-    const updatedCell = await.dbconnection.get(
+    const updatedCell = await dbconnection.get(
       'SELECT * FROM cellinfos WHERE cell_iname = ?',
       celliname
     );
     return updatedCell;
   }
-  
+
+  /**
+   * Reads cellrecord from the database
+   */
+  static async search(searcharg, orderarg, paginationarg, dbconnection) {
+    const searchSql =
+      searcharg !== undefined && searcharg !== null
+        ? searchArg.translateToSQL(searcharg, 'cellinfos')
+        : 'SELECT * FROM cellinfos';
+    console.log(
+      `SQL generated to search Cellinfos:\n${JSON.stringify(searchSql)}`
+    );
+
+    // Query the database
+    const dbResult = await dbconnection.all(searchSql);
+    // Done
+    return dbResult;
+  }
 }
 
 module.exports = CellInfos;

@@ -24,6 +24,10 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
+/**
+ * All Routes connected to the cellinfos table
+ * This will include Update, Delete and Search
+ */
 app.post('/cells', async (req, res) => {
   let db;
   try {
@@ -46,6 +50,73 @@ app.post('/cells', async (req, res) => {
   } finally {
     if (db) {
       await db.close();
+    }
+  }
+});
+
+/**
+ * Search Request for the Cellinfos table
+ */
+app.get('/cells', async (req, res) => {
+  let db;
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Obtain the search arg
+    const searcharg = req.body.searcharg;
+
+    // Query the db
+    const cells = await Cells.search(searcharg, undefined, undefined, db);
+
+    console.log(cells);
+
+    res.json(cells);
+
+    // Return the result:
+    // if ( req.accepts('html') ) {
+    //  ejs.
+    // }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+/**
+ * Delete Request for Cellinfos table
+ */
+// Route to handle DELETE requests to /cells/:name
+app.delete('/cells/:name', async (req, res) => {
+  let db;
+  try {
+    // Connect to the Database
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Extract the cell name from the request parameters
+    const celliname = req.params.name;
+
+    // Call the deleteOne method from the Cellinfos class
+    await Cells.deleteOne(db, celliname);
+
+    // Send a success response
+    res.status(200).send(`Cell with ${celliname} was deleted`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  } finally {
+    if (db) {
+      await db.close(); // Close the database connection if it was opened
     }
   }
 });

@@ -57,8 +57,17 @@ app.post('/cells', async (req, res) => {
 /**
  * Search Request for the Cellinfos table
  */
-app.get('/cells', async (req, res) => {
+app.get('/cells/search', async (req, res) => {
   let db;
+  const field = req.query.field;
+  const op = req.query.op;
+  const val = req.query.val;
+
+  const searchArg = {
+    field: field,
+    op: op,
+    val: val,
+  };
   try {
     // Connect to db
     db = await sqlite.open({
@@ -66,11 +75,8 @@ app.get('/cells', async (req, res) => {
       driver: sqlite3.Database,
     });
 
-    // Obtain the search arg
-    const searcharg = req.body.searcharg;
-
     // Query the db
-    const cells = await Cells.search(searcharg, undefined, undefined, db);
+    const cells = await Cells.search(searchArg, undefined, undefined, db);
 
     console.log(cells);
 

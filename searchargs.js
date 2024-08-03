@@ -31,7 +31,11 @@ function isTextField(field) {
 // Translate a search triplet to SQL
 function translateSearchTripletToSQL(triplet) {
   const encapsulateVal = isTextField(triplet.field);
-  return `(${triplet.field} ${triplet.op} ${encapsulateVal + triplet.val + encapsulateVal})`;
+  if (isTextField(triplet.val)) {
+    return `(${triplet.field} ${triplet.op} "${triplet.val}")`;
+  } else {
+    return `(${triplet.field} ${triplet.op} ${triplet.val})`;
+  }
 }
 
 // Translate the search argument to SQL
@@ -40,7 +44,7 @@ function translateToSQL(searchArg, table) {
   const header = `SELECT * FROM ${table} WHERE `;
   const searchSql = translateSearchTripletToSQL(searchArg);
   // combine both
-  return `${header} ${searchSql}`;
+  return `${header}${searchSql}`;
 }
 
 // Recursive translation

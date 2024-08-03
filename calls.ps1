@@ -28,23 +28,14 @@ $response = Invoke-RestMethod -Method Post -Uri $API_URL -ContentType "applicati
 Write-Output "Response from POST /cells:"
 Write-Output $response
 
-# Replace with your actual API URL
-$apiUrl = "http://localhost:3000/cells"
 
-# Sample search query
-$searcharg = @{
-    field = "cell_iname"
-    op = "=="
-    val = "MCF7"
-} | ConvertTo-Json
+$apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_iname&op==&val=MCF7"
+$response = Invoke-RestMethod -Method Get -Uri $apiUrl
 
-# Send the POST request
-$response = Invoke-RestMethod -Method Post -Uri $apiUrl -ContentType "application/json" -Body $searcharg
-
-# Check the response status code
 if ($response.StatusCode -eq 200) {
-    Write-Host "Search successful"
-    # Parse the response body to verify the results
+    Write-Host "Request successful"
+    $data = ConvertFrom-Json $response.Content
+    Write-Host $data
 } else {
-    Write-Host "Search failed: $($response.StatusCode) $($response.StatusDescription)"
+    Write-Host "Request failed: $($response.StatusCode)"
 }

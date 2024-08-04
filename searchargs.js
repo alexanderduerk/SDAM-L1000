@@ -1,25 +1,21 @@
 // Create a lookup table of the cellsinfo columns and their types
 const cellinfotypes = {
-  cell_iname: 'text',
+  cell_name: 'text',
   cellosaurus_id: 'text',
-  donor_age: 'int',
-  donor_age_death: 'int',
-  donor_disease_age_onset: 'int',
-  doubling_time: 'float',
+  donor_age: 'number',
+  donor_age_death: 'number',
+  donor_disease_onset: 'number',
+  doubling_time: 'number',
   growth_medium: 'text',
-  provider_catalog_id: 'text',
-  feature_id: 'text',
   cell_type: 'text',
   donor_ethnicity: 'text',
-  donor_sex: 'text',
+  donor_sex: 'boolean',
   donor_tumor_phase: 'text',
   cell_lineage: 'text',
   primary_disease: 'text',
-  subtype: 'text',
+  subtype_disease: 'text',
   provider_name: 'text',
   growth_pattern: 'text',
-  ccle_name: 'text',
-  cell_alias: 'text',
 };
 
 function isTextField(field) {
@@ -29,17 +25,41 @@ function isTextField(field) {
 
 function escapeValue(value, isText) {
   if (isText) {
-    // Implement proper escaping for text values (e.g., using parameterized queries)
+    // Implement proper escaping for text values
     return `'${value}'`;
-  } else {
-    return value;
   }
+  return value;
 }
 
 function translateSearchTripletToSQL(triplet) {
   const isText = isTextField(triplet.field);
   const escapedVal = escapeValue(triplet.val, isText);
-  return `(${triplet.field} ${triplet.op} ${escapedVal})`;
+  switch (triplet.op) {
+    case 'contains':
+      return `${triplet.field} LIKE '%${triplet.val}%'`;
+    case 'startswith':
+      return `${triplet.field} LIKE '${triplet.val}%'`;
+    case 'endswith':
+      return `${triplet.field} LIKE '%${triplet.val}'`;
+    case '=': // or any other default operator
+      return `${triplet.field} = ${escapedVal}`;
+    case '!=':
+      return `${triplet.field} != ${escapedVal}`;
+    case '>':
+      return `${triplet.field} > ${escapedVal}`;
+    case '<':
+      return `${triplet.field} < ${escapedVal}`;
+    case '>=':
+      return `${triplet.field} >= ${escapedVal}`;
+    case '<=':
+      return `${triplet.field} <= ${escapedVal}`;
+    case 'in':
+      return `${triplet.field} IN (${escapedVal})`;
+    case 'notin':
+      return `${triplet.field} NOT IN (${escapedVal})`;
+    default:
+      throw new Error(`Unsupported operator: ${triplet.op}`);
+  }
 }
 
 // Translate the search argument to SQL
@@ -59,9 +79,8 @@ function translateToSQLRecursive(searchArg) {
     const descSqlArr = searchArg.descendants.map(translateToSQLRecursive);
     const sql = descSqlArr.reduce((a, c) => `${a} ${searchArg.op} ${c}`);
     return `( ${sql} )`;
-  } else {
-    return translateSearchTripletToSQL(searchArg);
   }
+  return translateSearchTripletToSQL(searchArg);
 }
 
 module.exports = { translateToSQL };

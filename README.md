@@ -1,33 +1,16 @@
-# SDAM L1000 Datamodel and Website
+# SDAM RESTFull API for L1000 Data
 
-This project aims to create a proper sql implementation of the L1000 dataset, avilable within the browser using Node.js and html. The server structure is based on the express module.
+The [L1000 project](https://www.broadinstitute.org/publications/broad158356), started by the the research group around Todd Golub at the Broadinstitute, contains **Transcriptomic Data**.  
+The goal of this project is to provide a RESTFul API, which allows reading, writing, updating and deleting Data from the different **datamodels** created within this project.
 
-## SQL L1000
+## Structure
 
-## SQL Table structure
+The project is structured into different parts:
 
-### Main search table:
+1. Understanding the Data and create appropriate Tables using SQL (SQLite3)
+2. Create corresponding classes for every datamodel using Javascript
+3. Bind those classes and their corresponding functions to routes within an **express server**
+4. Test each route using **Shell Script**
+5. Handle **User Input** by creating a responsive Graphical user interface (GUI)
 
-#### instinfo
-
-- pert_id
-- cell_iname
-- pert_type
-
-#### siginfo
-
-- ss_ngene
-- tas
-
-#### foreign keys
-
-- cell_iname --> cell_info
-
-#### primary key
-
-- cell_iname = primary key
-  Test
-
-# Dataclasses for every table
-
-The dataclasses created for this RESTApi will be located in
+## SQL Tables

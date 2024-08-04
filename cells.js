@@ -79,12 +79,17 @@ class Cells {
     const sql = 'DELETE FROM cells WHERE cell_id = ?';
     const dbres = await dbconnection.run(sql, `${cellid}`);
     // return a console.log that the given cell was deleted
-    console.log(`Cell with ${cellid} was deleted`);
+    console.log(`Cell with cell_id: ${cellid} was deleted`);
   }
 
   /**
-   * Update Function for the cellinfos table
-   * @param {dbconnection, cellname, column, newvalue}
+   * Updates a single row in the "cells" table with the given id, column, and new value.
+   *
+   * @param {object} dbconnection - The database connection object.
+   * @param {number} id - The id of the row to update.
+   * @param {string} column - The column to update.
+   * @param {any} newvalue - The new value to set.
+   * @return {Promise<object>} - A Promise that resolves to the updated row.
    */
   static async updateOne(dbconnection, id, column, newvalue) {
     const sql = `UPDATE cells SET ${column} = ? WHERE cell_id = ${id}`;
@@ -98,7 +103,13 @@ class Cells {
   }
 
   /**
-   * Reads cellrecord from the database
+   * Reads cellrecord from the database based on the provided search parameters.
+   *
+   * @param {object} searcharg - The search parameters to filter the results.
+   * @param {string} orderarg - The order in which to sort the results.
+   * @param {object} paginationarg - The pagination parameters for the results.
+   * @param {object} dbconnection - The database connection object.
+   * @return {Promise<Array>} - A Promise that resolves to an array of cell records that match the search criteria.
    */
   static async search(searcharg, orderarg, paginationarg, dbconnection) {
     const searchSql =
@@ -109,6 +120,7 @@ class Cells {
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
     // Done
+    console.log(dbResult);
     return dbResult;
   }
 }

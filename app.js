@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 const sqlite = require('sqlite');
 const sqlite3 = require('sqlite3');
+const ejs = require('ejs');
 
 const Cells = require('./cells');
 const Mainviews = require('./mainviews');
@@ -59,14 +60,15 @@ app.post('/cells', async (req, res) => {
  */
 app.get('/cells/search', async (req, res) => {
   let db;
-  const field = req.query.field;
-  const op = req.query.op;
-  const val = req.query.val;
+  const { field, op, val, offset, limit, order } = req.query;
 
   const searchArg = {
     field: field,
     op: op,
     val: val,
+    offset: offset,
+    limit: limit,
+    order: order,
   };
   try {
     // Connect to db
@@ -80,13 +82,17 @@ app.get('/cells/search', async (req, res) => {
 
     console.log(`Found Cells:`);
     console.log(cells);
-
-    res.json(cells);
-
     // Return the result:
-    // if ( req.accepts('html') ) {
-    //  ejs.
-    // }
+    if (req.accepts('html')) {
+      ejs.renderFile('./views/cellstable.ejs', { cells }, {}, (err, str) => {
+        if (err) {
+          throw err;
+        }
+        res.send(str);
+      });
+    } else if (req.accepts('json')) {
+      res.json(cells);
+    }
   } catch (e) {
     console.error(e);
     res.status(500);
@@ -124,6 +130,35 @@ app.delete('/cells/:name', async (req, res) => {
   } finally {
     if (db) {
       await db.close(); // Close the database connection if it was opened
+    }
+  }
+});
+
+/**
+ * UpdateOne for the cells table
+ */
+app.patch('/cells', async (req, res) => {
+  let db;
+  try {
+    // Connect to the Database
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Extract the required parameters from the request parameters
+    const { cellid, columnname, newvalue } = req.body;
+    // Call the updateOne function from the cells class
+    const updatedCell = await Cells.updateOne(db, cellid, columnname, newvalue);
+    console.log(`Updated Cell record:`);
+    console.log(updatedCell);
+    res.json(updatedCell);
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+  } finally {
+    if (db) {
+      await db.close();
     }
   }
 });

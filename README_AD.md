@@ -32,7 +32,7 @@ We again looked at all Data available to us and decided to create new Tables whi
 
 ## Cells Table
 
-I created the cells table in the [l1000.sql file](l1000.sql), with guidance of the given metadata to the cellinfos csv file within the dataset. An in my eyes important approach was to not set a unique constrain to the cell_name column. This would prevent different media adaptions and growth pattern adaptions to be inserted in the database. But to still prevent duplicates a UNIQUE constrain is created based on those three columns. This allows for a control of duplicates and also the flexibility of cell adaptions.
+I created the cells table in the [l1000.sql file](l1000.sql), with guidance of the given metadata to the cellinfos csv file within the dataset. An in my eyes important approach was to not set a unique constrain to the cell_name column. This would prevent different media adaptions and growth pattern adaptions to be inserted in the database. But to still prevent duplicates a UNIQUE constrain is created based on cell_name, cell_type and growth_pattern, which were columns that didnt contained None values in the initial dataset. This allows for a control of duplicates and also the flexibility of cell adaptions.
 
 ### Cells class
 
@@ -43,4 +43,4 @@ The SQL placeholders are then dynamically created based on the amount of send va
 TODO ADD EXPLANATION FOR sh TEST INSTEAD OF PS1 TEST  
 The deleteOne function allows the deletion of a whole row by giving an id.  
 The updateOne function is exactly done as provided in the lecture it will update a given cell based on a column name and the entry id.  
-The search function needed to be adapted from the prvided code within the lecture. In the lecture we used the searcharchgs.js file to convert json args to proper sql statements and allow for operators. This was mainly adopted, as well as the static async implementation of the search.
+The search function needed to be adapted from the prvided code within the lecture. In the lecture we used the searcharchgs.js file to convert json args to proper sql statements and allow for operators. This was mainly adopted, as well as the static async implementation of the search. Changes were made to search the database for text specific args like contains, startswith and endswith. In those cases the value is already escaped and therefore the triplet.val could be used directly.

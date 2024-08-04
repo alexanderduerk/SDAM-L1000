@@ -64,9 +64,28 @@ function translateSearchTripletToSQL(triplet) {
 
 // Translate the search argument to SQL
 function translateToSQL(searchArg, table) {
+  let header;
   // Create a header (for every cellname the same)
-  const header = `SELECT * FROM ${table} WHERE `;
+  if (table === 'cells') {
+    header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
+  }
   const searchSql = translateSearchTripletToSQL(searchArg);
+  // Allow for pagination args if provided in the search
+  // containing the offset and limit
+  if (
+    searchArg.offset !== undefined &&
+    searchArg.limit !== undefined &&
+    searchArg.order === 'asc'
+  ) {
+    return `${header} ${searchSql} ORDER BY ${searchArg.field} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
+  }
+  if (
+    searchArg.offset !== undefined &&
+    searchArg.limit !== undefined &&
+    searchArg.order === 'desc'
+  ) {
+    return `${header} ${searchSql} ORDER BY ${searchArg.field} DESC LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
+  }
   // combine both
   return `${header}${searchSql}`;
 }

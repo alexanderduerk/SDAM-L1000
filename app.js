@@ -66,8 +66,8 @@ app.get('/cells/search', async (req, res) => {
     field: field,
     op: op,
     val: val,
-    offset: offset,
     limit: limit,
+    offset: offset,
     order: order,
   };
   try {

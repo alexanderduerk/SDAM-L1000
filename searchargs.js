@@ -86,6 +86,9 @@ function translateToSQL(searchArg, table) {
   ) {
     return `${header} ${searchSql} ORDER BY ${searchArg.field} DESC LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
   }
+  if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
+    return `${header} ${searchSql} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
+  }
   // combine both
   return `${header}${searchSql}`;
 }

@@ -111,7 +111,7 @@ class Cells {
    * @param {object} dbconnection - The database connection object.
    * @return {Promise<Array>} - A Promise that resolves to an array of cell records that match the search criteria.
    */
-  static async search(searcharg, orderarg, paginationarg, dbconnection) {
+  static async search(searcharg, limit, offset, dbconnection) {
     const searchSql =
       searcharg !== undefined && searcharg !== null
         ? searchArg.translateToSQL(searcharg, 'cells')

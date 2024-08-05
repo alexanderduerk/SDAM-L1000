@@ -61,16 +61,31 @@ app.post('/cells', async (req, res) => {
  */
 app.get('/cells/search', async (req, res) => {
   let db;
-  const { field, op, val, offset, limit, order } = req.query;
+  const { query, limit, offset, order } = req.query;
 
-  const searchArg = {
-    field: field,
-    op: op,
-    val: val,
-    limit: limit,
-    offset: offset,
-    order: order,
-  };
+  let searchArg = {};
+
+  if (query) {
+    try {
+      searchArg = JSON.parse(decodeURIComponent(query));
+    } catch (e) {
+      return res.status(400).send('Invalid query parameter');
+    }
+  } else {
+    // Use the simpler format if no complex query is provided
+    const { field, op, val } = req.query;
+    searchArg = {
+      field: field,
+      op: op,
+      val: val,
+    };
+  }
+
+  // Handle pagination and sorting parameters
+  if (limit) searchArg.limit = parseInt(limit);
+  if (offset) searchArg.offset = parseInt(offset);
+  if (order) searchArg.order = order;
+
   try {
     // Connect to db
     db = await sqlite.open({
@@ -79,7 +94,12 @@ app.get('/cells/search', async (req, res) => {
     });
 
     // Query the db
-    const cells = await Cells.search(searchArg, undefined, undefined, db);
+    const cells = await Cells.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
 
     console.log(`Found Cells:`);
     console.log(cells);
@@ -163,37 +183,6 @@ app.patch('/cells', async (req, res) => {
     }
   }
 });
-
-// Get Function for Pertubations db 
-app.get('/pertubations/:pert_id', async (req, res) => {
-  let db;
-  try {
-    db = await open ({
-      filename: `./l1000.db`, 
-      driver: sqlite3.Database
-    });
-    // Extract pert_id, column and newvalue from the request body 
-    const {pert_id} = req.params;
-  }
-  // Create new instance of the pertubagensget function
-  const Perturbagens = newPerturbagens();
-  // Call the retriveOne in get.function from pertubations.js to get the data
-  const perturbagen = await Perturbagens.retrieveOne(db, pert_id);
-  if (perturbagen) {
-    res.status(200).jon(perturbagen);
-  }
-  else {
-    res.status(404).send(`Pertubagen not found`);
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).send(`Internal server error`);
-    finally {
-      if (db) {
-        await db.close();
-      }
-    }
-  });
 
 // Post Function Pertubations
 app.post('/pertubations', async (req, res) => {

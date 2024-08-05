@@ -97,7 +97,7 @@ function translateToSQLRecursive(searchArg) {
     const sql = descSqlArr.join(` ${searchArg.op} `);
     return `( ${sql} )`;
   }
-  return translateSearchTripletToSQL(searchArg, typemapper);
+  return translateSearchTripletToSQL(searchArg);
 }
 
 // Translate the search argument to SQL

@@ -21,6 +21,7 @@ app.set('views', path.join(__dirname, 'views'));
 // allow static file useage
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Basic route
 app.get('/', (req, res) => {
@@ -60,32 +61,25 @@ app.post('/cells', async (req, res) => {
 /**
  * Search Request for the Cellinfos table
  */
-app.get('/cells/search', async (req, res) => {
+app.post('/cells/search', async (req, res) => {
   let db;
-  const { query, limit, offset, order } = req.query;
+  const { limit, offset, order } = req.body; // Access body directly
 
   let searchArg = {};
 
-  if (query) {
-    try {
-      searchArg = JSON.parse(decodeURIComponent(query));
-    } catch (e) {
-      return res.status(400).send('Invalid query parameter');
-    }
-  } else {
-    // Use the simpler format if no complex query is provided
-    const { field, op, val } = req.query;
-    searchArg = {
-      field: field,
-      op: op,
-      val: val,
-    };
-  }
+  // No need for parsing query or handling a simpler format
+  const { field, op, val } = req.body;
+  searchArg = {
+    field,
+    op,
+    val,
+  };
 
   // Handle pagination and sorting parameters
-  if (limit) searchArg.limit = parseInt(limit);
-  if (offset) searchArg.offset = parseInt(offset);
-  if (order) searchArg.order = order;
+  searchArg.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
+  searchArg.offset = req.body.offset ? parseInt(req.body.offset) : undefined;
+  searchArg.order = req.body.order || undefined;
+  console.log(searchArg);
 
   try {
     // Connect to db
@@ -220,33 +214,25 @@ app.post('/genes', async (req, res) => {
 /**
  * Search Request for the Cellinfos table
  */
-app.get('/genes/search', async (req, res) => {
+app.post('/genes/search', async (req, res) => {
   let db;
-  const { query, limit, offset, order } = req.query;
+  const { limit, offset, order } = req.body; // Access body directly
 
   let searchArg = {};
 
-  if (query) {
-    try {
-      searchArg = JSON.parse(decodeURIComponent(query));
-    } catch (e) {
-      return res.status(400).send('Invalid query parameter');
-    }
-  } else {
-    // Use the simpler format if no complex query is provided
-    const { field, op, val } = req.query;
-    searchArg = {
-      field: field,
-      op: op,
-      val: val,
-    };
-  }
+  // No need for parsing query or handling a simpler format
+  const { field, op, val } = req.body;
+  searchArg = {
+    field,
+    op,
+    val,
+  };
 
   // Handle pagination and sorting parameters
-  if (limit) searchArg.limit = parseInt(limit);
-  if (offset) searchArg.offset = parseInt(offset);
-  if (order) searchArg.order = order;
-
+  searchArg.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
+  searchArg.offset = req.body.offset ? parseInt(req.body.offset) : undefined;
+  searchArg.order = req.body.order || undefined;
+  console.log(searchArg);
   try {
     // Connect to db
     db = await sqlite.open({
@@ -262,7 +248,7 @@ app.get('/genes/search', async (req, res) => {
       db
     );
 
-    console.log(`Found Cells:`);
+    console.log(`Found Genes:`);
     console.log(genes);
     // Return the result:
     if (req.accepts('html')) {

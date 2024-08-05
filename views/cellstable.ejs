@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+<link rel="stylesheet" href="/css/tablestyles.css" />
+<link rel="stylesheet" href="/css/style.css" />
+<nav class="navbar">
+      <div class="container">
+        <a href="#" class="logo">L1000</a>
+        <ul class="nav-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+        <div class="menu-toggle">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
+    </nav>
+<p>
+    <!-- Retrieve the columnnames from the json object and create the table header-->
+     <% const headers = Object.keys(cells[0]); %>  <table id="cellstable"> 
+        <thead>
+          <tr>
+            <% for (const header of headers) { %>
+              <th><%= header %></th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (const row of cells) { %>
+            <tr>
+              <% for (const value of Object.values(row)) { %>
+                <td><%= value %></td>
+              <% } %>
+            </tr>
+          <% } %>
+        </tbody>
+     </table>
+    </p>
+</body>
+</html>

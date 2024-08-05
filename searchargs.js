@@ -32,14 +32,15 @@ const genetypes = {
   feature_space: 'text',
 };
 
-const perturbagentypes = {
-  pert_name: 'text',
+// Create a lookup table of compound info columns and their types
+const compoundinfo_beta = {
+  pert_id: 'text',
   cmap_name: 'text',
-  gene_target: 'text',
+  target: 'text',
   moa: 'text',
   canonical_smiles: 'text',
   inchi_key: 'text',
-  compound_aliases: 'text',
+  compund_aliases: 'text',
 };
 
 function isTextField(field) {

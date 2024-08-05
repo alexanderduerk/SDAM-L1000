@@ -365,7 +365,8 @@ app.post('/pertubations', async (req, res) => {
     const Perturbagensinstance = new Perturbagens(req.body);
     // Call Create One on the instance
     const newperdid = await Perturbagensinstance.createOne(db);
-    console.log(`Created new Perturbagens record:\n${newperdid}`);
+    console.log(`Created new Perturbagens record:`);
+    console.log(newperdid);
     res.json(newperdid);
   } catch (err) {
     console.log(err);

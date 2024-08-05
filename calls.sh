@@ -1,6 +1,6 @@
-#!/bin/bash
+# !/bin/bash
 
-#Pertubagens POST request with JSON payload
+# Pertubagens POST request with JSON payload
 curl -X POST --header "Content-Type: application/json" \
   --data '{
     "pert_name": "Pert123",
@@ -14,6 +14,25 @@ curl -X POST --header "Content-Type: application/json" \
   http://localhost:3000/pertubations
 
 
+
+# Pertubagens PATCH request with JSON payload
 curl -X PATCH --header "Content-Type: application/json" \
   --data '{
-  "pert_id": "
+    "pertid": 1,
+    "column": "gene_target",
+    "newvalue": "GeneY"
+  }' \
+  http://localhost:3000/pertubations
+
+
+
+# Pertubagens SEARCH request with JSON payload
+curl -X PATCH --header "Content-Type: application/json" \
+  --data '{
+    "pertid": 1,
+    "column": "gene_target",
+    "newvalue": "GeneY"
+  }' \
+  http://localhost:3000/pertubations
+
+# Pertubagens DELETION request with JSON payload

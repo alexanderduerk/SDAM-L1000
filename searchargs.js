@@ -112,6 +112,16 @@ function translateToSQL(searchArg, table) {
     header = `SELECT entrez_id AS 'Entrez ID', gene_symbol AS 'Gene Symbol', gene_title AS 'Gene Title', gene_type AS 'Gene Type', src AS 'Source', feature_space AS 'Feature Space' FROM ${table} WHERE `;
     typemapper = genetypes;
   }
+  // Create a header (for pertubations)
+  if (table === 'pertubations') {
+    header = `SELECT pert_id AS 'ID', 
+    cmap_name AS 'HUGO',
+    target AS 'Gene',
+    moa AS 'mechanism',
+    canonical_smiles AS 'Structure',
+    inchi_key AS 'inCHi identifyer',
+    compound_aliases AS 'compound',`;
+  }
 
   // Use translateToSQLRecursive to handle nested queries
   const searchSql = translateToSQLRecursive(searchArg);

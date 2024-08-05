@@ -8,6 +8,7 @@ const sqlite3 = require('sqlite3');
 const ejs = require('ejs');
 
 const Cells = require('./cells');
+const Genes = require('./genes');
 const Mainviews = require('./mainviews');
 const Perturbagens = require('./pertubations');
 
@@ -105,12 +106,17 @@ app.get('/cells/search', async (req, res) => {
     console.log(cells);
     // Return the result:
     if (req.accepts('html')) {
-      ejs.renderFile('./views/cellstable.ejs', { cells }, {}, (err, str) => {
-        if (err) {
-          throw err;
+      ejs.renderFile(
+        './views/cellstable.ejs',
+        { data: cells },
+        {},
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
         }
-        res.send(str);
-      });
+      );
     } else if (req.accepts('json')) {
       res.json(cells);
     }
@@ -184,6 +190,166 @@ app.patch('/cells', async (req, res) => {
   }
 });
 
+// Genes
+app.post('/genes', async (req, res) => {
+  let db;
+  try {
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+    console.log('Connected successfully');
+    // Log the request body to check its contents
+    console.log('Request Body:', req.body);
+    // Create a new instance of the Cell class
+    const GeneInstance = new Genes(req.body);
+    // Call Create One on the instance
+    const newGene = await GeneInstance.createOne(db);
+    console.log(`Created new Cell record:\n${newGene}`);
+    res.json(newGene);
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+/**
+ * Search Request for the Cellinfos table
+ */
+app.get('/genes/search', async (req, res) => {
+  let db;
+  const { query, limit, offset, order } = req.query;
+
+  let searchArg = {};
+
+  if (query) {
+    try {
+      searchArg = JSON.parse(decodeURIComponent(query));
+    } catch (e) {
+      return res.status(400).send('Invalid query parameter');
+    }
+  } else {
+    // Use the simpler format if no complex query is provided
+    const { field, op, val } = req.query;
+    searchArg = {
+      field: field,
+      op: op,
+      val: val,
+    };
+  }
+
+  // Handle pagination and sorting parameters
+  if (limit) searchArg.limit = parseInt(limit);
+  if (offset) searchArg.offset = parseInt(offset);
+  if (order) searchArg.order = order;
+
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Query the db
+    const genes = await Genes.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
+
+    console.log(`Found Cells:`);
+    console.log(genes);
+    // Return the result:
+    if (req.accepts('html')) {
+      ejs.renderFile(
+        './views/cellstable.ejs',
+        { data: genes },
+        {},
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+    } else if (req.accepts('json')) {
+      res.json(genes);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+/**
+ * Delete Request for Cellinfos table
+ */
+// Route to handle DELETE requests to /cells/:name
+app.delete('/genes/:id', async (req, res) => {
+  let db;
+  try {
+    // Connect to the Database
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Extract the cell name from the request parameters
+    const genesId = req.params.name;
+
+    // Call the deleteOne method from the Cellinfos class
+    await Cells.deleteOne(db, genesId);
+
+    // Send a success response
+    res.status(200).send(`Cell with ${genesId} was deleted`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  } finally {
+    if (db) {
+      await db.close(); // Close the database connection if it was opened
+    }
+  }
+});
+
+/**
+ * UpdateOne for the cells table
+ */
+app.patch('/genes', async (req, res) => {
+  let db;
+  try {
+    // Connect to the Database
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Extract the required parameters from the request parameters
+    const { geneid, columnname, newvalue } = req.body;
+    // Call the updateOne function from the cells class
+    const updatedGene = await Cells.updateOne(db, geneid, columnname, newvalue);
+    console.log(`Updated Cell record:`);
+    console.log(updatedGene);
+    res.json(updatedGene);
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
 // Post Function Pertubations
 app.post('/pertubations', async (req, res) => {
   let db;
@@ -199,8 +365,7 @@ app.post('/pertubations', async (req, res) => {
     const Perturbagensinstance = new Perturbagens(req.body);
     // Call Create One on the instance
     const newperdid = await Perturbagensinstance.createOne(db);
-    console.log(`Created new Perturbagens record:`);
-    console.log(newperdid);
+    console.log(`Created new Perturbagens record:\n${newperdid}`);
     res.json(newperdid);
   } catch (err) {
     console.log(err);

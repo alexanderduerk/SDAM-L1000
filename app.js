@@ -61,16 +61,31 @@ app.post('/cells', async (req, res) => {
  */
 app.get('/cells/search', async (req, res) => {
   let db;
-  const { field, op, val, offset, limit, order } = req.query;
+  const { query, limit, offset, order } = req.query;
 
-  const searchArg = {
-    field: field,
-    op: op,
-    val: val,
-    limit: limit,
-    offset: offset,
-    order: order,
-  };
+  let searchArg = {};
+
+  if (query) {
+    try {
+      searchArg = JSON.parse(decodeURIComponent(query));
+    } catch (e) {
+      return res.status(400).send('Invalid query parameter');
+    }
+  } else {
+    // Use the simpler format if no complex query is provided
+    const { field, op, val } = req.query;
+    searchArg = {
+      field: field,
+      op: op,
+      val: val,
+    };
+  }
+
+  // Handle pagination and sorting parameters
+  if (limit) searchArg.limit = parseInt(limit);
+  if (offset) searchArg.offset = parseInt(offset);
+  if (order) searchArg.order = order;
+
   try {
     // Connect to db
     db = await sqlite.open({
@@ -79,7 +94,12 @@ app.get('/cells/search', async (req, res) => {
     });
 
     // Query the db
-    const cells = await Cells.search(searchArg, undefined, undefined, db);
+    const cells = await Cells.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
 
     console.log(`Found Cells:`);
     console.log(cells);

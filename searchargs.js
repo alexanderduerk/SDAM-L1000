@@ -1,3 +1,7 @@
+const { type } = require('express/lib/response');
+
+let typemapper;
+
 // Create a lookup table of the cellsinfo columns and their types
 const cellinfotypes = {
   cell_name: 'text',
@@ -18,8 +22,19 @@ const cellinfotypes = {
   growth_pattern: 'text',
 };
 
+const genetypes = {
+  entrez_id: 'number',
+  gene_symbol: 'text',
+  ensembl_id: 'text',
+  gene_title: 'text',
+  gene_type: 'text',
+  src: 'text',
+  feature_space: 'text',
+};
+
 function isTextField(field) {
-  const fieldType = cellinfotypes[field];
+  const fieldType = typemapper[field];
+  console.log(typemapper[field]);
   return fieldType === 'text';
 }
 
@@ -71,7 +86,7 @@ function translateToSQLRecursive(searchArg) {
     const sql = descSqlArr.join(` ${searchArg.op} `);
     return `( ${sql} )`;
   }
-  return translateSearchTripletToSQL(searchArg);
+  return translateSearchTripletToSQL(searchArg, typemapper);
 }
 
 // Translate the search argument to SQL
@@ -80,6 +95,11 @@ function translateToSQL(searchArg, table) {
   // Create a header (for every cellname the same)
   if (table === 'cells') {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
+    typemapper = cellinfotypes;
+  }
+  if (table === 'genes') {
+    header = `SELECT entrez_id AS 'Entrez ID', gene_symbol AS 'Gene Symbol', gene_title AS 'Gene Title', gene_type AS 'Gene Type', src AS 'Source', feature_space AS 'Feature Space' FROM ${table} WHERE `;
+    typemapper = genetypes;
   }
 
   // Use translateToSQLRecursive to handle nested queries

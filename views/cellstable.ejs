@@ -1,36 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L1000</title>
+  <link rel="stylesheet" href="/css/tablestyles.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
 <body>
-<link rel="stylesheet" href="/css/tablestyles.css" />
-<link rel="stylesheet" href="/css/style.css" />
-<nav class="navbar">
-      <div class="container">
-        <a href="#" class="logo">L1000</a>
-        <ul class="nav-links">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Services</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-        <div class="menu-toggle">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
-        </div>
+  <nav class="navbar">
+    <div class="container">
+      <a href="#" class="logo">L1000</a>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Services</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <div class="menu-toggle">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
       </div>
-    </nav>
-<p>
-    <!-- Retrieve the columnnames from the json object and create the table header-->
-     <% const headers = Object.keys(cells[0]); %>  <table id="cellstable"> 
+    </div>
+  </nav>
+
+  <main>
+    <% if (data && data.length > 0) { %>
+      <table>
         <thead>
           <tr>
-            <% for (const header of headers) { %>
+            <% for (const header of Object.keys(data[0])) { %>
               <th><%= header %></th>
             <% } %>
           </tr>
         </thead>
         <tbody>
-          <% for (const row of cells) { %>
+          <% for (const row of data) { %>
             <tr>
               <% for (const value of Object.values(row)) { %>
                 <td><%= value %></td>
@@ -38,7 +44,10 @@
             </tr>
           <% } %>
         </tbody>
-     </table>
-    </p>
+      </table>
+    <% } else { %>
+      <p>No data available</p>
+    <% } %>
+  </main>
 </body>
 </html>

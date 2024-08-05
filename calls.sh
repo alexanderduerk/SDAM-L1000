@@ -1,6 +1,6 @@
-#!/bin/bash
+# !/bin/bash
 
-#Pertubagens POST request with JSON payload
+# Pertubagens POST request with JSON payload
 curl -X POST --header "Content-Type: application/json" \
   --data '{
     "pert_name": "Pert123",

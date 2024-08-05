@@ -107,16 +107,6 @@ function translateToSQL(searchArg, table) {
   if (table === 'cells') {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
   }
-  // Create a header (for pertubations)
-  if (table === 'pertubations') {
-    header = `SELECT pert_id AS 'ID', 
-    cmap_name AS 'HUGO',
-    target AS 'Gene',
-    moa AS 'mechanism',
-    canonical_smiles AS 'Structure',
-    inchi_key AS 'inCHi identifyer',
-    compound_aliases AS 'compound',`;
-  }
 
   // Use translateToSQLRecursive to handle nested queries
   const searchSql = translateToSQLRecursive(searchArg);

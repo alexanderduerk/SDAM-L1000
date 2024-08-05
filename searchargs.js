@@ -22,6 +22,16 @@ const cellinfotypes = {
   growth_pattern: 'text',
 };
 
+const perturbagentypes = {
+  pert_name: 'text',
+  cmap_name: 'text',
+  gene_target: 'text',
+  moa: 'text',
+  canonical_smiles: 'text',
+  inchi_key: 'text',
+  compound_aliases: 'text',
+};
+
 const genetypes = {
   entrez_id: 'number',
   gene_symbol: 'text',
@@ -106,6 +116,9 @@ function translateToSQL(searchArg, table) {
   // Create a header (for every cellname the same)
   if (table === 'cells') {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
+  }
+  if (table === 'perturbagens') {
+    header = `SELECT pert_name AS 'Name', cmap_name AS 'compound', gene_target AS 'gen', moa AS 'mechanism', canonical_smiles AS 'SMILE', inchi_key AS 'identifier', compound_aliases AS 'compound alternative name' FROM ${table} WHERE `;
   }
 
   // Use translateToSQLRecursive to handle nested queries

@@ -36,11 +36,86 @@ I created the cells table in the [l1000.sql file](l1000.sql), with guidance of t
 
 ### Cells class
 
-The creation of the [Cells class](cells.js) followed the given [code from the lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js) with some smaller adjustments. The createOne function here is created as a class method which needs an instance. At this step i also included a TypeChecking function which would initially check the body of the request if the types are correct. Therefore a HashMap is created with the correct types of each column.  
-Also the generation of the this. instance parameters is done dynamically by using the ierating over each key from the keyValuePairs, checking the type of the value at the key position and then assigning instance parameters to the found keys with the corresponding values.  
-The createOne function then just takes the connection to the database as an argument, retrieves all column names with **Object.keys(this)** and values with **Object.values(this)**.  
-The SQL placeholders are then dynamically created based on the amount of send values and converted to a SQL query to insert the Data.
-TODO ADD EXPLANATION FOR sh TEST INSTEAD OF PS1 TEST  
-The deleteOne function allows the deletion of a whole row by giving an id.  
-The updateOne function is exactly done as provided in the lecture it will update a given cell based on a column name and the entry id.  
-The search function needed to be adapted from the prvided code within the lecture. In the lecture we used the searcharchgs.js file to convert json args to proper sql statements and allow for operators. This was mainly adopted, as well as the static async implementation of the search. Changes were made to search the database for text specific args like contains, startswith and endswith. In those cases the value is already escaped and therefore the triplet.val could be used directly.
+#### createOne
+
+The creation of the [Cells class](cells.js) followed the given [code from the lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js) with some smaller adjustments. I did not use the static decorator for the function and instead used the instance to create an entry for the DB. To reduce the code and make it more accesible i opted for an approach which would at the beginning get all keys from the instance with:
+
+```js
+const columns = Object.keys(this);
+```
+
+The same approach then can be used to get the values of the instance
+
+```js
+const values = Object.values(this);
+```
+
+I then define the _?_ placeholders for the sql statement with map and create the statement later with the columns and those placeholder values.The statement then gets runned and the values get unpacked using
+
+```js
+...values
+```
+
+#### deleteOne
+
+Completly follows the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). For testing purposes it will log the ID of the cell that was deleted.
+
+#### updateOne
+
+Also follows the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). It returns the updatedCell to control within the server environment.
+
+#### search (with Args)
+
+The search function within the class is completly copied from the [GitHub](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). But uses an adjusted [searchArg](searchargs.js). For the searchArg i defined a cellinoftypes, which can be used to check the types of the columns and escape values if they are text using escapeValue and isTextField:
+
+```js
+function isTextField(field) {
+  // Checks if the field is type text
+  const fieldType = cellinfotypes[field];
+  return fieldType === 'text';
+}
+
+function escapeValue(value, isText) {
+  if (isText) {
+    // Escape the values if they are text
+    return `'${value}'`;
+  }
+}
+```
+
+Additionaly the [translateSearchTripletToSQL](searchargs.js) function was adjusted to allow implementation of _contains, startswith_ and _endswith_. This is easily donw with different return statements based on the operator we use.
+
+```js
+function translateSearchTripletToSQL(triplet) {
+  const isText = isTextField(triplet.field);
+  const escapedVal = escapeValue(triplet.val, isText);
+  switch (triplet.op) {
+    case 'contains':
+      return `${triplet.field} LIKE '%${triplet.val}%'`;
+    case 'startswith':
+      return `${triplet.field} LIKE '${triplet.val}%'`;
+    case 'endswith':
+      return `${triplet.field} LIKE '%${triplet.val}'`;
+    case '=': // or any other default operator
+      return `${triplet.field} = ${escapedVal}`;
+    case '!=':
+      return `${triplet.field} != ${escapedVal}`;
+    case '>':
+      return `${triplet.field} > ${escapedVal}`;
+    case '<':
+      return `${triplet.field} < ${escapedVal}`;
+    case '>=':
+      return `${triplet.field} >= ${escapedVal}`;
+    case '<=':
+      return `${triplet.field} <= ${escapedVal}`;
+    case 'in':
+      return `${triplet.field} IN (${escapedVal})`;
+    case 'notin':
+      return `${triplet.field} NOT IN (${escapedVal})`;
+    default:
+      throw new Error(`Unsupported operator: ${triplet.op}`);
+  }
+}
+```
+
+The [translateToSQL](searchargs.js) is also adjusted. To make it way more flexible i decided to include table in the parameters. Then a if check can be used to check the table name and to create a table specific **SELECT** statement, which also would rename the columns for better Readability within the Webpage. Then again if statements were used for different order args and different offset or limits that can be used to get a better handling for the View of the Data.

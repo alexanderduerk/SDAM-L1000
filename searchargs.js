@@ -9,24 +9,13 @@ const cellinfotypes = {
   growth_medium: 'text',
   cell_type: 'text',
   donor_ethnicity: 'text',
-  donor_sex: 'boolean',
+  donor_sex: 'text',
   donor_tumor_phase: 'text',
   cell_lineage: 'text',
   primary_disease: 'text',
   subtype_disease: 'text',
   provider_name: 'text',
   growth_pattern: 'text',
-};
-
-// Create a lookup table of compound info columns and their types
-const compoundinfo_beta = {
-  pert_id: 'text',
-  cmap_name: 'text',
-  target: 'text',
-  moa: 'text',
-  canonical_smiles: 'text',
-  inchi_key: 'text',
-  compund_aliases: 'text',
 };
 
 function isTextField(field) {
@@ -73,6 +62,18 @@ function translateSearchTripletToSQL(triplet) {
   }
 }
 
+function translateToSQLRecursive(searchArg) {
+  if (searchArg.descendants) {
+    // Translate each descendant recursively
+    const descSqlArr = searchArg.descendants.map(translateToSQLRecursive);
+
+    // Combine using the operator at the current level
+    const sql = descSqlArr.join(` ${searchArg.op} `);
+    return `( ${sql} )`;
+  }
+  return translateSearchTripletToSQL(searchArg);
+}
+
 // Translate the search argument to SQL
 function translateToSQL(searchArg, table) {
   let header;
@@ -80,50 +81,22 @@ function translateToSQL(searchArg, table) {
   if (table === 'cells') {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
   }
-  // Create a header (for pertubations)
-  if (table === 'pertubations') {
-    header = `SELECT pert_id AS 'ID', 
-    cmap_name AS 'HUGO',
-    target AS 'Gene',
-    moa AS 'mechanism',
-    canonical_smiles AS 'Structure',
-    inchi_key AS 'inCHi identifyer',
-    compound_aliases AS 'compound',`;
-  }
-  const searchSql = translateSearchTripletToSQL(searchArg);
-  // Allow for pagination args if provided in the search
-  // containing the offset and limit
-  if (
-    searchArg.offset !== undefined &&
-    searchArg.limit !== undefined &&
-    searchArg.order === 'asc'
-  ) {
-    return `${header} ${searchSql} ORDER BY ${searchArg.field} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
-  }
-  if (
-    searchArg.offset !== undefined &&
-    searchArg.limit !== undefined &&
-    searchArg.order === 'desc'
-  ) {
-    return `${header} ${searchSql} ORDER BY ${searchArg.field} DESC LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
-  }
-  if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
-    return `${header} ${searchSql} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
-  }
-  // combine both
-  return `${header}${searchSql}`;
-}
 
-// Recursive translation
-function translateToSQLRecursive(searchArg) {
-  const hasDescendants = searchArg.descendants !== undefined;
-  if (hasDescendants) {
-    // Translate each descendant
-    const descSqlArr = searchArg.descendants.map(translateToSQLRecursive);
-    const sql = descSqlArr.reduce((a, c) => `${a} ${searchArg.op} ${c}`);
-    return `( ${sql} )`;
+  // Use translateToSQLRecursive to handle nested queries
+  const searchSql = translateToSQLRecursive(searchArg);
+
+  let orderClause = '';
+  if (searchArg.field) {
+    orderClause = ` ORDER BY ${searchArg.field} ${searchArg.order || 'ASC'}`;
   }
-  return translateSearchTripletToSQL(searchArg);
+
+  // Allow for pagination args if provided in the search
+  if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
+    return `${header} ${searchSql}${orderClause} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
+  }
+
+  // Combine both
+  return `${header} ${searchSql}${orderClause}`;
 }
 
 module.exports = { translateToSQL };

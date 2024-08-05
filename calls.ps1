@@ -1,37 +1,55 @@
-# Start the Node.js application in the background
-Start-Process -NoNewWindow -FilePath "node" -ArgumentList "app.js"
-
-# Give the server a moment to start
-Start-Sleep -Seconds 5
-
-# Define the API URL and data
-$API_URL = "http://localhost:3000/cells"
+# Define the API URL and data for creating a cell record
+$API_URL = "http://127.0.0.1:3000/cells"  # Use 127.0.0.1 instead of localhost
 $DATA = @{
-    cell_iname = "MCF7"
-    cellosaurusId = "CVCL_0031"
-    donorAge = 70
-    donorAgeDeath = 72
-    donorDiseaseAgeOnset = 67
-    doublingTime = 72
-    growthMedium = "EMEM; 10% FBS ;.01mg/ml Bovine Insulin"
-    providerCatalogId = "XYZ123"
-    featureId = "c-438"
-    cellType = "tumor"
-    donorEthnicity = "Caucasian"
-    donorSex = "F"
-    donorTumorPhase = "Metastatic"
-    cellLineage = "breast"
-    primaryDisease = "breast cancer"
-    subtype = "adenocarcinoma"
-    providerName = "ATCC"
-    growthPattern = "adherent"
-    ccleName = "MCF7_BREAST"
-    cellAlias = "IBMF-7"
+    cell_name = "SF9"
+    cellosaurus_id = "CVCL_0031"
+    donor_age = 80
+    growth_medium = "SF900"
+    cell_type = "insect"
+    donor_ethnicity = "Caucasian"
+    donor_tumor_phase = "Metastatic"
+    cell_lineage = "breast"
+    primary_disease = "breast cancer"
+    subtype_disease = "adenocarcinoma"
+    provider_name = "ATCC"
+    growth_pattern = "adherent"
 } | ConvertTo-Json
 
 # Make a POST request to create a new cell record
 $response = Invoke-RestMethod -Method Post -Uri $API_URL -ContentType "application/json" -Body $DATA
-
-# Output the response to the terminal
 Write-Output "Response from POST /cells:"
 Write-Output $response
+
+$apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_name&op==&val=MCF7"
+$response = Invoke-RestMethod -Method Get -Uri $apiUrl
+
+$apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_name&op=contains&val=A"
+$response = Invoke-RestMethod -Method Get -Uri $apiUrl
+
+$apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_name&op=startswith&val=A"
+$response = Invoke-RestMethod -Method Get -Uri $apiUrl
+
+$apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_name&op=endswith&val=A"
+$response = Invoke-RestMethod -Method Get -Uri $apiUrl
+
+$apiUrl = "http://127.0.0.1:3000/cells/search?field=donor_age&op=<&val=5.0"
+$response = Invoke-RestMethod -Method Get -Uri $apiUrl
+
+# search for the earlier inserted cell
+$apiUrl = "http://127.0.0.1:3000/cells/search?field=cell_name&op==&val=SF9"
+$response = Invoke-RestMethod -Method Get -Uri $apiUrl
+# get the cell_id from the response
+$cell_id = $response[0].cell_id
+
+# update the earlier inserted cell
+$apiUrl = "http://127.0.0.1:3000/cells"
+$DATA = @{
+    cellid = $cell_id
+    columnname = "cell_name"
+    newvalue = "High5"
+} | ConvertTo-Json
+$response = Invoke-RestMethod -Method Patch -Uri $apiUrl -ContentType "application/json" -Body $DATA
+
+# delete the earlier inserted cell
+$apiUrl = "http://127.0.0.1:3000/cells/$cell_id"
+$response = Invoke-RestMethod -Method Delete -Uri $apiUrl

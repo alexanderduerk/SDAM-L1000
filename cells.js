@@ -1,75 +1,128 @@
+const searchArg = require('./searchargs');
+/**
+ * Typechecking function to detect type errors early
+ * @param {string, number, boolean}
+ * @param {string, number, boolean}
+ */
+function checkType(value, expectedType) {
+  if (typeof value !== expectedType) {
+    // throw a type error
+    throw new TypeError(`Expected ${expectedType}, got ${typeof value}`);
+  }
+}
+
 /**
  * Datamodel defines all data for the cellinfos table
  */
 /**
  * Represents a cell line with various attributes.
  */
-class CellInfos {
+class Cells {
   /**
-   * Constructor for the cellinfos class
+   * Constructor for the cells class
    * @param {HashMap} keyValuePairs - Attributes and their values
    */
   constructor(keyValuePairs) {
-    this.cell_iname = keyValuePairs.cell_iname; // Curated name for the cell line
-    this.cellosaurus_id = keyValuePairs.cellosaurusId; // Cellosaurus identifier
-    this.donor_age = keyValuePairs.donorAge; // Patient age at time of cell line derivatization
-    this.donor_age_death = keyValuePairs.donorAgeDeath; // Patient age at time of death
-    this.donor_disease_age_onset = keyValuePairs.donorDiseaseAgeOnset; // Patient age of disease onset
-    this.doubling_time = keyValuePairs.doublingTime; // Doubling time in hours
-    this.growth_medium = keyValuePairs.growthMedium; // Name of growth medium
-    this.provider_catalog_id = keyValuePairs.providerCatalogId; // Catalog number from provider
-    this.feature_id = keyValuePairs.featureId; // Feature identifier if used in PRISM
-    this.cell_type = keyValuePairs.cellType; // High level descriptor of cell status
-    this.donor_ethnicity = keyValuePairs.donorEthnicity; // Ethnicity of donor
-    this.donor_sex = keyValuePairs.donorSex; // Gender of donor
-    this.donor_tumor_phase = keyValuePairs.donorTumorPhase; // Whether it is primary or metastasis
-    this.cell_lineage = keyValuePairs.cellLineage; // Lineage/tissue description
-    this.primary_disease = keyValuePairs.primaryDisease; // Name of primary disease
-    this.subtype = keyValuePairs.subtype; // Name of disease subtype
-    this.provider_name = keyValuePairs.providerName; // Name of the provider
-    this.growth_pattern = keyValuePairs.growthPattern; // Description of growth pattern
-    this.ccle_name = keyValuePairs.ccleName; // CCLE identifier
-    this.cell_alias = keyValuePairs.cellAlias; // Other names or identifiers for the cell line
+    const expectedTypes = {
+      cell_name: 'string',
+      cellosaurus_id: 'string',
+      donor_age: 'number',
+      doubling_time: 'string',
+      growth_medium: 'string',
+      cell_type: 'string',
+      donor_ethnicity: 'string',
+      donor_sex: 'string',
+      donor_tumor_phase: 'string',
+      cell_lineage: 'string',
+      primary_disease: 'string',
+      subtype_disease: 'string',
+      provider_name: 'string',
+      growth_pattern: 'string',
+    };
+    // use a dynamic constructor approach
+    Object.keys(keyValuePairs).forEach((key) => {
+      checkType(keyValuePairs[key], expectedTypes[key]);
+      this[key] = keyValuePairs[key];
+    });
   }
+
   /**
    * Write Function for inserting the instance into the db
-   * @param {instance}
+   * @param {object}
    */
 
-  async createOne(db_connection) {
-    const sql =
-      'INSERT INTO cellinfos (cell_iname, cellosaurus_id, donor_age, donor_age_death, donor_disease_age_onset, doubling_time, growth_medium, provider_catalog_id, feature_id, cell_type, donor_ethnicity, donor_sex, donor_tumor_phase, cell_lineage, primary_disease, subtype, provider_name, growth_pattern, ccle_name, cell_alias) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  async createOne(dbconnection) {
+    // get all columns
+    const columns = Object.keys(this);
+    // get all values
+    const values = Object.values(this);
+    // define the placeholder ?s
+    const placeholders = columns.map(() => '?').join(',');
+    // define the sql statement
+    const sql = `INSERT INTO cells (${columns.join(',')}) VALUES (${placeholders})`;
     // Execute SQL statement with the instanced values
-    const db_res = await db_connection.run(
-      sql,
-      this.cell_iname,
-      this.cellosaurus_id,
-      this.donor_age,
-      this.donor_age_death,
-      this.donor_disease_age_onset,
-      this.doubling_time,
-      this.growth_medium,
-      this.provider_catalog_id,
-      this.feature_id,
-      this.cell_type,
-      this.donor_ethnicity,
-      this.donor_sex,
-      this.donor_tumor_phase,
-      this.cell_lineage,
-      this.primary_disease,
-      this.subtype,
-      this.provider_name,
-      this.growth_pattern,
-      this.ccle_name,
-      this.cell_alias
-    );
+    const dbres = await dbconnection.run(sql, ...values);
     // return the newly inserted cell
-    const new_cell = await db_connection.get(
-      'SELECT * FROM cellinfos WHERE cell_iname = ?',
-      this.cell_iname
+    const newcell = await dbconnection.get(
+      'SELECT * FROM cells WHERE cell_name = ?',
+      this.cell_name
     );
-    return new_cell;
+    return newcell;
+  }
+
+  /**
+   * Delete Function for the cellinfos table
+   * @param {dbconnection, celliname}
+   */
+  // sql statement
+  static async deleteOne(dbconnection, cellid) {
+    const sql = 'DELETE FROM cells WHERE cell_id = ?';
+    const dbres = await dbconnection.run(sql, `${cellid}`);
+    // return a console.log that the given cell was deleted
+    console.log(`Cell with cell_id: ${cellid} was deleted`);
+  }
+
+  /**
+   * Updates a single row in the "cells" table with the given id, column, and new value.
+   *
+   * @param {object} dbconnection - The database connection object.
+   * @param {number} id - The id of the row to update.
+   * @param {string} column - The column to update.
+   * @param {any} newvalue - The new value to set.
+   * @return {Promise<object>} - A Promise that resolves to the updated row.
+   */
+  static async updateOne(dbconnection, id, column, newvalue) {
+    const sql = `UPDATE cells SET ${column} = ? WHERE cell_id = ${id}`;
+    const dbres = await dbconnection.run(sql, newvalue);
+    // return the newly updated Row
+    const updatedCell = await dbconnection.get(
+      'SELECT * FROM cells WHERE cell_id = ?',
+      id
+    );
+    return updatedCell;
+  }
+
+  /**
+   * Reads cellrecord from the database based on the provided search parameters.
+   *
+   * @param {object} searcharg - The search parameters to filter the results.
+   * @param {string} orderarg - The order in which to sort the results.
+   * @param {object} paginationarg - The pagination parameters for the results.
+   * @param {object} dbconnection - The database connection object.
+   * @return {Promise<Array>} - A Promise that resolves to an array of cell records that match the search criteria.
+   */
+  static async search(searcharg, orderarg, paginationarg, dbconnection) {
+    const searchSql =
+      searcharg !== undefined && searcharg !== null
+        ? searchArg.translateToSQL(searcharg, 'cells')
+        : 'SELECT * FROM cells';
+    console.log(`SQL generated to search Cells:\n${JSON.stringify(searchSql)}`);
+    // Query the database
+    const dbResult = await dbconnection.all(searchSql);
+    // Done
+    console.log(dbResult);
+    return dbResult;
   }
 }
 
-module.exports = CellInfos;
+module.exports = Cells;

@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+table,
+th,
+td {
+  font-family: 'Roboto';
+  /* Proper alignement */
+  text-align: center;
+  /* Table border */
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  /* Set vertical alignment to centered */
+  text-align: center;
+  background-color: #333;
+  color: white;
+  font-size: larger;
+}
+
+td {
+  text-align: center;
+}
+
+tr {
+  padding: 10px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: lightcoral;
+}

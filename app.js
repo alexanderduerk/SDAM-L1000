@@ -185,7 +185,7 @@ app.get('/pertubations/:pert_id', async (req, res) => {
   else {
     res.status(404).send(`Pertubagen not found`);
   }
-  } catch(err) {
+  catch (err) {
     console.error(err);
     res.status(500).send(`Internal server error`);
     finally {

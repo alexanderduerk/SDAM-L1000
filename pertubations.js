@@ -1,3 +1,16 @@
+const searchArg = require('./searchargs');
+
+/** Typechecking functino to detect type errors early
+ * @param {string, number, boolean}
+ * @param {string, number, boolean}
+ */
+function checkType(value, expectedType) {
+  if (typeof value !== expectedType) {
+    //throw a type error
+    throw new TypeError(`Expected ${expectedType}, got ${typeof value}`);
+  }
+}
+
 /**
  * Datamodel defines all data for the pertubations table
  */
@@ -10,13 +23,20 @@ class Perturbagens {
    * @param {HashMap} keyValuePairs - Attributes and their values
    */
   constructor(keyValuePairs) {
-    this.pert_id = keyValuePairs.pert_id; // pertubations ID of a Pertubagens
-    this.cmap_name = keyValuePairs.pert_id; // name of pertubagens cmap designated
-    this.gene_target = keyValuePairs.gene_target; // The symbol of the gene that the compound targets
-    this.moa = keyValuePairs.moa; // Curated phrase representing the compound's mechanism of action
-    this.canonical_smiles = keyValuePairs.canonical_smiles; // Canonical SMILES structures
-    this.inchi_key = keyValuePairs.inchi_key; // InChIKey - hashed version of the InChi identifier
-    this.compound_aliases = keyValuePairs.compound_aliases; // Alternative name for the compound
+    const expectedTypes = {
+      pert_id: 'text',
+      cmap_name: 'text',
+      gene_target: 'text',
+      moa: 'text',
+      canonical_smiles: 'text',
+      inchi_key: 'text',
+      compound_aliases: 'text',
+    };
+    // use a dymaic constructor approach
+    Object.keys(keyValuePairs).forEach((key) => {
+      checkType(keyValuePairs[key], expectedTypes[key]);
+      this[key] = keyValuePairs[key];
+    });
   }
   /**
    * Write Function for inserting the instance into the db
@@ -24,24 +44,22 @@ class Perturbagens {
    */
 
   async createOne(dbconnection) {
-    const sql = `INSERT INTO perturbagens (pert_id, cmap_name, gene_target, moa, canonical_smiles, inchi_key, compound_aliases) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    // get all columns
+    const columns = Object.keys(this);
+    // get all values
+    const values = Object.values(this);
+    // define the placeholder ?s
+    const placeholders = columns.map(() => '?').join(',');
+    // define sql statement
+    const sql = `INSERT INTO perturbagens (${columns.join(',')}) VALUES (${placeholders})`;
     // Execute SQL statement with the instanced values
-    const dbres = await dbconnection.run(
-      sql,
-      this.cmap_name,
-      this.canonical_smiles,
-      this.compound_aliases,
-      this.gene_target,
-      this.inchi_key,
-      this.moa,
-      this.pert_id
+    const dbres = await dbconnection.run(sql, ...values);
+    // return the newly inserted cell
+    const newpertid = await dbconnection.get(
+      `SELECT * FROM perturbagens WHERE pert_name = ?`,
+      this.pert_name
     );
-    //return the newly inserted cell
-    const newperdid = await dbconnection.get(
-      `SELECT * FROM perturbagens WHERE pert_id = ?`,
-      this.pert_id
-    );
-    return newperdid;
+    return newpertid;
   }
 
   /**
@@ -49,40 +67,35 @@ class Perturbagens {
    * @param {dbconnection, pert_id}
    */
   // sql statement
-  async deleteOne(dbconnection, pert_id) {
-    const sql = `Delete FROM pert_id = ?`;
-    const dbres = await dbconnection.run(pert_id);
+  static async deleteOne(dbconnection, pertid) {
+    const sql = `DELETE FROM perturbagens WHERE pert_id = ?`;
+    const dbres = await dbconnection.run(sql, `${pertid}`);
     // return a console.log that the given pertubagens was deleted
-    console.log(`Pertubagens with ${pert_id} was deleted`);
+    console.log(`Perturbagens with pert_id: ${pertid} was deleted`);
   }
+  /**
+   * Updates a single row in the "compound" table with the given id, column, and new value
+   *
+   * @param {object} dbconnection - The database connection object.
+   * @param {number} id - The id of the row to update.
+   * @param {string} column - The column to update.
+   * @param {any} newvalue - The new value to set.
+   * @return {Promise<object>} - A Promise that resolves to the updated row.
+   */
 
   /**
    * Update/Patch Function for pert_id table
    * @param {dbconnection, pert_id, column, newvalue}
    */
-  static async updateOne(dbconnection, pert_id, column, newvalue) {
-    const sql = `Update pert_id SET ${column} = ? WHERE ${column} = ${pert_id}`;
-    const dbres = await dbconnection.run(pert_id);
+  static async updateOne(dbconnection, pertid, column, newvalue) {
+    const sql = `UPDATE perturbagens SET ${column} = ? WHERE pert_id = ${pertid}`;
+    const dbres = await dbconnection.run(sql, pertid);
     // return a console.log that the given pertubagens was updated
-    console.log(`Pertubagens with ${pert_id} was updated`);
-  }
-
-  /**
-   * Get Function for pert_id
-   * @param {dbconnection, pert_id}
-   */
-  async retrieveOne(dbconnection, pert_id) {
-    const sql = `SELECT * FROM perturbagens WHERE pert_id = ?`;
-    try {
-      const perturbagen = await dbconnection.get(sql, [pert_id]);
-      return perturbagen;
-    } catch (err) {
-      console.error(
-        `Error retrieving pertubagens with pert_id ${pert_id}:`,
-        err
-      );
-      throw err;
-    }
+    console.log(`Pertubagens with ${pertid} was updated`);
+    const updatedPerturbagens = await dbconnection.get(
+      'SELECT * FROM perturbagens WHERE pert_id = ?',
+      pertid
+    );
   }
 }
 

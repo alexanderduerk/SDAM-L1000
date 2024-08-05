@@ -126,6 +126,18 @@ function translateToSQL(searchArg, table) {
     orderClause = ` ORDER BY ${searchArg.field} ${searchArg.order || 'ASC'}`;
   }
 
+  }
+  // Create a header (for pertubations)
+  if (table === 'pertubations') {
+    header = `SELECT pert_id AS 'ID', 
+    cmap_name AS 'HUGO',
+    target AS 'Gene',
+    moa AS 'mechanism',
+    canonical_smiles AS 'Structure',
+    inchi_key AS 'inCHi identifyer',
+    compound_aliases AS 'compound',`;
+  }
+  const searchSql = translateSearchTripletToSQL(searchArg);
   // Allow for pagination args if provided in the search
   if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
     return `${header} ${searchSql}${orderClause} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;

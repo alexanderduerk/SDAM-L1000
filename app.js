@@ -164,37 +164,6 @@ app.patch('/cells', async (req, res) => {
   }
 });
 
-// Get Function for Pertubations db 
-app.get('/pertubations/:pert_id', async (req, res) => {
-  let db;
-  try {
-    db = await open ({
-      filename: `./l1000.db`, 
-      driver: sqlite3.Database
-    });
-    // Extract pert_id, column and newvalue from the request body 
-    const {pert_id} = req.params;
-  }
-  // Create new instance of the pertubagensget function
-  const Perturbagens = newPerturbagens();
-  // Call the retriveOne in get.function from pertubations.js to get the data
-  const perturbagen = await Perturbagens.retrieveOne(db, pert_id);
-  if (perturbagen) {
-    res.status(200).jon(perturbagen);
-  }
-  else {
-    res.status(404).send(`Pertubagen not found`);
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).send(`Internal server error`);
-    finally {
-      if (db) {
-        await db.close();
-      }
-    }
-  });
-
 // Post Function Pertubations
 app.post('/pertubations', async (req, res) => {
   let db;
@@ -210,7 +179,8 @@ app.post('/pertubations', async (req, res) => {
     const Perturbagensinstance = new Perturbagens(req.body);
     // Call Create One on the instance
     const newperdid = await Perturbagensinstance.createOne(db);
-    console.log(`Created new Perturbagens record:\n${newperdid}`);
+    console.log(`Created new Perturbagens record:`);
+    console.log(newperdid);
     res.json(newperdid);
   } catch (err) {
     console.log(err);

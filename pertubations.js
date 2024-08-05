@@ -24,13 +24,13 @@ class Perturbagens {
    */
   constructor(keyValuePairs) {
     const expectedTypes = {
-      pert_id: 'text',
-      cmap_name: 'text',
-      gene_target: 'text',
-      moa: 'text',
-      canonical_smiles: 'text',
-      inchi_key: 'text',
-      compound_aliases: 'text',
+      pert_name: 'string',
+      cmap_name: 'string',
+      gene_target: 'string',
+      moa: 'string',
+      canonical_smiles: 'string',
+      inchi_key: 'string',
+      compound_aliases: 'string',
     };
     // use a dymaic constructor approach
     Object.keys(keyValuePairs).forEach((key) => {
@@ -89,13 +89,14 @@ class Perturbagens {
    */
   static async updateOne(dbconnection, pertid, column, newvalue) {
     const sql = `UPDATE perturbagens SET ${column} = ? WHERE pert_id = ${pertid}`;
-    const dbres = await dbconnection.run(sql, pertid);
+    const dbres = await dbconnection.run(sql, newvalue);
     // return a console.log that the given pertubagens was updated
     console.log(`Pertubagens with ${pertid} was updated`);
     const updatedPerturbagens = await dbconnection.get(
       'SELECT * FROM perturbagens WHERE pert_id = ?',
       pertid
     );
+    return updatedPerturbagens;
   }
 }
 

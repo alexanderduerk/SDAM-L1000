@@ -18,6 +18,17 @@ const cellinfotypes = {
   growth_pattern: 'text',
 };
 
+// Create a lookup table of compound info columns and their types
+const compoundinfo_beta = {
+  pert_id: 'text',
+  cmap_name: 'text',
+  target: 'text',
+  moa: 'text',
+  canonical_smiles: 'text',
+  inchi_key: 'text',
+  compund_aliases: 'text',
+};
+
 function isTextField(field) {
   const fieldType = cellinfotypes[field];
   return fieldType === 'text';
@@ -80,6 +91,16 @@ function translateToSQL(searchArg, table) {
   // Create a header (for every cellname the same)
   if (table === 'cells') {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
+  }
+  // Create a header (for pertubations)
+  if (table === 'pertubations') {
+    header = `SELECT pert_id AS 'ID', 
+    cmap_name AS 'HUGO',
+    target AS 'Gene',
+    moa AS 'mechanism',
+    canonical_smiles AS 'Structure',
+    inchi_key AS 'inCHi identifyer',
+    compound_aliases AS 'compound',`;
   }
 
   // Use translateToSQLRecursive to handle nested queries

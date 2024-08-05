@@ -130,6 +130,9 @@ function translateToSQL(searchArg, table) {
     inchi_key AS 'inCHi identifyer',
     compound_aliases AS 'compound',`;
   }
+  if (table === 'perturbagens') {
+    header = `SELECT pert_name AS 'Name', cmap_name AS 'compound', gene_target AS 'gen', moa AS 'mechanism', canonical_smiles AS 'SMILE', inchi_key AS 'identifier', compound_aliases AS 'compound alternative name' FROM ${table} WHERE `;
+  }
 
   // Use translateToSQLRecursive to handle nested queries
   const searchSql = translateToSQLRecursive(searchArg);

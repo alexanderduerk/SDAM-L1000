@@ -106,11 +106,6 @@ function translateToSQL(searchArg, table) {
   // Create a header (for every cellname the same)
   if (table === 'cells') {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
-    typemapper = cellinfotypes;
-  }
-  if (table === 'genes') {
-    header = `SELECT entrez_id AS 'Entrez ID', gene_symbol AS 'Gene Symbol', gene_title AS 'Gene Title', gene_type AS 'Gene Type', src AS 'Source', feature_space AS 'Feature Space' FROM ${table} WHERE `;
-    typemapper = genetypes;
   }
   // Create a header (for pertubations)
   if (table === 'pertubations') {

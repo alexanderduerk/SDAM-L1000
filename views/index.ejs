@@ -62,6 +62,20 @@
         <input type="hidden" name="order" value="ASC" />
         <button type="submit">Search</button>
       </form>
+      <!--Create a pertubations search input field-->
+      <form
+        action="/compounds/search"
+        method="post"
+        enctype="application/x-www-form-urlencoded"
+      >
+        <input type="text" name="val" placeholder="Search by compound name" />
+        <input type="hidden" name="field" value="pert_id" />
+        <input type="hidden" name="op" value="contains" />
+        <input type="hidden" name="limit" value="25" />
+        <input type="hidden" name="offset" value="0" />
+        <input type="hidden" name="order" value="ASC" />
+        <button type="submit">Search</button>
+      </form>
     </section>
   </body>
 </html>

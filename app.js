@@ -425,7 +425,7 @@ app.get('/perturbations/search', async (req, res) => {
     // Return the result:
     if (req.accepts('html')) {
       ejs.renderFile(
-        './views/cellstable.ejs',
+        './views/perts.ejs',
         { data: compounds },
         {},
         (err, str) => {

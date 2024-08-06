@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L1000</title>
+  <link rel="stylesheet" href="/css/tablestyles.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="#" class="logo">L1000</a>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Services</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <div class="menu-toggle">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <% if (data && data.length > 0) { %>
+      <table>
+        <thead>
+          <tr>
+            <!--Hardcoded header-->
+            <th>Pert Name</th>
+            <th>CMAP Name</th>
+            <th>Gene Target</th>
+            <th>MOA</th>
+            <th>Canonical SMILES</th>
+            <th>InChI Key</th>
+            <th>Compound Aliases</th>
+          </tr>
+        </thead>
+        <tbody>
+        </thead>
+        <tbody>
+          <% for (const row of data) { %>
+            <tr>
+              <% for (const [key, value] of Object.entries(row)) { %>
+                <td>
+                    <% if (key === 'SMILE') { %>
+            <img class="smilesstructure" data-smiles="<%= value %>"
+             alt="Molecule">
+          <% } else { %>
+            <%= value %> 
+              <% } %>
+                </td>
+            <% } %>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>No data available</p>
+    <% } %>
+  </main>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"
+    ></script>
+    <script>
+      SmiDrawer.apply();
+    </script>
+</body>
+</html>

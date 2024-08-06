@@ -31,14 +31,20 @@
       <table>
         <thead>
           <tr>
-            <% for (const header of Object.keys(data[0])) { %>
-              <th>
-                <%= header %>
-                <form>
-                  <input type="text" name="<%= header %>" placeholder="Search <%= header %>">
-                </form>
-              </th>
-            <% } %>
+            <th>Name</th>
+            <th>Cellosaurus ID</th>
+            <th>Donor Age</th>
+            <th>Doubling Time</th>
+            <th>Growthmedium</th>
+            <th>Celltype</th>
+            <th>Donor ethnicity</th>
+            <th>Donor sex</th>
+            <th>Donor tumor phase</th>
+            <th>Cell lineage</th>
+            <th>Primary disease</th>
+            <th>Subtype disease</th>
+            <th>Provider name</th>
+            <th>Growth pattern</th>
           </tr>
         </thead>
         <tbody>

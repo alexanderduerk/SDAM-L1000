@@ -145,6 +145,10 @@ function translateToSQL(searchArg, table) {
     header = `SELECT pert_name AS 'Name', cmap_name AS 'compound', gene_target AS 'Target', moa AS 'mechanism', canonical_smiles AS 'SMILE', inchi_key AS 'identifier', compound_aliases AS 'compound alternative name' FROM ${table} WHERE `;
     typemapper = perturbagentypes;
   }
+  if (table === 'genes') {
+    header = `SELECT * FROM ${table} WHERE `;
+    typemapper = cellinfotypes;
+  }
 
   // Use translateToSQLRecursive to handle nested queries
   const searchSql = translateToSQLRecursive(searchArg);

@@ -93,17 +93,14 @@ function translateSearchTripletToSQL(triplet) {
  * @param {object} searchArg - The search argument to translate.
  * @return {string} The translated SQL string.
  */
-/**
- * Recursively translates a search argument to SQL.
- *
- * @param {object} searchArg - The search argument to translate.
- * @return {string} The translated SQL string.
- */
 function translateToSQLRecursive(searchArg) {
   console.log('Received searchArg:', JSON.stringify(searchArg)); // Log to check structure
 
   // Check if searchArg.descendants is an array
-  if (Array.isArray(searchArg.descendants)) {
+  if (
+    Array.isArray(searchArg.descendants) &&
+    searchArg.descendants.length > 0
+  ) {
     const descSqlArr = searchArg.descendants.map((descendant) => {
       console.log('Processing descendant:', JSON.stringify(descendant)); // Log each descendant
 

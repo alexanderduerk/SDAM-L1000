@@ -341,7 +341,7 @@ app.patch('/genes', async (req, res) => {
 });
 
 // Post Function Pertubations
-app.post('/pertubations', async (req, res) => {
+app.post('/perturbations', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({
@@ -355,11 +355,82 @@ app.post('/pertubations', async (req, res) => {
     const Perturbagensinstance = new Perturbagens(req.body);
     // Call Create One on the instance
     const newperdid = await Perturbagensinstance.createOne(db);
-    console.log(`Created new Perturbagens record:\n${newperdid}`);
+    console.log(`Created new Perturbagens record:`);
+    console.log(newperdid);
     res.json(newperdid);
   } catch (err) {
     console.log(err);
     res.status(400).send('Internal server error');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+app.get('/perturbations/search', async (req, res) => {
+  let db;
+  const { query, limit, offset, order } = req.query;
+
+  let searchArg = {};
+
+  if (query) {
+    try {
+      searchArg = JSON.parse(decodeURIComponent(query));
+    } catch (e) {
+      return res.status(400).send('Invalid query parameter');
+    }
+  } else {
+    // Use the simpler format if no complex query is provided
+    const { field, op, val } = req.query;
+    searchArg = {
+      field: field,
+      op: op,
+      val: val,
+    };
+  }
+
+  // Handle pagination and sorting parameters
+  if (limit) searchArg.limit = parseInt(limit);
+  if (offset) searchArg.offset = parseInt(offset);
+  if (order) searchArg.order = order;
+
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Query the db
+    const compounds = await Perturbagens.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
+
+    console.log(`Found compounds:`);
+    console.log(compounds);
+    // Return the result:
+    if (req.accepts('html')) {
+      ejs.renderFile(
+        './views/cellstable.ejs',
+        { data: compounds },
+        {},
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+    } else if (req.accepts('json')) {
+      res.json(compounds);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
   } finally {
     if (db) {
       await db.close();

@@ -22,6 +22,16 @@ const cellinfotypes = {
   growth_pattern: 'text',
 };
 
+const perturbagentypes = {
+  pert_name: 'text',
+  cmap_name: 'text',
+  gene_target: 'text',
+  moa: 'text',
+  canonical_smiles: 'text',
+  inchi_key: 'text',
+  compound_aliases: 'text',
+};
+
 const genetypes = {
   entrez_id: 'number',
   gene_symbol: 'text',
@@ -128,9 +138,9 @@ function translateToSQL(searchArg, table) {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
     typemapper = cellinfotypes;
   }
-  if (table === 'genes') {
-    header = `SELECT entrez_id AS 'Entrez ID', gene_symbol AS 'Gene Symbol', gene_title AS 'Gene Title', gene_type AS 'Gene Type', src AS 'Source', feature_space AS 'Feature Space' FROM ${table} WHERE `;
-    typemapper = genetypes;
+  if (table === 'perturbagens') {
+    header = `SELECT pert_name AS 'Name', cmap_name AS 'compound', gene_target AS 'Target', moa AS 'mechanism', canonical_smiles AS 'SMILE', inchi_key AS 'identifier', compound_aliases AS 'compound alternative name' FROM ${table} WHERE `;
+    typemapper = perturbagentypes;
   }
 
   // Use translateToSQLRecursive to handle nested queries
@@ -140,7 +150,6 @@ function translateToSQL(searchArg, table) {
   if (searchArg.field) {
     orderClause = ` ORDER BY ${searchArg.field} ${searchArg.order || 'ASC'}`;
   }
-
   // Allow for pagination args if provided in the search
   if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
     return `${header} ${searchSql}${orderClause} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;

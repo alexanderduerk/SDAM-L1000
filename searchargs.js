@@ -97,7 +97,10 @@ function translateToSQLRecursive(searchArg) {
   console.log('Received searchArg:', JSON.stringify(searchArg)); // Log to check structure
 
   // Check if searchArg.descendants is an array
-  if (Array.isArray(searchArg.descendants)) {
+  if (
+    Array.isArray(searchArg.descendants) &&
+    searchArg.descendants.length > 0
+  ) {
     const descSqlArr = searchArg.descendants.map((descendant) => {
       console.log('Processing descendant:', JSON.stringify(descendant)); // Log each descendant
 
@@ -135,7 +138,7 @@ function translateToSQL(searchArg, table) {
   let header;
   // Create a header (for every cellname the same)
   if (table === 'cells') {
-    header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', donor_sex AS 'Donor Sex', donor_ethnicity AS 'Donor Ethnicity', donor_tumor_phase AS 'Donor Tumor Phase', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
+    header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', doubling_time AS 'Doubling time', growth_medium AS 'Growth Medium', cell_type AS 'Cell Type', donor_ethnicity AS 'Donor Ethnicity', donor_sex AS 'Donor Sex', donor_tumor_phase AS 'Donor Tumor Phase', cell_lineage AS 'Cell Lineage', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
     typemapper = cellinfotypes;
   }
   if (table === 'perturbagens') {

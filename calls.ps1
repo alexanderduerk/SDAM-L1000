@@ -53,3 +53,48 @@ $response = Invoke-RestMethod -Method Patch -Uri $apiUrl -ContentType "applicati
 # delete the earlier inserted cell
 $apiUrl = "http://127.0.0.1:3000/cells/$cell_id"
 $response = Invoke-RestMethod -Method Delete -Uri $apiUrl
+
+# Complex search argument with descriptive variable names
+$searchArg = @{
+    descendants = @(
+        @{
+            field = "growth_pattern"
+            op = "="
+            val = "adherent"
+        },
+        @{
+            descendants = @(
+                @{
+                    field = "donor_age"
+                    op = "<"
+                    val = 20
+                },
+                @{
+                    descendants = @(
+                        @{
+                            field = "donor_ethnicity"
+                            op = "="
+                            val = "Asian"
+                        }
+                    )
+                    op = "AND"
+                }
+            )
+            op = "OR"
+        }
+    )
+    op = "AND"
+}
+
+# Convert the search argument to a JSON string
+$jsonBody = $searchArg | ConvertTo-Json -Depth 10
+
+# Output the JSON to verify
+Write-Output $jsonBody
+
+$apiUrl = "http://127.0.0.1:3000/cells/search"
+$headers = @{
+    "Content-Type" = "application/json"
+}
+
+Invoke-RestMethod -Uri $apiUrl -Method Post -Headers $headers -Body $jsonBody

@@ -63,16 +63,18 @@ app.post('/cells', async (req, res) => {
  */
 app.post('/cells/search', async (req, res) => {
   let db;
-  const { limit, offset, order } = req.body; // Access body directly
+  // Extract all relevant fields from req.body
+  const { limit, offset, order, descendants, field, op, val } = req.body;
 
-  let searchArg = {};
-
-  // No need for parsing query or handling a simpler format
-  const { field, op, val } = req.body;
-  searchArg = {
+  // Construct the searchArg object with potential descendants
+  const searchArg = {
     field,
     op,
     val,
+    limit,
+    offset,
+    order,
+    descendants: Array.isArray(descendants) ? descendants : [],
   };
 
   // Handle pagination and sorting parameters
@@ -216,16 +218,18 @@ app.post('/genes', async (req, res) => {
  */
 app.post('/genes/search', async (req, res) => {
   let db;
-  const { limit, offset, order } = req.body; // Access body directly
+  // Extract all relevant fields from req.body
+  const { limit, offset, order, descendants, field, op, val } = req.body;
 
-  let searchArg = {};
-
-  // No need for parsing query or handling a simpler format
-  const { field, op, val } = req.body;
-  searchArg = {
+  // Construct the searchArg object with potential descendants
+  const searchArg = {
     field,
     op,
     val,
+    limit,
+    offset,
+    order,
+    descendants: Array.isArray(descendants) ? descendants : [],
   };
 
   // Handle pagination and sorting parameters

@@ -87,16 +87,47 @@ function translateSearchTripletToSQL(triplet) {
   }
 }
 
+/**
+ * Recursively translates a search argument to SQL.
+ *
+ * @param {object} searchArg - The search argument to translate.
+ * @return {string} The translated SQL string.
+ */
 function translateToSQLRecursive(searchArg) {
-  if (searchArg.descendants) {
-    // Translate each descendant recursively
-    const descSqlArr = searchArg.descendants.map(translateToSQLRecursive);
+  console.log('Received searchArg:', JSON.stringify(searchArg)); // Log to check structure
 
-    // Combine using the operator at the current level
-    const sql = descSqlArr.join(` ${searchArg.op} `);
-    return `( ${sql} )`;
+  // Check if searchArg.descendants is an array
+  if (Array.isArray(searchArg.descendants)) {
+    const descSqlArr = searchArg.descendants.map((descendant) => {
+      console.log('Processing descendant:', JSON.stringify(descendant)); // Log each descendant
+
+      if (Array.isArray(descendant.descendants)) {
+        return translateToSQLRecursive(descendant);
+      }
+
+      if (
+        descendant.field &&
+        descendant.op &&
+        (descendant.value || descendant.val)
+      ) {
+        return translateSearchTripletToSQL(descendant);
+      } else {
+        console.error('Invalid descendant:', descendant);
+        return ''; // Handle invalid descendant
+      }
+    });
+
+    // Join the SQL parts with the operator specified in searchArg
+    return `( ${descSqlArr.filter(Boolean).join(` ${searchArg.op || 'AND'} `)} )`;
   }
-  return translateSearchTripletToSQL(searchArg);
+
+  // Check if searchArg is a valid search triplet
+  if (searchArg.field && searchArg.op && (searchArg.value || searchArg.val)) {
+    return translateSearchTripletToSQL(searchArg);
+  }
+
+  console.error('Invalid search argument:', searchArg);
+  return ''; // Or throw an error
 }
 
 // Translate the search argument to SQL

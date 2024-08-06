@@ -11,28 +11,29 @@ curl -X POST --header "Content-Type: application/json" \
     "inchi_key": "InChIKey1",
     "compound_aliases": "Alias1"
   }' \
-  http://localhost:3000/pertubations
+  http://localhost:3000/perturbations
 
 
 
-# Pertubagens PATCH request with JSON payload
+ 
+#Pertubagens PATCH request with JSON payload
 curl -X PATCH --header "Content-Type: application/json" \
   --data '{
     "pertid": 1,
     "column": "gene_target",
     "newvalue": "GeneY"
   }' \
-  http://localhost:3000/pertubations
+  http://localhost:3000/perturbations
 
 
 
 # Pertubagens SEARCH request with JSON payload
-curl -X PATCH --header "Content-Type: application/json" \
-  --data '{
-    "pertid": 1,
-    "column": "gene_target",
-    "newvalue": "GeneY"
-  }' \
-  http://localhost:3000/pertubations
+apiURL="http://localhost:3000/perturbations/search?field=pert_name&op==&val=Pert123"
+response=$(curl -s "$apiURL")
+# Extract pert_name using jq or other methods
+pert_name=$(echo "$response" | jq -r '[0].pert_name')
+
+echo "Pert Name: $pert_name"
 
 # Pertubagens DELETION request with JSON payload
+

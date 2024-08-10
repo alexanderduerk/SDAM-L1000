@@ -64,7 +64,8 @@ app.post('/cells', async (req, res) => {
 app.post('/cells/search', async (req, res) => {
   let db;
   // Extract all relevant fields from req.body
-  const { limit, offset, order, descendants, field, op, val, orderfield } = req.body;
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    req.body;
 
   // Construct the searchArg object with potential descendants
   const searchArg = {
@@ -627,7 +628,7 @@ app.delete('/siginfo', async (req, res) => {
   }
 });
 
-// Patch pertubations
+// Patch Signatures
 app.patch(`/siginfo`, async (req, res) => {
   let db;
   try {

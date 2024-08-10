@@ -34,49 +34,5 @@
         analysis tools for the user.
       </p>
     </section>
-    <!-- Create a search Gene input field-->
-    <section class="search">
-      <form
-        action="/genes/search"
-        method="post"
-        enctype="application/x-www-form-urlencoded"
-      >
-        <input type="text" name="val" placeholder="Search by gene name" />
-        <input type="hidden" name="field" value="gene_symbol" />
-        <input type="hidden" name="op" value="contains" />
-        <input type="hidden" name="limit" value="25" />
-        <input type="hidden" name="offset" value="0" />
-        <input type="hidden" name="order" value="ASC" />
-        <button type="submit">Search</button>
-      </form>
-      <form
-        action="/cells/search"
-        method="post"
-        enctype="application/x-www-form-urlencoded"
-      >
-        <input type="text" name="val" placeholder="Search by Cell name" />
-        <input type="hidden" name="field" value="cell_name" />
-        <input type="hidden" name="op" value="contains" />
-        <input type="hidden" name="limit" value="25" />
-        <input type="hidden" name="offset" value="0" />
-        <input type="hidden" name="order" value="ASC" />
-        <input type="hidden" name="orderfield" value="cell_name" />
-        <button type="submit">Search</button>
-      </form>
-      <!--Create a pertubations search input field-->
-      <form
-        action="/perturbations/search"
-        method="post"
-        enctype="application/x-www-form-urlencoded"
-      >
-        <input type="text" name="val" placeholder="Search by compound name" />
-        <input type="hidden" name="field" value="pert_name" />
-        <input type="hidden" name="op" value="contains" />
-        <input type="hidden" name="limit" value="25" />
-        <input type="hidden" name="offset" value="0" />
-        <input type="hidden" name="order" value="ASC" />
-        <button type="submit">Search</button>
-      </form>
-    </section>
   </body>
 </html>

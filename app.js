@@ -628,7 +628,7 @@ app.delete('/siginfo', async (req, res) => {
   }
 });
 
-// Patch Signatures
+// Patch pertubations
 app.patch(`/siginfo`, async (req, res) => {
   let db;
   try {

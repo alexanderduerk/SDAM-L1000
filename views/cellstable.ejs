@@ -28,6 +28,20 @@
     // Log the new offset value
     console.log(`New offset value: ${offset}`);
   }
+  // Function for column limit change
+  function changeLimit(newlimit) {
+    const documentlimit = document.getElementById("limitInput");
+    let limit = parseInt(newlimit, 10) || 25;
+    documentlimit.value = limit
+  }
+// Funnction for Changing individual column order
+  function changeOrder(order, column) {
+    console.log(column)
+    const documentorderfield = document.getElementById("orderinput")
+    documentorderfield.value = String(column)
+    const documentorder = document.getElementById("order")
+    documentorder.value = String(order)
+  }
   </script>
   <nav class="navbar">
     <div class="container">
@@ -53,7 +67,26 @@
           <tr>
             <th>Name</th>
             <th>Cellosaurus ID</th>
-            <th>Donor Age</th>
+            <th>Donor Age
+              <form
+    action="/cells/search"
+    method="post"
+    enctype="application/x-www-form-urlencoded"
+  >
+    <label for="limitInput">Limit:</label>
+    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
+    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
+    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
+    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
+    <input type="hidden" name="order"  id="order" value="<%= currentSearchArg.order %>" />
+    <input type="hidden" name="orderfield" id="orderinput" value="<%= currentSearchArg.orderfield %>">
+    <input type="hidden" id="limitInput" name="limit" value="<%= currentSearchArg.limit %>">
+    <button type="submit" onclick="changeOrder('ASC', 'donor_age')">ASC
+    </button>
+    <button type="submit" onclick="changeOrder('DESC', 'donor_age')">DESC
+    </button>
+  </form>
+            </th>
             <th>Doubling Time</th>
             <th>Growthmedium</th>
             <th>Celltype</th>
@@ -80,20 +113,42 @@
     <% } else { %>
       <p>No data available</p>
     <% } %>
+    <!--overhanding searchArg-->
     <form
     action="/cells/search"
     method="post"
     enctype="application/x-www-form-urlencoded"
-  >
+  ><!--Hidden input fields for searchArg values-->
     <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
     <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
     <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
     <input type="hidden" id="limit" name="limit" value="<%= currentSearchArg.limit %>" />
     <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
-    <input type="hidden" name="order" value="<%= currentSearchArg.order %>" />
-
+    <input type="hidden" name="order" value="<%= currentSearchArg.order %>" /><!--Button functionality-->
+    <input type="hidden" id="orderinput" name="orderfield" value="<%= currentSearchArg.orderfield %>">
     <button type="submit" onclick="adjustOffset(-1)">Prev.</button>
     <button type="submit" onclick="adjustOffset(1)">Next.</button>
+  </form>
+  <!-- Hidden input fields & buttons for limit change-->
+  <form
+    action="/cells/search"
+    method="post"
+    enctype="application/x-www-form-urlencoded"
+  >
+    <label for="limitInput">Limit:</label>
+    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
+    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
+    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
+    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
+    <input type="hidden" name="order"  id="order" value="<%= currentSearchArg.order %>" />
+    <input type="hidden" name="orderfield" id="orderinput" value="<%= currentSearchArg.orderfield %>">
+    <input type="hidden" id="limitInput" name="limit" value="<%= currentSearchArg.limit %>">
+    <button type="submit" onclick="changeLimit(50)">50
+    </button>
+    <button type="submit" onclick="changeLimit(100)">100
+    </button>
+    <button type="submit" onclick="changeLimit(150)">150
+    </button>
   </form>
   </main>
 </body>

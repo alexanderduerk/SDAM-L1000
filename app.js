@@ -64,7 +64,7 @@ app.post('/cells', async (req, res) => {
 app.post('/cells/search', async (req, res) => {
   let db;
   // Extract all relevant fields from req.body
-  const { limit, offset, order, descendants, field, op, val } = req.body;
+  const { limit, offset, order, descendants, field, op, val, orderfield } = req.body;
 
   // Construct the searchArg object with potential descendants
   const searchArg = {
@@ -74,6 +74,7 @@ app.post('/cells/search', async (req, res) => {
     limit,
     offset,
     order,
+    orderfield,
     descendants: Array.isArray(descendants) ? descendants : [],
   };
 

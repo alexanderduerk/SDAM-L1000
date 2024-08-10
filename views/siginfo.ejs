@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+  <script src="/advancedSearch.js"></script>
   <nav class="navbar">
     <div class="container">
       <a href="#" class="logo">L1000</a>
@@ -55,128 +56,6 @@
     <% } else { %>
       <p>No data available</p>
     <% } %>
-    <!-- Form button for CHanging Offset-->
-    <form
-      id="searchForm"
-      action="/siginfo/search"
-      method="post"
-    >
-      <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
-      <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
-      <button type="button" onclick="adjustOffset(1, event)">Next.</button>
-    </form>
   </main>
-  <script>
-    function adjustOffset(amount, event) {
-    // Prevent default form submission behavior
-      event.preventDefault();
-      // Get the hidden input field for searchArg
-      const searchArgField = document.getElementById('searchArg');
-      // Decode and parse the JSON string from the hidden field
-      let searchArg;
-      try {
-        searchArg = JSON.parse(searchArgField.value);
-        console.log(`searchArg: ${JSON.stringify(searchArg)}`);
-      } catch (e) {
-        console.error('Error parsing searchArg:', e);
-        return;
-      }
-      // Update offset and limit values
-      const currentOffset = parseInt(searchArg.offset, 10) || 0;
-      const limit = parseInt(searchArg.limit, 10) || 10;
-      // Adjust offset
-      searchArg.offset = currentOffset + (amount * limit);
-      searchArg.limit = limit;
-      // Update the hidden input field with the new searchArg
-      searchArgField.value = JSON.stringify(searchArg);
-      // Log for debugging
-      console.log('Updated searchArg:', searchArg);
-      console.log('Hidden input value:', searchArgField.value);
-      // Submit the form
-      document.getElementById('searchForm').submit();
-
-    }
-  
- // Searcharg limit function
-    function adjustLimit(limit, searchargid) {
-      const searchArgField = document.getElementById(searchargid)
-      let searchArg;
-      searchArg.limit == 1000
-      searchArgField.value = JSON.stringify(searchArg)
-
-    } 
-   </script>
 </body>
-</form>
- <!-- Creating plots.js connection for reconstructed searcharg -->
-   <main>
-    <% if (data && data.length > 0) { %>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Cellosaurus ID</th>
-            <th>Donor Age
-              <form
-    action="/cells/plots"
-    method="post"
-    enctype="application/x-www-form-urlencoded"
-  >
-  <!--
-    <label for="limitInput">Limit:</label>
-    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
-    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
-    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
-    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
-    <input type="hidden" name="order"  id="order" value="<%= currentSearchArg.order %>" />
-    <input type="hidden" name="orderfield" id="orderinput" value="<%= currentSearchArg.orderfield %>">
-    <input type="hidden" id="limitInput" name="limit" value="<%= currentSearchArg.limit %>">
-    <button type="submit" onclick="changeOrder('ASC', 'donor_age')">ASC
-    </button>
-    <button type="submit" onclick="changeOrder('DESC', 'donor_age')">DESC
-    </button>-->
-
-    <!-- which data from which th is needed from db l1000? -->
-  </form>
-            </th>
-            <th>Celltype</th>
-            <th>Cell lineage</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% for (const row of data) { %>
-            <tr>
-              <% for (const value of Object.values(row)) { %>
-                <td><%= value %></td>
-              <% } %>
-            </tr>
-          <% } %>
-        </tbody>
-      </table>
-    <% } else { %>
-      <p>No data available</p>
-    <% } %>
-    <!--overhanding searchArg-->
-    <form
-    action="/cells/plots"
-    method="post"
-    enctype="application/x-www-form-urlencoded"
-  ><!--Hidden input fields for searchArg values
-    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
-    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
-    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
-    <input type="hidden" id="limit" name="limit" value="<%= currentSearchArg.limit %>" />
-    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
-    <input type="hidden" name="order" value="<%= currentSearchArg.order %>" />
-    --><!--Button functionality
-    <input type="hidden" id="orderinput" name="orderfield" value="<%= currentSearchArg.orderfield %>">
-    <button type="submit" onclick="adjustOffset(-1)">Prev.</button>
-    <button type="submit" onclick="adjustOffset(1)">Next.</button>-->
-
-
-    <!-- Link to Chart.js library -->
-    <script
-src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
-</script>
-    </form>
 </html>

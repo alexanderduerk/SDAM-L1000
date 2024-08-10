@@ -595,7 +595,7 @@ app.post('/siginfo/search', async (req, res) => {
   }
 });
 
-// Delete Pertubations
+// Delete Signature
 app.delete('/siginfo', async (req, res) => {
   let db;
   try {
@@ -609,8 +609,8 @@ app.delete('/siginfo', async (req, res) => {
     const { sig_name } = req.body;
     console.log('Request Body:', req.body);
 
-    // Create a new instance of the Perturbagens class (if needed for any purpose)
-    // const Pertubagensinstance = new Perturbagens(req.body);
+    // Create a new instance of the Signature class (if needed for any purpose)
+    // const Signatureinstance = new Signature(req.body);
 
     // Call deleteOne function
     await Signatureinfo.deleteOne(db, sig_name);
@@ -628,7 +628,7 @@ app.delete('/siginfo', async (req, res) => {
   }
 });
 
-// Patch pertubations
+// Patch Signatures
 app.patch(`/siginfo`, async (req, res) => {
   let db;
   try {

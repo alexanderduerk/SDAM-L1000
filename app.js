@@ -9,8 +9,8 @@ const ejs = require('ejs');
 
 const Cells = require('./cells');
 const Genes = require('./genes');
-const Mainviews = require('./mainviews');
 const Perturbagens = require('./pertubations');
+const Signatureinfo = require('./siginfo');
 
 // Set the view engine to EJS
 app.set('view engine', 'ejs');
@@ -504,7 +504,8 @@ app.patch(`/pertubations`, async (req, res) => {
   }
 });
 
-app.post('/mainviews', async (req, res) => {
+// Post Function sig_info
+app.post('/siginfo', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({
@@ -514,15 +515,151 @@ app.post('/mainviews', async (req, res) => {
     console.log('Connected successfully');
     // Log the request body to check its contents
     console.log('Request Body:', req.body);
-    // Create a new instance of the Cell class
-    const MViews = new Mainviews(req.body);
+    // Create a new instance of the signature_infos class
+    const Signatureinstance = new Signatureinfo(req.body);
     // Call Create One on the instance
-    const newMainviews = await MViews.createOne(db);
-    console.log(`Created new Cell record:\n${newMainviews}`);
-    res.json(newMainviews);
+    const newsigid = await Signatureinstance.createOne(db);
+    console.log(`Created new Signature record:`);
+    console.log(newsigid);
+    res.json(newsigid);
   } catch (err) {
     console.log(err);
     res.status(400).send('Internal server error');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+app.post('/siginfo/search', async (req, res) => {
+  let db;
+  const { limit, offset, order, descendants, field, op, val } = req.body;
+
+  const searchArg = {
+    field,
+    op,
+    val,
+    limit,
+    offset,
+    order,
+    descendants: Array.isArray(descendants) ? descendants : [],
+  };
+  // Handle pagination and sorting parameters
+  searchArg.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
+  searchArg.offset = req.body.offset ? parseInt(req.body.offset) : undefined;
+  searchArg.order = req.body.order || undefined;
+  console.log(searchArg);
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Query the db
+    const signatures = await Signatureinfo.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
+
+    console.log(`Found signatures:`);
+    console.log(signatures);
+    // Return the result:
+    if (req.accepts('html')) {
+      ejs.renderFile(
+        './views/siginfo.ejs',
+        { data: signatures },
+        {},
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+    } else if (req.accepts('json')) {
+      res.json(signatures);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+// Delete Pertubations
+app.delete('/siginfo', async (req, res) => {
+  let db;
+  try {
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+    console.log('Connected successfully');
+
+    // Extract the pert_id from the request body
+    const { sig_name } = req.body;
+    console.log('Request Body:', req.body);
+
+    // Create a new instance of the Perturbagens class (if needed for any purpose)
+    // const Pertubagensinstance = new Perturbagens(req.body);
+
+    // Call deleteOne function
+    await Signatureinfo.deleteOne(db, sig_name);
+    console.log(`Deleted Pertubagens record with pert_id: ${sig_name}`);
+    res
+      .status(200)
+      .send(`Deleted Pertubagens record with pert_id: ${sig_name}`);
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+// Patch pertubations
+app.patch(`/siginfo`, async (req, res) => {
+  let db;
+  try {
+    db = await sqlite.open({
+      filename: `./l1000.db`,
+      driver: sqlite3.Database,
+    });
+    console.log(`Connected successfully`);
+
+    // Extract the pert_id to be updated from request body
+    const { sig_name, column, newvalue } = req.body;
+
+    // Validate input
+    if (!sig_name || !column || newvalue === undefined) {
+      return res.status(400).send('Bad request: Missing fields');
+    }
+
+    const updatedSignatureinfo = Signatureinfo.updateOne(
+      db,
+      sig_name,
+      column,
+      newvalue
+    );
+    // Send a success response
+    res
+      .status(200)
+      .send(`Updated signature record with sig_namme: ${sig_name}`);
+    console.log('Updated Signature record:');
+    console.log(updatedSignatureinfo);
+    res.json(updatedSignatureinfo);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal server error');
   } finally {
     if (db) {
       await db.close();

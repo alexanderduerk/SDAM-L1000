@@ -541,41 +541,22 @@ app.post('/siginfo', async (req, res) => {
 
 app.post('/siginfo/search', async (req, res) => {
   let db;
-  // Retrieve the searchArg JSON string from the request body
-  const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
+  const { limit, offset, order, descendants, field, op, val } = req.body;
 
-  // Parse the JSON string into an object
-  let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
-  }
-
-  // Construct the searchArg object
-  const { limit, offset, order, descendants, field, op, val, orderfield } =
-    searchArg;
-
-  const searchArgObject = {
+  const searchArg = {
     field,
     op,
     val,
-    limit: parseInt(limit, 10) || 10, // Convert to number with a default value
-    offset: parseInt(offset, 10) || 0, // Convert to number with a default value
+    limit,
+    offset,
     order,
-    orderfield,
-    descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
+    descendants: Array.isArray(descendants) ? descendants : [],
   };
-
   // Handle pagination and sorting parameters
-  // searchArgObject.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
-  // searchArgObject.offset = req.body.offset
-  //   ? parseInt(req.body.offset)
-  //   : undefined;
-  // searchArgObject.order = req.body.order || undefined;
-  // console.log(searchArgObject);
+  searchArg.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
+  searchArg.offset = req.body.offset ? parseInt(req.body.offset) : undefined;
+  searchArg.order = req.body.order || undefined;
+  console.log(searchArg);
   try {
     // Connect to db
     db = await sqlite.open({
@@ -585,19 +566,20 @@ app.post('/siginfo/search', async (req, res) => {
 
     // Query the db
     const signatures = await Signatureinfo.search(
-      searchArgObject,
+      searchArg,
       searchArg.limit,
       searchArg.offset,
       db
     );
 
     console.log(`Found signatures:`);
-    // console.log(signatures);
+    console.log(signatures);
     // Return the result:
     if (req.accepts('html')) {
-      res.render(
-        'siginfo.ejs',
-        { data: signatures, siteSearchArg: searchArgObject },
+      ejs.renderFile(
+        './views/siginfo.ejs',
+        { data: signatures },
+        {},
         (err, str) => {
           if (err) {
             throw err;
@@ -606,7 +588,7 @@ app.post('/siginfo/search', async (req, res) => {
         }
       );
     } else if (req.accepts('json')) {
-      // res.json(signatures);
+      res.json(signatures);
     }
   } catch (e) {
     console.error(e);

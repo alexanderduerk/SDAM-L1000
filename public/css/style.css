@@ -92,7 +92,7 @@ body {
   width: 20vw;
   background: white;
   padding: 60px 20px;
-  margin: 20px 20px;
+  margin: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -118,4 +118,57 @@ body {
   float: left;
   margin-right: 10px;
   line-height: 1.1;
+}
+
+/* Added CSS for side-by-side layout */
+.content-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.about,
+.search-window {
+  flex: 1;
+  margin: 0 10px; /* Space between sections */
+}
+
+.search-window {
+  max-width: 400px;
+  padding: 60px 20px; /* Consistent padding with .about */
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.search-window h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.search-window form {
+  margin-bottom: 20px;
+}
+
+.search-window input[type='text'] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.search-window button {
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.search-window button:hover {
+  background-color: #555;
 }

@@ -25,63 +25,14 @@
       </div>
     </nav>
 
-    <div class="content-wrapper">
-      <!-- About Section -->
-      <section class="about">
-        <h1>What is this project about?</h1>
-        <p>
-          This project aims to deliver a user-friendly way to access, and save
-          data in a SQL database that stores the L1000 dataset. Additionally, we
-          aim to provide several graphical analysis tools for the user.
-        </p>
-      </section>
-
-      <!-- Search Window Section -->
-      <section class="search-window">
-        <h2>Search the Database</h2>
-        <!-- Gene Search Form -->
-        <form
-          action="/perturbations/search"
-          method="post"
-          enctype="application/x-www-form-urlencoded"
-        >
-          <input type="text" name="val" placeholder="Search by gene name" />
-          <input type="hidden" name="field" value="gene_target" />
-          <input type="hidden" name="op" value="contains" />
-          <input type="hidden" name="limit" value="25" />
-          <input type="hidden" name="offset" value="0" />
-          <input type="hidden" name="order" value="ASC" />
-          <button type="submit">Search</button>
-        </form>
-        <!-- Cell Search Form -->
-        <form
-          action="/siginfo/search"
-          method="post"
-          enctype="application/x-www-form-urlencoded"
-        >
-          <input type="text" name="val" placeholder="Search by cell name" />
-          <input type="hidden" name="field" value="cell_name" />
-          <input type="hidden" name="op" value="contains" />
-          <input type="hidden" name="limit" value="25" />
-          <input type="hidden" name="offset" value="0" />
-          <input type="hidden" name="order" value="ASC" />
-          <button type="submit">Search</button>
-        </form>
-        <!-- Signature Info Search Form -->
-        <form
-          action="/siginfo/search"
-          method="post"
-          enctype="application/x-www-form-urlencoded"
-        >
-          <input type="text" name="val" placeholder="Search by compound name" />
-          <input type="hidden" name="field" value="pert_name" />
-          <input type="hidden" name="op" value="contains" />
-          <input type="hidden" name="limit" value="25" />
-          <input type="hidden" name="offset" value="0" />
-          <input type="hidden" name="order" value="ASC" />
-          <button type="submit">Search</button>
-        </form>
-      </section>
-    </div>
+    <section class="about">
+      <h1>What is this project about?</h1>
+      <p>
+        This project aims to deliver a user friendly way to access, and save
+        data in a SQL database which stores the L1000 dataset in it. Also we
+        hope to get some analysis running delivering several different graphical
+        analysis tools for the user.
+      </p>
+    </section>
   </body>
 </html>

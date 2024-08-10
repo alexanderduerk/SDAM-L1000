@@ -188,7 +188,7 @@ function translateToSQL(searchArg, table) {
 
   let orderClause = '';
   if (searchArg.field) {
-    orderClause = ` ORDER BY ${searchArg.field} ${searchArg.order || 'ASC'}`;
+    orderClause = ` ORDER BY ${searchArg.orderfield} ${searchArg.order || 'ASC'}`;
   }
   // Allow for pagination args if provided in the search
   if (searchArg.offset !== undefined && searchArg.limit !== undefined) {

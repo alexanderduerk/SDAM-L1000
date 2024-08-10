@@ -64,7 +64,8 @@ app.post('/cells', async (req, res) => {
 app.post('/cells/search', async (req, res) => {
   let db;
   // Extract all relevant fields from req.body
-  const { limit, offset, order, descendants, field, op, val } = req.body;
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    req.body;
 
   // Construct the searchArg object with potential descendants
   const searchArg = {
@@ -74,6 +75,7 @@ app.post('/cells/search', async (req, res) => {
     limit,
     offset,
     order,
+    orderfield,
     descendants: Array.isArray(descendants) ? descendants : [],
   };
 
@@ -366,32 +368,30 @@ app.post('/perturbations', async (req, res) => {
   }
 });
 
-app.get('/perturbations/search', async (req, res) => {
+/**
+ * Search Request for the Pertubations table
+ */
+app.post('/perturbations/search', async (req, res) => {
   let db;
-  const { query, limit, offset, order } = req.query;
+  // Extract all relevant fields from req.body
+  const { limit, offset, order, descendants, field, op, val } = req.body;
 
-  let searchArg = {};
-
-  if (query) {
-    try {
-      searchArg = JSON.parse(decodeURIComponent(query));
-    } catch (e) {
-      return res.status(400).send('Invalid query parameter');
-    }
-  } else {
-    // Use the simpler format if no complex query is provided
-    const { field, op, val } = req.query;
-    searchArg = {
-      field: field,
-      op: op,
-      val: val,
-    };
-  }
+  // Construct the searchArg object with potential descendants
+  const searchArg = {
+    field,
+    op,
+    val,
+    limit,
+    offset,
+    order,
+    descendants: Array.isArray(descendants) ? descendants : [],
+  };
 
   // Handle pagination and sorting parameters
-  if (limit) searchArg.limit = parseInt(limit);
-  if (offset) searchArg.offset = parseInt(offset);
-  if (order) searchArg.order = order;
+  searchArg.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
+  searchArg.offset = req.body.offset ? parseInt(req.body.offset) : undefined;
+  searchArg.order = req.body.order || undefined;
+  console.log(searchArg);
 
   try {
     // Connect to db
@@ -413,7 +413,7 @@ app.get('/perturbations/search', async (req, res) => {
     // Return the result:
     if (req.accepts('html')) {
       ejs.renderFile(
-        './views/cellstable.ejs',
+        './views/perts.ejs',
         { data: compounds },
         {},
         (err, str) => {
@@ -595,7 +595,7 @@ app.post('/siginfo/search', async (req, res) => {
   }
 });
 
-// Delete Signature
+// Delete Pertubations
 app.delete('/siginfo', async (req, res) => {
   let db;
   try {
@@ -609,8 +609,8 @@ app.delete('/siginfo', async (req, res) => {
     const { sig_name } = req.body;
     console.log('Request Body:', req.body);
 
-    // Create a new instance of the Signature class (if needed for any purpose)
-    // const Signatureinstance = new Signature(req.body);
+    // Create a new instance of the Perturbagens class (if needed for any purpose)
+    // const Pertubagensinstance = new Perturbagens(req.body);
 
     // Call deleteOne function
     await Signatureinfo.deleteOne(db, sig_name);

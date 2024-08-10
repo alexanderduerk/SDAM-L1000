@@ -6,6 +6,7 @@ const app = express();
 const sqlite = require('sqlite');
 const sqlite3 = require('sqlite3');
 const ejs = require('ejs');
+const bodyParser = require('body-parser');
 
 const Cells = require('./cells');
 const Genes = require('./genes');
@@ -21,7 +22,11 @@ app.set('views', path.join(__dirname, 'views'));
 // allow static file useage
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Middleware to parse URL-encoded form data
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Middleware to parse JSON data (if needed, for other parts of your app)
+app.use(bodyParser.json());
 
 // Basic route
 app.get('/', (req, res) => {
@@ -536,22 +541,41 @@ app.post('/siginfo', async (req, res) => {
 
 app.post('/siginfo/search', async (req, res) => {
   let db;
-  const { limit, offset, order, descendants, field, op, val } = req.body;
+  // Retrieve the searchArg JSON string from the request body
+  const searchArgString = req.body.searchArg;
+  console.log('Request Body:', searchArgString);
 
-  const searchArg = {
+  // Parse the JSON string into an object
+  let searchArg;
+  try {
+    searchArg = JSON.parse(searchArgString);
+  } catch (e) {
+    console.error('Error parsing searchArg:', e);
+    return res.status(400).send('Invalid searchArg format.');
+  }
+
+  // Construct the searchArg object
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    searchArg;
+
+  const searchArgObject = {
     field,
     op,
     val,
-    limit,
-    offset,
+    limit: parseInt(limit, 10) || 10, // Convert to number with a default value
+    offset: parseInt(offset, 10) || 0, // Convert to number with a default value
     order,
-    descendants: Array.isArray(descendants) ? descendants : [],
+    orderfield,
+    descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
   };
+
   // Handle pagination and sorting parameters
-  searchArg.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
-  searchArg.offset = req.body.offset ? parseInt(req.body.offset) : undefined;
-  searchArg.order = req.body.order || undefined;
-  console.log(searchArg);
+  // searchArgObject.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
+  // searchArgObject.offset = req.body.offset
+  //   ? parseInt(req.body.offset)
+  //   : undefined;
+  // searchArgObject.order = req.body.order || undefined;
+  // console.log(searchArgObject);
   try {
     // Connect to db
     db = await sqlite.open({
@@ -561,20 +585,19 @@ app.post('/siginfo/search', async (req, res) => {
 
     // Query the db
     const signatures = await Signatureinfo.search(
-      searchArg,
+      searchArgObject,
       searchArg.limit,
       searchArg.offset,
       db
     );
 
     console.log(`Found signatures:`);
-    console.log(signatures);
+    // console.log(signatures);
     // Return the result:
     if (req.accepts('html')) {
-      ejs.renderFile(
-        './views/siginfo.ejs',
-        { data: signatures },
-        {},
+      res.render(
+        'siginfo.ejs',
+        { data: signatures, siteSearchArg: searchArgObject },
         (err, str) => {
           if (err) {
             throw err;
@@ -583,7 +606,7 @@ app.post('/siginfo/search', async (req, res) => {
         }
       );
     } else if (req.accepts('json')) {
-      res.json(signatures);
+      // res.json(signatures);
     }
   } catch (e) {
     console.error(e);

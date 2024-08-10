@@ -160,7 +160,7 @@ class Signatureinfo {
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
     // Done
-    console.log(dbResult);
+    // console.log(dbResult);
     return dbResult;
   }
 }

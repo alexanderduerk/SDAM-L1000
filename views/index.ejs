@@ -6,6 +6,41 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>L1000</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <script>
+      function updateFieldAndSubmit(column_name) {
+        // Get the value from the input field
+        const newValue = document.getElementById('val').value;
+
+        // Create the searchArg object (assuming it was initially set)
+        let searchArg = {};
+
+        // Get the current JSON string from the hidden input field if it exists
+        const searchArgField = document.getElementById('searchArg');
+        console.log(searchArgField.value);
+        try {
+          searchArg = JSON.parse(searchArgField.value) || {};
+        } catch (e) {
+          console.error('Error parsing searchArg:', e);
+        }
+
+        // Update the specific field in the searchArg object
+        searchArg.val = newValue;
+
+        searchArg.field = column_name;
+        searchArg.op = 'contains';
+        searchArg.limit = '25';
+        searchArg.offset = '0';
+        searchArg.orderfield = column_name;
+        searchArg.order = 'ASC';
+        searchArg.descendants = [];
+
+        // Serialize the updated searchArg object and set it in the hidden input
+        searchArgField.value = JSON.stringify(searchArg);
+
+        // Submit the form
+        document.getElementById('searchForm').submit();
+      }
+    </script>
   </head>
   <body>
     <nav class="navbar">
@@ -34,5 +69,18 @@
         analysis tools for the user.
       </p>
     </section>
+    <form
+      id="searchForm"
+      action="/siginfo/search"
+      method="post"
+      enctype="application/x-www-form-urlencoded"
+    >
+      <!--Hidden input fields for searchArg values-->
+      <input type="text" id="val" value="" placeholder="Search a Cell" />
+      <input type="hidden" id="searchArg" name="searchArg" />
+      <button type="button" onclick="updateFieldAndSubmit('cell_name')">
+        Search
+      </button>
+    </form>
   </body>
 </html>

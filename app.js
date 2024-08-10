@@ -99,13 +99,12 @@ app.post('/cells/search', async (req, res) => {
     );
 
     console.log(`Found Cells:`);
-    console.log(cells);
+    console.log(cells.length);
     // Return the result:
     if (req.accepts('html')) {
-      ejs.renderFile(
-        './views/cellstable.ejs',
-        { data: cells },
-        {},
+      res.render(
+        'cellstable.ejs',
+        { data: cells, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
             throw err;
@@ -256,10 +255,9 @@ app.post('/genes/search', async (req, res) => {
     console.log(genes);
     // Return the result:
     if (req.accepts('html')) {
-      ejs.renderFile(
-        './views/cellstable.ejs',
-        { data: genes },
-        {},
+      res.render(
+        'cellstable.ejs',
+        { data: genes, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
             throw err;

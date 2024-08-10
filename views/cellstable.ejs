@@ -8,7 +8,27 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <script src="/advancedSearch.js"></script>
+  <script>
+  function adjustOffset(amount) {
+    // Log the action to confirm the function is being called
+    console.log(`Adjusting offset by ${amount}`);
+
+    // Get the current offset value
+    const offsetInput = document.getElementById('offset');
+    let offset = parseInt(offsetInput.value, 10) || 0;
+    const limitInput = document.getElementById('limit');
+    let limit = parseInt(limitInput.value, 10) || 25;
+
+    // Adjust the offset value
+    offset += amount * limit;
+
+    // Update the hidden input with the new offset value
+    offsetInput.value = offset;
+
+    // Log the new offset value
+    console.log(`New offset value: ${offset}`);
+  }
+  </script>
   <nav class="navbar">
     <div class="container">
       <a href="#" class="logo">L1000</a>
@@ -60,6 +80,21 @@
     <% } else { %>
       <p>No data available</p>
     <% } %>
+    <form
+    action="/cells/search"
+    method="post"
+    enctype="application/x-www-form-urlencoded"
+  >
+    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
+    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
+    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
+    <input type="hidden" id="limit" name="limit" value="<%= currentSearchArg.limit %>" />
+    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
+    <input type="hidden" name="order" value="<%= currentSearchArg.order %>" />
+
+    <button type="submit" onclick="adjustOffset(-1)">Prev.</button>
+    <button type="submit" onclick="adjustOffset(1)">Next.</button>
+  </form>
   </main>
 </body>
 </html>

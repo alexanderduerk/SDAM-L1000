@@ -61,13 +61,6 @@
       action="/siginfo/search"
       method="post"
     >
-      <!-- <input type="hidden" name="val" value="<%= siteSearchArg.val %>">
-      <input type="hidden" name="field" value="<%= siteSearchArg.field %>">
-      <input type="hidden" name="op" value="<%= siteSearchArg.op %>">
-      <input type="hidden" id="limit" name="limit" value="<%= siteSearchArg.limit %>">
-      <input type="hidden" id="offset" name="offset" value="<%= siteSearchArg.offset %>">
-      <input type="hidden" name="order" value="<%= siteSearchArg.order %>">
-      <input type="hidden" name="orderfield" value="<%= siteSearchArg.orderfield %>"> -->
       <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
       <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
       <button type="button" onclick="adjustOffset(1, event)">Next.</button>
@@ -77,10 +70,8 @@
     function adjustOffset(amount, event) {
     // Prevent default form submission behavior
       event.preventDefault();
-
       // Get the hidden input field for searchArg
       const searchArgField = document.getElementById('searchArg');
-
       // Decode and parse the JSON string from the hidden field
       let searchArg;
       try {
@@ -90,22 +81,17 @@
         console.error('Error parsing searchArg:', e);
         return;
       }
-
       // Update offset and limit values
       const currentOffset = parseInt(searchArg.offset, 10) || 0;
       const limit = parseInt(searchArg.limit, 10) || 10;
-
       // Adjust offset
       searchArg.offset = currentOffset + (amount * limit);
       searchArg.limit = limit;
-
       // Update the hidden input field with the new searchArg
       searchArgField.value = JSON.stringify(searchArg);
-
       // Log for debugging
       console.log('Updated searchArg:', searchArg);
       console.log('Hidden input value:', searchArgField.value);
-
       // Submit the form
       document.getElementById('searchForm').submit();
     }

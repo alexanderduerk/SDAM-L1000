@@ -251,9 +251,9 @@ function translateToSQL(searchArg, table) {
   const searchSql = translateToSQLRecursive(searchArg);
 
   let orderClause = '';
-  if (searchArg.field) {
-    orderClause = ` ORDER BY ${searchArg.orderfield} ${searchArg.order || 'ASC'}`;
-  }
+  // if (searchArg.field) {
+  orderClause = ` ORDER BY ${searchArg.orderfield} ${searchArg.order || 'ASC'}`;
+  // }
   // Allow for pagination args if provided in the search
   if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
     return `${header} ${searchSql}${orderClause} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;

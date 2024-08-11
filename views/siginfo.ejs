@@ -7,9 +7,7 @@
   <link rel="stylesheet" href="/css/tablestyles.css" />
   <link rel="stylesheet" href="/css/style.css" />
   <script>
-    function adjustOffset(amount, event) {
-    // Prevent default form submission behavior
-      event.preventDefault();
+    function adjustOffset(amount) {
       // Get the hidden input field for searchArg
       const searchArgField = document.getElementById('searchArg');
       // Decode and parse the JSON string from the hidden field
@@ -30,9 +28,6 @@
       searchArg.limit = limit;
       // Update the hidden input field with the new searchArg
       searchArgField.value = JSON.stringify(searchArg);
-      // Log for debugging
-      console.log('Updated searchArg:', searchArg);
-      console.log('Hidden input value:', searchArgField.value);
       // Submit the form
       document.getElementById('searchForm').submit();
     }
@@ -40,6 +35,7 @@
       const searchArgField = document.getElementById('searchArg');
       const searchArg = JSON.parse(searchArgField.value);
       searchArg.limit = newLimit;
+      console.log(JSON.stringify(searchArg.limit));
       searchArgField.value = JSON.stringify(searchArg);
       document.getElementById('searchForm').submit();
     }
@@ -50,64 +46,39 @@
       searchArg.order = order;
       searchArg.orderfield = column;
       searchArgField.value = JSON.stringify(searchArg);
-      document.getElementById(formid).submit();
+      document.getElementById('searchForm').submit();
     }
 
-    function addDescendant(op, valueform, field, formid) {
-    // Retrieve the value from the input field
-    const searchvalue = document.getElementById(valueform).value;
-    console.log('Input Value:', searchvalue); // Debugging output
+function addDescendant(operator, valueInputId, field, formId) {
+  const value = document.getElementById(valueInputId).value;
 
-    // Retrieve and parse the JSON from the hidden field
-    const searchArgField = document.getElementById('added_searchArg');
-    let searchArg;
+  const searchArgField = document.getElementById('searchArg');
+  let searchArg = JSON.parse(searchArgField.value);
 
-    try {
-        searchArg = JSON.parse(searchArgField.value);
-    } catch (error) {
-        console.error('Error parsing JSON:', error);
-        return; // Exit function if parsing fails
-    }
+  searchArg.descendants = searchArg.descendants || [];
 
-    // Ensure the searchArg object has a 'descendants' property which is an array
-    if (!searchArg.descendants || !Array.isArray(searchArg.descendants)) {
-        searchArg.descendants = [];
-    }
+  const originalSearch = {
+    op: searchArg.op,
+    val: searchArg.val,
+    field: searchArg.field
+  };
 
-    const oldSearchArg = {
-        op: searchArg.op,
-        val: searchArg.val,
-        field: searchArg.field,
-        descendants: searchArg.descendants
-    };
+  searchArg.op = '';
+  searchArg.val = '';
+  searchArg.field = '';
 
+  const newDescendant = {
+    op: operator,
+    val: value,
+    field
+  };
 
-    // Create the new descendant object
-    const newDescendant = {
-        op: op,
-        val: searchvalue,
-        field: field
-    };
+  searchArg.descendants.push(originalSearch, newDescendant);
+  searchArg.op = 'AND';
 
-    console.log('Original searchArg:', searchArg);
+  searchArgField.value = JSON.stringify(searchArg);
 
-    console.log('New Descendant:', newDescendant);
-
-    // Add the new descendant object to the 'descendants' array
-    searchArg.descendants.push(newDescendant);
-
-    // This assumes you want to combine the original search arguments with the new ones using 'AND'
-    const combinedSearchArg = {
-        op: 'AND',
-        descendants: [oldSearchArg, newDescendant]
-    };
-
-    // Update the hidden input field with the new JSON string
-    searchArgField.value = JSON.stringify(combinedSearchArg);
-    console.log('Updated Descendants:', JSON.stringify(combinedSearchArg.descendants));
-
-    // Submit the form
-    document.getElementById(formid).submit();
+  document.getElementById('searchForm').submit();
 }
   </script>
 </head>
@@ -135,25 +106,10 @@
         <thead>
           <tr>
             <th>Signature Name
-              <form
-                id="change_order_signaturename" action="/siginfo/search"
-                method="post"
-              >
-                <input type="hidden" id="searchArg"
-                name="searchArg"
-                value="<%= JSON.stringify(siteSearchArg) %>">
-                <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
-                <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
-              </form>
-              <form
-                id="descendants" action="/siginfo/search"
-                method="post"
-              >
-                <input type="hidden" id="added_searchArg"
-                name="searchArg"
-                value="<%= JSON.stringify(siteSearchArg) %>">
-                <input type="text" id="descendants_value" name="descendants_value" value="">
-                <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
+              <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
+              <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
+              <input type="text" id="descendants_value" name="descendants_value" value="">
+              <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
               </form>
             </th>
             <th>Compound</th>
@@ -174,25 +130,17 @@
     <% } else { %>
       <p>No data available</p>
     <% } %>
-    <!-- Form button for CHanging Offset-->
+    <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
+    <button type="button" onclick="adjustOffset(1, event)">Next.</button>
+    <button type="button" onclick="changeLimit(25)">25</button>
+    <button type="button" onclick="changeLimit(50)">50</button>
+    <button type="button" onclick="changeLimit(100)">100</button>
     <form
       id="searchForm"
       action="/siginfo/search"
       method="post"
     >
       <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
-      <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
-      <button type="button" onclick="adjustOffset(1, event)">Next.</button>
-    </form>
-    <form
-      id="searchForm"
-      action="/siginfo/search"
-      method="post"
-    >
-      <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
-      <button type="button" onclick="changeLimit(25)">25</button>
-      <button type="button" onclick="changeLimit(50)">50</button>
-      <button type="button" onclick="changeLimit(100)">100</button>
     </form>
   </main>
 </body>

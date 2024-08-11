@@ -14,7 +14,6 @@
 
         // Create the searchArg object (assuming it was initially set)
         let searchArg = {};
-
         // Get the current JSON string from the hidden input field if it exists
         const searchArgField = document.getElementById(searchargid);
         console.log(searchArgField.value);
@@ -23,10 +22,8 @@
         } catch (e) {
           console.error('Error parsing searchArg:', e);
         }
-
         // Update the specific field in the searchArg object
         searchArg.val = newValue;
-
         searchArg.field = column_name;
         searchArg.op = 'contains';
         searchArg.limit = '25';

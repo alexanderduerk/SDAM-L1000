@@ -95,7 +95,7 @@
             console.log('Updated searchArgs:', searchArgs);
 
             // Optionally, you can submit a form or perform other actions
-            // document.getElementById('searchForm').submit();
+            document.getElementById('searchForm').submit();
         }
   </script>
 </head>
@@ -135,14 +135,14 @@
                 <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
               </form>
               <form
-                id="change_order_signaturename" action="/siginfo/search"
+                id="descendants" action="/siginfo/search"
                 method="post"
               >
                 <input type="hidden"id="searchArg"
                 name="searchArg"
                 value="<%= JSON.stringify(siteSearchArg) %>">
                 <input type="text" id="descendants" name="descendants">
-                <button type="button">Search</button>
+                <button type="button" onclick="handleSearch()">Search</button>
               </form>
             </th>
             <th>Compound</th>

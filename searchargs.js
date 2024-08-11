@@ -71,6 +71,36 @@ const siginfotypes = {
   project_code: 'text',
 };
 
+const geneinfotypes = {
+  sig_name: 'text',
+  gene_target: 'text',
+  pert_name: 'text',
+  cmap_name: 'text',
+  pert_type: 'text',
+  cell_name: 'text',
+  bead_batch: 'text',
+  pert_dose: 'text',
+  pert_time: 'text',
+  nsamples: 'number',
+  cc_q75: 'number',
+  ss_ngene: 'number',
+  tas: 'number',
+  pct_self_rank_q25: 'number',
+  wt: 'text',
+  median_recall_rank_spearman: 'number',
+  median_recall_rank_wtcs_50: 'number',
+  median_recall_score_spearman: 'number',
+  median_recall_score_wtcs_50: 'number',
+  batch_effect_tstat: 'number',
+  batch_effect_tstat_pct: 'number',
+  is_hiq: 'boolean',
+  qc_pass: 'boolean',
+  det_wells: 'text',
+  det_plates: 'text',
+  distil_ids: 'text',
+  project_code: 'text',
+};
+
 function isTextField(field) {
   const fieldType = typemapper[field];
   console.log(typemapper[field]);
@@ -181,6 +211,40 @@ function translateToSQL(searchArg, table) {
   if (table === 'signature_infos') {
     header = `SELECT sig_name AS 'Signature Name', pert_name AS 'compound', cmap_name AS 'Connectivity Map', cell_name AS 'Cells', bead_batch AS 'Batch Nr.', pert_dose AS 'Dosage', pert_time AS 'Perturbation period', nsamples AS 'Number of Samples', cc_q75 AS 'landmark space', ss_ngene AS 'Number of Genes', tas AS 'Transcriptional activity score', pct_self_rank_q25 AS 'Self connectivity', wt AS 'Wheight list', median_recall_rank_spearman AS 'MRR1', median_recall_rank_wtcs_50 as 'MRR50', median_recall_score_spearman AS 'MRS1', median_recall_score_wtcs_50 as 'MRS50', batch_effect_tstat AS 'Batch effect', batch_effect_tstat_pct AS 'Batch effect %', is_hiq AS 'High Quality', qc_pass AS 'Quality control pass', det_wells AS 'Detection wells', det_plates AS 'Detected plates', distil_ids AS 'Replicate IDs', project_code AS 'Project code' FROM ${table} WHERE `;
     typemapper = siginfotypes;
+  }
+
+  if (table === 'genetargets') {
+    header = `SELECT si.sig_name AS 'Signature Name',
+                     at.gene_target AS 'Targeted Gene',
+                     at.pert_name AS 'Compound',
+                     si.cmap_name AS 'Connectivity Map',
+                     si.cell_name AS 'Cells',
+                     si.bead_batch AS 'Batch Nr.',
+                     si.pert_dose AS 'Dosage',
+                     si.pert_time AS 'Perturbation Period',
+                     si.nsamples AS 'Number of Samples',
+                     si.cc_q75 AS 'Landmark Space',
+                     si.ss_ngene AS 'Number of Genes',
+                     si.tas AS 'Transcriptional Activity Score',
+                     si.pct_self_rank_q25 AS 'Self Connectivity',
+                     si.wt AS 'Weight List',
+                     si.median_recall_rank_spearman AS 'MRR1',
+                     si.median_recall_rank_wtcs_50 AS 'MRR50',
+                     si.median_recall_score_spearman AS 'MRS1',
+                     si.median_recall_score_wtcs_50 AS 'MRS50',
+                     si.batch_effect_tstat AS 'Batch Effect',
+                     si.batch_effect_tstat_pct AS 'Batch Effect %',
+                     si.is_hiq AS 'High Quality',
+                     si.qc_pass AS 'Quality Control Pass',
+                     si.det_wells AS 'Detection Wells',
+                     si.det_plates AS 'Detected Plates',
+                     si.distil_ids AS 'Replicate IDs',
+                     si.project_code AS 'Project Code'
+              FROM signature_infos si
+              LEFT JOIN perturbagens at
+              ON si.pert_name = at.pert_name
+              WHERE`;
+    typemapper = geneinfotypes;
   }
 
   // Use translateToSQLRecursive to handle nested queries

@@ -7,13 +7,15 @@
     <title>L1000</title>
     <link rel="stylesheet" href="/css/style.css" />
     <script>
-      function updateFieldAndSubmit(column_name) {
+      function updateFieldAndSubmit(column_name, searchargid, formid, valueid) {
         // Get the value from the input field
-        const newValue = document.getElementById('val').value;
+        const newValue = document.getElementById(valueid).value;
+        console.log(newValue);
+
         // Create the searchArg object (assuming it was initially set)
         let searchArg = {};
         // Get the current JSON string from the hidden input field if it exists
-        const searchArgField = document.getElementById('searchArg');
+        const searchArgField = document.getElementById(searchargid);
         console.log(searchArgField.value);
         try {
           searchArg = JSON.parse(searchArgField.value) || {};
@@ -34,7 +36,7 @@
         searchArgField.value = JSON.stringify(searchArg);
 
         // Submit the form
-        document.getElementById('searchForm').submit();
+        document.getElementById(formid).submit();
       }
     </script>
 
@@ -68,15 +70,60 @@
       </p>
     </section>
     <form
-      id="searchForm"
+      id="searchFormCells"
       action="/siginfo/search"
       method="post"
       enctype="application/x-www-form-urlencoded"
     >
       <!--Hidden input fields for searchArg values-->
-      <input type="text" id="val" value="" placeholder="Search a Cell" />
-      <input type="hidden" id="searchArg" name="searchArg" value="" />
-      <button type="button" onclick="updateFieldAndSubmit('cell_name')">
+      <input
+        type="text"
+        id="cellval"
+        value=""
+        placeholder="Search by cellname"
+      />
+      <input type="hidden" id="searchArgCells" name="searchArg" />
+      <button
+        type="button"
+        onclick="updateFieldAndSubmit('cell_name', 'searchArgCells', 'searchFormCells', 'cellval')"
+      >
+        Search
+      </button>
+    </form>
+    <form
+      id="searchFormCompounds"
+      action="/siginfo/search"
+      method="post"
+      enctype="application/x-www-form-urlencoded"
+    >
+      <!--Hidden input fields for searchArg values-->
+      <input
+        type="text"
+        id="compoundval"
+        value=""
+        placeholder="Search by compound"
+      />
+      <input type="hidden" id="searchArgCompounds" name="searchArg" />
+      <button
+        type="button"
+        onclick="updateFieldAndSubmit('pert_name', 'searchArgCompounds', 'searchFormCompounds', 'compoundval')"
+      >
+        Search
+      </button>
+    </form>
+    <form
+      id="searchFormGenes"
+      action="/genetargets"
+      method="post"
+      enctype="application/x-www-form-urlencoded"
+    >
+      <!--Hidden input fields for searchArg values-->
+      <input type="text" id="geneval" value="" placeholder="Search by genes" />
+      <input type="hidden" id="searchArgGenetargets" name="searchArg" />
+      <button
+        type="button"
+        onclick="updateFieldAndSubmit('at.gene_target', 'searchArgGenetargets', 'searchFormGenes', 'geneval')"
+      >
         Search
       </button>
     </form>

@@ -52,6 +52,51 @@
       searchArgField.value = JSON.stringify(searchArg);
       document.getElementById(formid).submit();
     }
+
+    function handleSearch() {
+            // Get the value from the descendants input field
+            const searchCriteria = document.getElementById('descendants').value;
+            
+            // Retrieve the search arguments from the hidden input field
+            let searchArgs = JSON.parse(document.getElementById('searchArg').value);
+            
+            // Function to create search args based on criteria
+            function createSearchArgs(criteria) {
+                // Initialize an object to hold the search arguments
+                let args = {};
+
+                // Check for criteria type and create search arguments accordingly
+                if (criteria.includes('-')) {
+                    let [type, value] = criteria.split('-').map(part => part.trim());
+                    if (type.toLowerCase() === 'letters') {
+                        if (value.toLowerCase() === 'is begins') {
+                            args.startsWith = value;
+                        } else if (value.toLowerCase() === 'is ends with') {
+                            args.endsWith = value;
+                        }
+                    }
+                } else {
+                    args.contains = criteria;
+                }
+                
+                return args;
+            }
+            
+            // Create search arguments based on the input criteria
+            let newArgs = createSearchArgs(searchCriteria);
+
+            // Update the search arguments
+            searchArgs = { ...searchArgs, ...newArgs };
+
+            // Update the hidden input field with new search arguments
+            document.getElementById('searchArg').value = JSON.stringify(searchArgs);
+
+            // Log the updated search arguments
+            console.log('Updated searchArgs:', searchArgs);
+
+            // Optionally, you can submit a form or perform other actions
+            // document.getElementById('searchForm').submit();
+        }
   </script>
 </head>
 <body>
@@ -88,6 +133,16 @@
                 value="<%= JSON.stringify(siteSearchArg) %>">
                 <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
                 <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
+              </form>
+              <form
+                id="change_order_signaturename" action="/siginfo/search"
+                method="post"
+              >
+                <input type="hidden"id="searchArg"
+                name="searchArg"
+                value="<%= JSON.stringify(siteSearchArg) %>">
+                <input type="text" id="descendants" name="descendants">
+                <button type="button">Search</button>
               </form>
             </th>
             <th>Compound</th>

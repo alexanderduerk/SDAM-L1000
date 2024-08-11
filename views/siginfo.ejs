@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <script src="/advancedSearch.js"></script>
   <nav class="navbar">
     <div class="container">
       <a href="#" class="logo">L1000</a>
@@ -56,6 +55,46 @@
     <% } else { %>
       <p>No data available</p>
     <% } %>
+    <!-- Form button for CHanging Offset-->
+    <form
+      id="searchForm"
+      action="/siginfo/search"
+      method="post"
+    >
+      <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+      <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
+      <button type="button" onclick="adjustOffset(1, event)">Next.</button>
+    </form>
   </main>
+  <script>
+    function adjustOffset(amount, event) {
+    // Prevent default form submission behavior
+      event.preventDefault();
+      // Get the hidden input field for searchArg
+      const searchArgField = document.getElementById('searchArg');
+      // Decode and parse the JSON string from the hidden field
+      let searchArg;
+      try {
+        searchArg = JSON.parse(searchArgField.value);
+        console.log(`searchArg: ${JSON.stringify(searchArg)}`);
+      } catch (e) {
+        console.error('Error parsing searchArg:', e);
+        return;
+      }
+      // Update offset and limit values
+      const currentOffset = parseInt(searchArg.offset, 10) || 0;
+      const limit = parseInt(searchArg.limit, 10) || 10;
+      // Adjust offset
+      searchArg.offset = currentOffset + (amount * limit);
+      searchArg.limit = limit;
+      // Update the hidden input field with the new searchArg
+      searchArgField.value = JSON.stringify(searchArg);
+      // Log for debugging
+      console.log('Updated searchArg:', searchArg);
+      console.log('Hidden input value:', searchArgField.value);
+      // Submit the form
+      document.getElementById('searchForm').submit();
+    }
+  </script>
 </body>
 </html>

@@ -163,6 +163,21 @@ class Signatureinfo {
     // console.log(dbResult);
     return dbResult;
   }
+
+  static async searchcompounds(searcharg, limit, offset, dbconnection) {
+    const searchSql =
+      searcharg !== undefined && searcharg !== null
+        ? searchArg.translateToSQL(searcharg, 'genetargets')
+        : 'SELECT * FROM signature_infos';
+    console.log(
+      `SQL generated to search Compounds:\n${JSON.stringify(searchSql)}`
+    );
+    // Query the database
+    const dbResult = await dbconnection.all(searchSql);
+    // Done
+    // console.log(dbResult);
+    return dbResult;
+  }
 }
 
 module.exports = Signatureinfo;

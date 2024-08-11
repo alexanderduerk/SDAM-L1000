@@ -10,10 +10,8 @@
       function updateFieldAndSubmit(column_name) {
         // Get the value from the input field
         const newValue = document.getElementById('val').value;
-
         // Create the searchArg object (assuming it was initially set)
         let searchArg = {};
-
         // Get the current JSON string from the hidden input field if it exists
         const searchArgField = document.getElementById('searchArg');
         console.log(searchArgField.value);
@@ -22,10 +20,8 @@
         } catch (e) {
           console.error('Error parsing searchArg:', e);
         }
-
         // Update the specific field in the searchArg object
         searchArg.val = newValue;
-
         searchArg.field = column_name;
         searchArg.op = 'contains';
         searchArg.limit = '25';
@@ -77,7 +73,7 @@
     >
       <!--Hidden input fields for searchArg values-->
       <input type="text" id="val" value="" placeholder="Search a Cell" />
-      <input type="hidden" id="searchArg" name="searchArg" />
+      <input type="hidden" id="searchArg" name="searchArg" value="" />
       <button type="button" onclick="updateFieldAndSubmit('cell_name')">
         Search
       </button>

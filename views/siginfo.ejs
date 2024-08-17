@@ -80,6 +80,22 @@ function addDescendant(operator, valueInputId, field, formId) {
 
   document.getElementById('searchForm').submit();
 }
+
+function forwardLink(value, column_name, searchForm, searchArgID) {
+  const searchArgField = document.getElementById(searchArgID);
+  let searchArg = JSON.parse(searchArgField.value);
+  searchArg.val = value;
+  searchArg.field = column_name;
+  searchArg.op = 'contains';
+  searchArg.limit = '25';
+  searchArg.offset = '0';
+  searchArg.orderfield = column_name;
+  searchArg.order = 'ASC';
+  searchArg.descendants = [];
+  console.log(JSON.stringify(searchArg));
+  searchArgField.value = JSON.stringify(searchArg);
+  document.getElementById(searchForm).submit();
+}
   </script>
 </head>
 <body>
@@ -119,18 +135,28 @@ function addDescendant(operator, valueInputId, field, formId) {
           </tr>
         </thead>
         <tbody>
-          <% for (const row of data) { %>
-            <tr>
-              <% for (const value of Object.values(row)) { %>
-                <td><%= value %></td>
+      <% for (const row of data) { %>
+        <tr>
+          <% for (const [key, value] of Object.entries(row)) { %>
+            <td>
+              <% if (key === 'cell_name') { %>
+                <a href="#" onclick="forwardLink('<%= value %>', 'cell_name', 'searchFormCells', 'searchArgCells')"><%= value %></a>
+              <% } else if (key === 'pert_name') { %>
+                <a href="#" onclick="forwardLink('<%= value %>', 'pert_name', 'searchFormPerts', 'searchArgPerts')"><%= value %></a>
+              <% } else if (key === 'gene_target') { %>
+                <a href="#" onclick="forwardLink('<%= value %>', 'gene_symbol', 'searchFormGenes', 'searchArgGenes')"><%= value %></a>
+              <% } else { %>
+                <%= value %>
               <% } %>
-            </tr>
+            </td>
           <% } %>
-        </tbody>
-      </table>
-    <% } else { %>
-      <p>No data available</p>
-    <% } %>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+<% } else { %>
+  <p>No data available</p>
+<% } %>
     <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
     <button type="button" onclick="adjustOffset(1, event)">Next.</button>
     <button type="button" onclick="changeLimit(25)">25</button>
@@ -142,6 +168,15 @@ function addDescendant(operator, valueInputId, field, formId) {
       method="post"
     >
       <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+    </form>
+    <form id="searchFormCells" action="/cells/search" method="post">
+      <input type="hidden" id="searchArgCells" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+    </form>
+    <form id="searchFormPerts" action="/perturbations/search" method="post">
+      <input type="hidden" id="searchArgPerts" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+    </form>
+    <form id="searchFormGenes" action="/genes/search" method="post">
+      <input type="hidden" id="searchArgGenes" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
     </form>
   </main>
 </body>

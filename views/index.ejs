@@ -58,72 +58,94 @@
       </div>
     </nav>
 
-    <section class="about">
-      <h1>What is this project about?</h1>
-      <p>
-        This project aims to deliver a user friendly way to access, and save
-        data in a SQL database which stores the L1000 dataset in it. Also we
-        hope to get some analysis running delivering several different graphical
-        analysis tools for the user.
-      </p>
-    </section>
-    <form
-      id="searchFormCells"
-      action="/siginfo/search"
-      method="post"
-      enctype="application/x-www-form-urlencoded"
-    >
-      <!--Hidden input fields for searchArg values-->
-      <input
-        type="text"
-        id="cellval"
-        value=""
-        placeholder="Search by cellname"
-      />
-      <input type="hidden" id="searchArgCells" name="searchArg" />
-      <button
-        type="button"
-        onclick="updateFieldAndSubmit('cell_name', 'searchArgCells', 'searchFormCells', 'cellval')"
-      >
-        Search
-      </button>
-    </form>
-    <form
-      id="searchFormCompounds"
-      action="/siginfo/search"
-      method="post"
-      enctype="application/x-www-form-urlencoded"
-    >
-      <!--Hidden input fields for searchArg values-->
-      <input
-        type="text"
-        id="compoundval"
-        value=""
-        placeholder="Search by compound"
-      />
-      <input type="hidden" id="searchArgCompounds" name="searchArg" />
-      <button
-        type="button"
-        onclick="updateFieldAndSubmit('pert_name', 'searchArgCompounds', 'searchFormCompounds', 'compoundval')"
-      >
-        Search
-      </button>
-    </form>
-    <form
-      id="searchFormGenes"
-      action="/genetargets"
-      method="post"
-      enctype="application/x-www-form-urlencoded"
-    >
-      <!--Hidden input fields for searchArg values-->
-      <input type="text" id="geneval" value="" placeholder="Search by genes" />
-      <input type="hidden" id="searchArgGenetargets" name="searchArg" />
-      <button
-        type="button"
-        onclick="updateFieldAndSubmit('at.gene_target', 'searchArgGenetargets', 'searchFormGenes', 'geneval')"
-      >
-        Search
-      </button>
-    </form>
+    <div class="grid-container">
+      <section class="about">
+        <h1>What is this project about?</h1>
+        <p>
+          This project aims to deliver a user-friendly way to access and save
+          data in a SQL database which stores the L1000 dataset. Also, we hope
+          to get some analysis running, delivering several different graphical
+          analysis tools for the user.
+        </p>
+      </section>
+
+      <div class="search-window">
+        <div class="widget">
+          <h2>Search by Cell</h2>
+          <form
+            id="searchFormCells"
+            action="/siginfo/searchUI"
+            method="post"
+            enctype="application/x-www-form-urlencoded"
+          >
+            <input
+              type="text"
+              id="cellval"
+              value=""
+              placeholder="Search by cellname"
+            />
+            <input type="hidden" id="searchArgCells" name="searchArg" val="" />
+            <button
+              type="button"
+              onclick="updateFieldAndSubmit('cell_name', 'searchArgCells', 'searchFormCells', 'cellval')"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+        <div class="widget">
+          <h2>Search by Compound</h2>
+          <form
+            id="searchFormCompounds"
+            action="/siginfo/searchUI"
+            method="post"
+            enctype="application/x-www-form-urlencoded"
+          >
+            <input
+              type="text"
+              id="compoundval"
+              value=""
+              placeholder="Search by compound"
+            />
+            <input type="hidden" id="searchArgCompounds" name="searchArg" />
+            <button
+              type="button"
+              onclick="updateFieldAndSubmit('at.pert_name', 'searchArgCompounds', 'searchFormCompounds', 'compoundval')"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+        <div class="widget">
+          <h2>Search by Gene</h2>
+          <form
+            id="searchFormGenes"
+            action="/siginfo/searchUI"
+            method="post"
+            enctype="application/x-www-form-urlencoded"
+          >
+            <input
+              type="text"
+              id="geneval"
+              value=""
+              placeholder="Search by genes"
+            />
+            <input type="hidden" id="searchArgGenetargets" name="searchArg" />
+            <button
+              type="button"
+              onclick="updateFieldAndSubmit('at.gene_target', 'searchArgGenetargets', 'searchFormGenes', 'geneval')"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <p>TEST</p>
+      </div>
+    </div>
   </body>
 </html>

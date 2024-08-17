@@ -88,11 +88,17 @@ body {
   }
 }
 
+/* CSS Grid for the layout */
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr; /* Three columns */
+  gap: 20px; /* Space between columns */
+  padding: 20px; /* Padding around the grid */
+}
+
 .about {
-  width: 20vw;
   background: white;
-  padding: 60px 20px;
-  margin: 20px;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -106,7 +112,6 @@ body {
 
 .about p {
   font-size: 1.1rem;
-  margin: 0 auto;
   color: #666;
   line-height: 1.8;
 }
@@ -120,30 +125,20 @@ body {
   line-height: 1.1;
 }
 
-/* Added CSS for side-by-side layout */
-.content-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.about,
 .search-window {
-  flex: 1;
-  margin: 0 10px; /* Space between sections */
-}
-
-.search-window {
-  max-width: 400px;
-  padding: 60px 20px; /* Consistent padding with .about */
   background: white;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.search-window h2 {
-  font-size: 2rem;
+.search-window .widget {
   margin-bottom: 20px;
+}
+
+.search-window h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
   color: #333;
 }
 
@@ -160,15 +155,5 @@ body {
 }
 
 .search-window button {
-  padding: 10px 20px;
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.search-window button:hover {
-  background-color: #555;
+  padding: 10;
 }

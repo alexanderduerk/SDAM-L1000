@@ -7,9 +7,7 @@
   <link rel="stylesheet" href="/css/tablestyles.css" />
   <link rel="stylesheet" href="/css/style.css" />
   <script>
-    function adjustOffset(amount, event) {
-    // Prevent default form submission behavior
-      event.preventDefault();
+    function adjustOffset(amount) {
       // Get the hidden input field for searchArg
       const searchArgField = document.getElementById('searchArg');
       // Decode and parse the JSON string from the hidden field
@@ -30,9 +28,6 @@
       searchArg.limit = limit;
       // Update the hidden input field with the new searchArg
       searchArgField.value = JSON.stringify(searchArg);
-      // Log for debugging
-      console.log('Updated searchArg:', searchArg);
-      console.log('Hidden input value:', searchArgField.value);
       // Submit the form
       document.getElementById('searchForm').submit();
     }
@@ -40,6 +35,7 @@
       const searchArgField = document.getElementById('searchArg');
       const searchArg = JSON.parse(searchArgField.value);
       searchArg.limit = newLimit;
+      console.log(JSON.stringify(searchArg.limit));
       searchArgField.value = JSON.stringify(searchArg);
       document.getElementById('searchForm').submit();
     }
@@ -50,53 +46,56 @@
       searchArg.order = order;
       searchArg.orderfield = column;
       searchArgField.value = JSON.stringify(searchArg);
-      document.getElementById(formid).submit();
+      document.getElementById('searchForm').submit();
     }
 
-    function handleSearch() {
-            // Get the value from the descendants input field
-            const searchCriteria = document.getElementById('descendants').value;
-            
-            // Retrieve the search arguments from the hidden input field
-            let searchArgs = JSON.parse(document.getElementById('searchArg').value);
-            
-            // Function to create search args based on criteria
-            function createSearchArgs(criteria) {
-                // Initialize an object to hold the search arguments
-                let args = {};
+function addDescendant(operator, valueInputId, field, formId) {
+  const value = document.getElementById(valueInputId).value;
 
-                // Check for criteria type and create search arguments accordingly
-                if (criteria.includes('-')) {
-                    let [type, value] = criteria.split('-').map(part => part.trim());
-                    if (type.toLowerCase() === 'letters') {
-                        if (value.toLowerCase() === 'is begins') {
-                            args.startsWith = value;
-                        } else if (value.toLowerCase() === 'is ends with') {
-                            args.endsWith = value;
-                        }
-                    }
-                } else {
-                    args.contains = criteria;
-                }
-                
-                return args;
-            }
-            
-            // Create search arguments based on the input criteria
-            let newArgs = createSearchArgs(searchCriteria);
+  const searchArgField = document.getElementById('searchArg');
+  let searchArg = JSON.parse(searchArgField.value);
 
-            // Update the search arguments
-            searchArgs = { ...searchArgs, ...newArgs };
+  searchArg.descendants = searchArg.descendants || [];
 
-            // Update the hidden input field with new search arguments
-            document.getElementById('searchArg').value = JSON.stringify(searchArgs);
+  const originalSearch = {
+    op: searchArg.op,
+    val: searchArg.val,
+    field: searchArg.field
+  };
 
-            // Log the updated search arguments
-            console.log('Updated searchArgs:', searchArgs);
+  searchArg.op = '';
+  searchArg.val = '';
+  searchArg.field = '';
 
-            // Optionally, you can submit a form or perform other actions
-            document.getElementById('searchForm').submit();
-        }
+  const newDescendant = {
+    op: operator,
+    val: value,
+    field
+  };
+
+  searchArg.descendants.push(originalSearch, newDescendant);
+  searchArg.op = 'AND';
+
+  searchArgField.value = JSON.stringify(searchArg);
+
+  document.getElementById('searchForm').submit();
+}
+
+function forwardLink(value, column_name, searchForm, searchArgID) {
+  const searchArgField = document.getElementById(searchArgID);
+  let searchArg = JSON.parse(searchArgField.value);
+  searchArg.val = value;
+  searchArg.field = column_name;
+  searchArg.op = 'contains';
+  searchArg.limit = '25';
+  searchArg.offset = '0';
+  searchArg.orderfield = column_name;
+  searchArg.order = 'ASC';
+  searchArg.descendants = [];
+  console.log(JSON.stringify(searchArg));
+  searchArgField.value = JSON.stringify(searchArg);
+  document.getElementById(searchForm).submit();
+}
   </script>
 </head>
 <body>
@@ -123,25 +122,10 @@
         <thead>
           <tr>
             <th>Signature Name
-              <form
-                id="change_order_signaturename" action="/siginfo/search"
-                method="post"
-              >
-                <input type="hidden"id="searchArg"
-                name="searchArg"
-                value="<%= JSON.stringify(siteSearchArg) %>">
-                <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
-                <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
-              </form>
-              <form
-                id="descendants" action="/siginfo/search"
-                method="post"
-              >
-                <input type="hidden"id="searchArg"
-                name="searchArg"
-                value="<%= JSON.stringify(siteSearchArg) %>">
-                <input type="text" id="descendants" name="descendants">
-                <button type="button" onclick="handleSearch()">Search</button>
+              <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
+              <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
+              <input type="text" id="descendants_value" name="descendants_value" value="">
+              <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
               </form>
             </th>
             <th>Compound</th>
@@ -150,37 +134,48 @@
           </tr>
         </thead>
         <tbody>
-          <% for (const row of data) { %>
-            <tr>
-              <% for (const value of Object.values(row)) { %>
-                <td><%= value %></td>
+      <% for (const row of data) { %>
+        <tr>
+          <% for (const [key, value] of Object.entries(row)) { %>
+            <td>
+              <% if (key === 'cell_name') { %>
+                <a href="#" onclick="forwardLink('<%= value %>', 'cell_name', 'searchFormCells', 'searchArgCells')"><%= value %></a>
+              <% } else if (key === 'pert_name') { %>
+                <a href="#" onclick="forwardLink('<%= value %>', 'pert_name', 'searchFormPerts', 'searchArgPerts')"><%= value %></a>
+              <% } else if (key === 'gene_target') { %>
+                <a href="#" onclick="forwardLink('<%= value %>', 'gene_symbol', 'searchFormGenes', 'searchArgGenes')"><%= value %></a>
+              <% } else { %>
+                <%= value %>
               <% } %>
-            </tr>
+            </td>
           <% } %>
-        </tbody>
-      </table>
-    <% } else { %>
-      <p>No data available</p>
-    <% } %>
-    <!-- Form button for CHanging Offset-->
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+<% } else { %>
+  <p>No data available</p>
+<% } %>
+    <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
+    <button type="button" onclick="adjustOffset(1, event)">Next.</button>
+    <button type="button" onclick="changeLimit(25)">25</button>
+    <button type="button" onclick="changeLimit(50)">50</button>
+    <button type="button" onclick="changeLimit(100)">100</button>
     <form
       id="searchForm"
       action="/siginfo/search"
       method="post"
     >
       <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
-      <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
-      <button type="button" onclick="adjustOffset(1, event)">Next.</button>
     </form>
-    <form
-      id="searchForm"
-      action="/siginfo/search"
-      method="post"
-    >
-      <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
-      <button type="button" onclick="changeLimit(25)">25</button>
-      <button type="button" onclick="changeLimit(50)">50</button>
-      <button type="button" onclick="changeLimit(100)">100</button>
+    <form id="searchFormCells" action="/cells/search" method="post">
+      <input type="hidden" id="searchArgCells" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+    </form>
+    <form id="searchFormPerts" action="/perturbations/search" method="post">
+      <input type="hidden" id="searchArgPerts" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+    </form>
+    <form id="searchFormGenes" action="/genes/search" method="post">
+      <input type="hidden" id="searchArgGenes" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
     </form>
   </main>
 </body>

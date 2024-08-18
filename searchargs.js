@@ -214,12 +214,12 @@ function translateToSQL(searchArg, table) {
   }
   if (table === 'genes') {
     header = `SELECT * FROM ${table} WHERE `;
-    typemapper = geneinfotypes;
+    typemapper = genetypes;
   }
   if (table === 'genesUI') {
     header = `SELECT gene_symbol, ensembl_id, gene_title, gene_type, src, 
     feature_space FROM genes WHERE `;
-    typemapper = geneinfotypes;
+    typemapper = genetypes;
   }
 
   if (table === 'signature_infos') {

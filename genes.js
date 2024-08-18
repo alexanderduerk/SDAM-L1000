@@ -118,6 +118,28 @@ class Genes {
     console.log(dbResult);
     return dbResult;
   }
+
+  /**
+   * Searches the database based on the provided search arguments, limit, offset, and database connection.
+   *
+   * @param {any} searcharg - The search arguments to filter the results.
+   * @param {number} limit - The maximum number of results to return.
+   * @param {number} offset - The offset from the beginning of the results.
+   * @param {object} dbconnection - The database connection object.
+   * @return {Promise<Array>} An array of database results matching the search criteria.
+   */
+  static async searchUI(searcharg, limit, offset, dbconnection) {
+    const searchSql =
+      searcharg !== undefined && searcharg !== null
+        ? searchArg.translateToSQL(searcharg, 'genesUI')
+        : 'SELECT * FROM genes';
+    console.log(`SQL generated to search Genes:\n${JSON.stringify(searchSql)}`);
+    // Query the database
+    const dbResult = await dbconnection.all(searchSql);
+    // Done
+    console.log(dbResult);
+    return dbResult;
+  }
 }
 
 module.exports = Genes;

@@ -123,6 +123,28 @@ class Cells {
     console.log(dbResult);
     return dbResult;
   }
+
+  /**
+   * Reads cellrecord from the database based on the provided search parameters.
+   *
+   * @param {object} searcharg - The search parameters to filter the results.
+   * @param {string} orderarg - The order in which to sort the results.
+   * @param {object} paginationarg - The pagination parameters for the results.
+   * @param {object} dbconnection - The database connection object.
+   * @return {Promise<Array>} - A Promise that resolves to an array of cell records that match the search criteria.
+   */
+  static async searchUI(searcharg, limit, offset, dbconnection) {
+    const searchSql =
+      searcharg !== undefined && searcharg !== null
+        ? searchArg.translateToSQL(searcharg, 'cellsUI')
+        : 'SELECT * FROM cells';
+    console.log(`SQL generated to search Cells:\n${JSON.stringify(searchSql)}`);
+    // Query the database
+    const dbResult = await dbconnection.all(searchSql);
+    // Done
+    console.log(dbResult);
+    return dbResult;
+  }
 }
 
 module.exports = Cells;

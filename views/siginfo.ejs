@@ -81,6 +81,64 @@ function addDescendant(operator, valueInputId, field, formId) {
   document.getElementById('searchForm').submit();
 }
 
+function addNumberDescendant(valueInputId, field, formId) {
+  const inputValue = document.getElementById(valueInputId).value.trim();
+
+  // Regular expression to extract operator and value
+  const operatorValueRegex = /^(<=|>=|<|>)?\s*(.+)$/;
+  const match = inputValue.match(operatorValueRegex);
+
+  // Extract operator and value from the input
+  let operator = '';
+  let value = '';
+
+  if (match) {
+    operator = match[1] || ''; // Capture the operator if present, default to empty string if not
+    value = match[2]; // Capture the value
+  }
+
+  console.log(operator);
+  console.log(value);
+
+  // Fetch the searchArg field and parse its value as JSON
+  const searchArgField = document.getElementById('searchArg');
+  let searchArg = JSON.parse(searchArgField.value);
+
+  // Ensure descendants array exists
+  searchArg.descendants = searchArg.descendants || [];
+
+  // Store the original search parameters
+  const originalSearch = {
+    op: searchArg.op,
+    val: searchArg.val,
+    field: searchArg.field
+  };
+
+  // Reset the main search parameters to empty
+  searchArg.op = '';
+  searchArg.val = '';
+  searchArg.field = '';
+
+  // Create a new descendant with the parsed operator, value, and field
+  const newDescendant = {
+    op: operator,
+    val: value,
+    field: field
+  };
+
+  // Push both the original search and the new descendant into descendants
+  searchArg.descendants.push(originalSearch, newDescendant);
+
+  // Set the main operator to AND, implying both conditions should be met
+  searchArg.op = 'AND';
+
+  // Update the hidden searchArg field with the new search argument structure
+  searchArgField.value = JSON.stringify(searchArg);
+
+  // Submit the form
+  document.getElementById(formId).submit();
+}
+
 function forwardLink(value, column_name, searchForm, searchArgID) {
   const searchArgField = document.getElementById(searchArgID);
   let searchArg = JSON.parse(searchArgField.value);
@@ -132,10 +190,9 @@ function fullsearch() {
         <tr>
           <th>
             Signature Name
-            <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
-            <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
-            <input type="text" id="descendants_value" name="descendants_value" value="">
-            <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
+            <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">↑</button>
+            <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">
+            </button>
           </th>
           <th>Compound</th>
           <th>Gene Target</th>
@@ -179,6 +236,56 @@ function fullsearch() {
             <span class="tooltip">ⓘ<span class="tooltiptext">Binary indicating whether the given signature had at least 50% of its replicates flagged as qc_pass.</span></span>
           </th>
         </tr>
+        <tr>
+          <th>
+            <input type="text" id="SigNameDesc" name="SigNameDesc" value="">
+            <button type="button" onclick="addDescendant('contains', 'SigNameDesc', 'sig_name', 'descendants')">Search</button>
+          </th>
+          <th>
+            <input type="text" id="compoundDesc" name="compoundDesc" value="">
+            <button type="button" onclick="addDescendant('contains', 'compoundDesc', 'at.pert_name', 'descendants')">Search</button>
+          </th>
+          <th>
+            <input type="text" id="geneTargetDesc" name="geneTargetDesc" value="">
+            <button type="button" onclick="addDescendant('contains', 'geneTargetDesc', 'gene_target', 'descendants')">Search</button>
+          </th>
+          <th>
+            <input type="text" id="cellNameDesc" name="cellNameDesc" value="">
+            <button type="button" onclick="addDescendant('contains', 'cellNameDesc', 'cell_name', 'descendants')">Search</button>
+          </th>
+          <th>
+            <input type="text" id="pertDoseDesc" name="pertDoseDesc" value="">
+            <button type="button" onclick="addDescendant('contains', 'pertDoseDesc', 'pert_dose', 'descendants')">Search</button>
+          </th>
+          <th>
+            <input type="text" id="pertTimeDesc" name="pertTimeDesc" value="">
+            <button type="button" onclick="addDescendant('contains', 'pertTimeDesc', 'pert_time', 'descendants')">Search</button>
+          </th>
+          <th>
+            <input type="text" id="SsNgeneDesc" name="SsNgeneDesc" value="">
+            <button type="button" onclick="addNumberDescendant('SsNgeneDesc','ss_ngene', 'searchForm')">Search</button>
+          </th>
+          <th>
+            <input type="text" id="tasDesc" name="tasDesc" value="">
+            <button type="button" onclick="addNumberDescendant('tasDesc','tas', 'searchForm')">Search</button>
+          </th>
+          <th>
+            <select id="highQCDesc" name="highQCDesc">
+              <option value="">All</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+            <button type="button" onclick="addDescendant('=', 'highQCDesc', 'is_hiq', 'descendants')">Search</button>
+          </th>
+          <th>
+            <select id="QcPassDesc" name="QcPassDesc">
+              <option value="">All</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+            <button type="button" onclick="addDescendant('=', 'QcPassDesc', 'qc_pass', 'descendants')">Search</button>
+          </th>
+        </tr>
       </thead>
   <tbody>
     <% for (const row of data) { %>
@@ -210,7 +317,7 @@ function fullsearch() {
     <button type="button" onclick="changeLimit(100)">100</button>
     <form
       id="searchForm"
-      action="/siginfo/search"
+      action="/siginfo/searchUI"
       method="post"
     >
       <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">

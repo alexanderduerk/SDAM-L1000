@@ -31,12 +31,10 @@
         <thead>
           <tr>
             <!--Hardcoded header for SMILES Structure visualisation-->
-            <th>Pert Name</th>
-            <th>CMAP Name</th>
+            <th>Name of reagent</th>
             <th>Gene Target</th>
-            <th>MOA</th>
-            <th>Canonical SMILES</th>
-            <th>InChI Key</th>
+            <th>Mechanism of action</th>
+            <th>Structure</th>
             <th>Compound Aliases</th>
           </tr>
         </thead>
@@ -47,7 +45,7 @@
             <tr>
               <% for (const [key, value] of Object.entries(row)) { %>
                 <td>
-                    <% if (key === 'SMILE') { %>
+                    <% if (key === 'canonical_smiles') { %>
             <img class="smilesstructure" data-smiles="<%= value %>"
              alt="Molecule">
           <% } else { %>

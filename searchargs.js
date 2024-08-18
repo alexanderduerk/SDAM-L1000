@@ -200,14 +200,28 @@ function translateToSQL(searchArg, table) {
     header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', doubling_time AS 'Doubling time', growth_medium AS 'Growth Medium', cell_type AS 'Cell Type', donor_ethnicity AS 'Donor Ethnicity', donor_sex AS 'Donor Sex', donor_tumor_phase AS 'Donor Tumor Phase', cell_lineage AS 'Cell Lineage', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
     typemapper = cellinfotypes;
   }
+  if (table === 'cellsUI') {
+    header = `SELECT cell_name, donor_age, doubling_time, growth_medium, donor_ethnicity, donor_sex, donor_tumor_phase, primary_disease, growth_pattern FROM cells WHERE `;
+    typemapper = cellinfotypes;
+  }
   if (table === 'perturbagens') {
     header = `SELECT pert_name AS 'Name', cmap_name AS 'compound', gene_target AS 'Target', moa AS 'mechanism', canonical_smiles AS 'SMILE', inchi_key AS 'identifier', compound_aliases AS 'compound alternative name' FROM ${table} WHERE `;
     typemapper = perturbagentypes;
   }
+  if (table === 'perturbagensUI') {
+    header = `SELECT pert_name, gene_target, moa, canonical_smiles, compound_aliases FROM perturbagens WHERE `;
+    typemapper = perturbagentypes;
+  }
   if (table === 'genes') {
     header = `SELECT * FROM ${table} WHERE `;
-    typemapper = cellinfotypes;
+    typemapper = geneinfotypes;
   }
+  if (table === 'genesUI') {
+    header = `SELECT gene_symbol, ensembl_id, gene_title, gene_type, src, 
+    feature_space FROM genes WHERE `;
+    typemapper = geneinfotypes;
+  }
+
   if (table === 'signature_infos') {
     header = `SELECT sig_name AS 'Signature Name', pert_name AS 'compound', cmap_name AS 'Connectivity Map', cell_name AS 'Cells', bead_batch AS 'Batch Nr.', pert_dose AS 'Dosage', pert_time AS 'Perturbation period', nsamples AS 'Number of Samples', cc_q75 AS 'landmark space', ss_ngene AS 'Number of Genes', tas AS 'Transcriptional activity score', pct_self_rank_q25 AS 'Self connectivity', wt AS 'Wheight list', median_recall_rank_spearman AS 'MRR1', median_recall_rank_wtcs_50 as 'MRR50', median_recall_score_spearman AS 'MRS1', median_recall_score_wtcs_50 as 'MRS50', batch_effect_tstat AS 'Batch effect', batch_effect_tstat_pct AS 'Batch effect %', is_hiq AS 'High Quality', qc_pass AS 'Quality control pass', det_wells AS 'Detection wells', det_plates AS 'Detected plates', distil_ids AS 'Replicate IDs', project_code AS 'Project code' FROM ${table} WHERE `;
     typemapper = siginfotypes;
@@ -278,5 +292,4 @@ function translateToSQL(searchArg, table) {
   // Combine both
   return `${header} ${searchSql}${orderClause}`;
 }
-
 module.exports = { translateToSQL };

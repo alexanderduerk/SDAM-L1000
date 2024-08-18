@@ -139,6 +139,81 @@ app.post('/cells/search', async (req, res) => {
 });
 
 /**
+ * Search Request for the Cellinfos table
+ */
+app.post('/cells/searchUI', async (req, res) => {
+  let db;
+  // Retrieve the searchArg JSON string from the request body
+  const searchArgString = req.body.searchArg;
+  console.log('Request Body:', searchArgString);
+
+  // Parse the JSON string into an object
+  let searchArg;
+  try {
+    searchArg = JSON.parse(searchArgString);
+  } catch (e) {
+    console.error('Error parsing searchArg:', e);
+    return res.status(400).send('Invalid searchArg format.');
+  }
+
+  // Construct the searchArg object
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    searchArg;
+
+  const searchArgObject = {
+    field,
+    op,
+    val,
+    limit: parseInt(limit, 10) || 10, // Convert to number with a default value
+    offset: parseInt(offset, 10) || 0, // Convert to number with a default value
+    order,
+    orderfield,
+    descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
+  };
+
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Query the db
+    const cells = await Cells.searchUI(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
+
+    console.log(`Found Cells:`);
+    console.log(cells.length);
+    // Return the result:
+    if (req.accepts('html')) {
+      res.render(
+        'cellstable.ejs',
+        { data: cells, currentSearchArg: searchArg },
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+    } else if (req.accepts('json')) {
+      res.json(cells);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+/**
  * Delete Request for Cellinfos table
  */
 // Route to handle DELETE requests to /cells/:name
@@ -289,6 +364,69 @@ app.post('/genes/search', async (req, res) => {
 });
 
 /**
+ * Search Request for the Cellinfos table
+ */
+app.post('/genes/searchUI', async (req, res) => {
+  let db;
+  // Retrieve the searchArg JSON string from the request body
+  const searchArgString = req.body.searchArg;
+  console.log('Request Body:', searchArgString);
+
+  // Parse the JSON string into an object
+  let searchArg;
+  try {
+    searchArg = JSON.parse(searchArgString);
+  } catch (e) {
+    console.error('Error parsing searchArg:', e);
+    return res.status(400).send('Invalid searchArg format.');
+  }
+
+  // Construct the searchArg object
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    searchArg;
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Query the db
+    const genes = await Genes.searchUI(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
+
+    console.log(`Found Genes:`);
+    console.log(genes);
+    // Return the result:
+    if (req.accepts('html')) {
+      res.render(
+        'genes.ejs',
+        { data: genes, currentSearchArg: searchArg },
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+    } else if (req.accepts('json')) {
+      res.json(genes);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+/**
  * Delete Request for Cellinfos table
  */
 // Route to handle DELETE requests to /cells/:name
@@ -407,6 +545,71 @@ app.post('/perturbations/search', async (req, res) => {
 
     // Query the db
     const compounds = await Perturbagens.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
+
+    console.log(`Found compounds:`);
+    console.log(compounds);
+    // Return the result:
+    if (req.accepts('html')) {
+      ejs.renderFile(
+        './views/perts.ejs',
+        { data: compounds },
+        {},
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+    } else if (req.accepts('json')) {
+      res.json(compounds);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+/**
+ * Search Request for the Pertubations table
+ */
+app.post('/perturbations/searchUI', async (req, res) => {
+  let db;
+  // Retrieve the searchArg JSON string from the request body
+  const searchArgString = req.body.searchArg;
+  console.log('Request Body:', searchArgString);
+
+  // Parse the JSON string into an object
+  let searchArg;
+  try {
+    searchArg = JSON.parse(searchArgString);
+  } catch (e) {
+    console.error('Error parsing searchArg:', e);
+    return res.status(400).send('Invalid searchArg format.');
+  }
+
+  // Construct the searchArg object
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    searchArg;
+
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Query the db
+    const compounds = await Perturbagens.searchUI(
       searchArg,
       searchArg.limit,
       searchArg.offset,

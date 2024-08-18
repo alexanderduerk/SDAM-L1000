@@ -130,8 +130,14 @@ function forwardLink(value, column_name, searchForm, searchArgID) {
               </form>
             </th>
             <th>Compound</th>
-            <th>Connectivity Map</th>
+            <th>Gene target</th>
             <th>Cells</th>
+            <th>Perturbation dose</th>
+            <th>Perturbation time</th>
+            <th>Modulated Genes</th>
+            <th>Transcriptional activity score</th>
+            <th>Is high quality data</th>
+            <th>Did pass Quality control</th>
           </tr>
         </thead>
         <tbody>
@@ -169,13 +175,13 @@ function forwardLink(value, column_name, searchForm, searchArgID) {
     >
       <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
     </form>
-    <form id="searchFormCells" action="/cells/search" method="post">
+    <form id="searchFormCells" action="/cells/searchUI" method="post">
       <input type="hidden" id="searchArgCells" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
     </form>
-    <form id="searchFormPerts" action="/perturbations/search" method="post">
+    <form id="searchFormPerts" action="/perturbations/searchUI" method="post">
       <input type="hidden" id="searchArgPerts" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
     </form>
-    <form id="searchFormGenes" action="/genes/search" method="post">
+    <form id="searchFormGenes" action="/genes/searchUI" method="post">
       <input type="hidden" id="searchArgGenes" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
     </form>
   </main>

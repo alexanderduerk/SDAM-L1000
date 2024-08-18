@@ -119,46 +119,94 @@ function forwardLink(value, column_name, searchForm, searchArgID) {
   <main>
     <% if (data && data.length > 0) { %>
       <table>
-        <thead>
-          <tr>
-            <th>Signature Name
-              <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
-              <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
-              <input type="text" id="descendants_value" name="descendants_value" value="">
-              <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
-              </form>
-            </th>
-            <th>Compound</th>
-            <th>Gene target</th>
-            <th>Cells</th>
-            <th>Perturbation dose</th>
-            <th>Perturbation time</th>
-            <th>Modulated Genes</th>
-            <th>Transcriptional activity score</th>
-            <th>Is high quality data</th>
-            <th>Did pass Quality control</th>
-          </tr>
-        </thead>
-        <tbody>
-      <% for (const row of data) { %>
-        <tr>
-          <% for (const [key, value] of Object.entries(row)) { %>
-            <td>
-              <% if (key === 'cell_name') { %>
-                <a href="#" onclick="forwardLink('<%= value %>', 'cell_name', 'searchFormCells', 'searchArgCells')"><%= value %></a>
-              <% } else if (key === 'pert_name') { %>
-                <a href="#" onclick="forwardLink('<%= value %>', 'pert_name', 'searchFormPerts', 'searchArgPerts')"><%= value %></a>
-              <% } else if (key === 'gene_target') { %>
-                <a href="#" onclick="forwardLink('<%= value %>', 'gene_symbol', 'searchFormGenes', 'searchArgGenes')"><%= value %></a>
-              <% } else { %>
-                <%= value %>
-              <% } %>
-            </td>
-          <% } %>
-        </tr>
-      <% } %>
-    </tbody>
-  </table>
+  <thead>
+    <tr>
+      <th>
+        Signature Name
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">This is the name of the signature.</span>
+        </span>
+        <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
+        <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
+        <input type="text" id="descendants_value" name="descendants_value" value="">
+        <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
+      </th>
+      <th>
+        Compound
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">This is the name of the compound used.</span>
+        </span>
+      </th>
+      <th>
+        Gene Target
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">The gene that the compound targets.</span>
+        </span>
+      </th>
+      <th>
+        Cells
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">The cell types used in the experiment.</span>
+        </span>
+      </th>
+      <th>
+        Perturbation Dose
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">The dose of the compound applied.</span>
+        </span>
+      </th>
+      <th>
+        Perturbation Time
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">The duration for which the compound was applied.</span>
+        </span>
+      </th>
+      <th>
+        Modulated Genes
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">Genes that were modulated in response to the compound.</span>
+        </span>
+      </th>
+      <th>
+        Transcriptional Activity Score
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">Score representing transcriptional activity.</span>
+        </span>
+      </th>
+      <th>
+        Is High Quality Data
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">Indicates if the data is of high quality.</span>
+        </span>
+      </th>
+      <th>
+        Did Pass Quality Control
+        <span class="tooltip">ⓘ
+          <span class="tooltiptext">Indicates if the data passed quality control checks.</span>
+        </span>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for (const row of data) { %>
+      <tr>
+        <% for (const [key, value] of Object.entries(row)) { %>
+          <td>
+            <% if (key === 'cell_name') { %>
+              <a href="#" onclick="forwardLink('<%= value %>', 'cell_name', 'searchFormCells', 'searchArgCells')"><%= value %></a>
+            <% } else if (key === 'pert_name') { %>
+              <a href="#" onclick="forwardLink('<%= value %>', 'pert_name', 'searchFormPerts', 'searchArgPerts')"><%= value %></a>
+            <% } else if (key === 'gene_target') { %>
+              <a href="#" onclick="forwardLink('<%= value %>', 'gene_symbol', 'searchFormGenes', 'searchArgGenes')"><%= value %></a>
+            <% } else { %>
+              <%= value %>
+            <% } %>
+          </td>
+        <% } %>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
 <% } else { %>
   <p>No data available</p>
 <% } %>

@@ -28,6 +28,7 @@ th {
   position: sticky;
   top: 0;
   z-index: 0;
+  overflow: visible;
 }
 
 td {
@@ -56,4 +57,67 @@ td img:hover {
   transition: transform 0.3s ease; /* Add smooth transition */
   border: 2px solid #ccc;
   background-color: whitesmoke;
+}
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  color: grey;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  max-width: 100px; /* Adjust as needed to fit within column width */
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px 10px;
+  position: absolute;
+  z-index: 1000000; /* High z-index to ensure tooltip appears above other elements */
+  top: 125%; /* Position below the icon */
+  left: 50%;
+  transform: translateX(-50%); /* Center the tooltip */
+  margin-left: 0; /* Reset margin-left since we use transform for centering */
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 9px;
+  overflow: hidden; /* Prevents the text from spilling out of the tooltip */
+  white-space: normal; /* Allows text to wrap within the tooltip */
+  word-wrap: break-word; /* Ensures long words break and wrap within the tooltip */
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+  content: '';
+  position: absolute;
+  bottom: 100%; /* Position the arrow above the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent; /* Arrow color and direction */
+}
+
+/* Show the tooltip text when hovering */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Styling for the tooltip row */
+.tooltip-row {
+  background-color: #f9f9f9; /* Optional background color for the tooltip row */
+  height: 1px; /* Adjust height as needed */
+}
+
+.tooltip-row th {
+  text-align: center;
+  padding: 0;
+  vertical-align: bottom;
 }

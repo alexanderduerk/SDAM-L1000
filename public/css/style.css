@@ -96,6 +96,13 @@ body {
   padding: 20px; /* Padding around the grid */
 }
 
+.contact-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 30px;
+  padding: 20px;
+}
+
 .about {
   background: white;
   padding: 20px;
@@ -116,14 +123,14 @@ body {
   line-height: 1.8;
 }
 
-.about p::first-letter {
+/* .about p::first-letter {
   font-size: 2.5rem;
   font-weight: bold;
   color: #333;
   float: left;
   margin-right: 10px;
   line-height: 1.1;
-}
+} */
 
 .search-window {
   background: white;

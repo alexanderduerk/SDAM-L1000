@@ -28,9 +28,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Middleware to parse JSON data (if needed, for other parts of your app)
 app.use(bodyParser.json());
 
-// Basic route
+// Basic route for homepage
 app.get('/', (req, res) => {
   res.render('index');
+});
+
+// Basic route for about
+app.get('/about', (req, res) => {
+  res.render('about');
+});
+
+// Basic route for contact
+app.get('/contact', (req, res) => {
+  res.render('contact');
 });
 
 /**

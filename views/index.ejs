@@ -38,6 +38,38 @@
         // Submit the form
         document.getElementById(formid).submit();
       }
+
+      function setupEnterKeyHandler(inputId, column_name, searchargid, formid) {
+        document
+          .getElementById(inputId)
+          .addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+              event.preventDefault(); // Prevent the default form submission
+              updateFieldAndSubmit(column_name, searchargid, formid, inputId);
+            }
+          });
+      }
+
+      window.addEventListener('DOMContentLoaded', (event) => {
+        setupEnterKeyHandler(
+          'cellval',
+          'cell_name',
+          'searchArgCells',
+          'searchFormCells'
+        );
+        setupEnterKeyHandler(
+          'compoundval',
+          'at.pert_name',
+          'searchArgCompounds',
+          'searchFormCompounds'
+        );
+        setupEnterKeyHandler(
+          'geneval',
+          'at.gene_target',
+          'searchArgGenetargets',
+          'searchFormGenes'
+        );
+      });
     </script>
   </head>
   <body>
@@ -83,7 +115,7 @@
               value=""
               placeholder="Search by cellname"
             />
-            <input type="hidden" id="searchArgCells" name="searchArg" val="" />
+            <input type="hidden" id="searchArgCells" name="searchArg" />
             <button
               type="button"
               onclick="updateFieldAndSubmit('cell_name', 'searchArgCells', 'searchFormCells', 'cellval')"

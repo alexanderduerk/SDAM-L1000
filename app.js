@@ -888,7 +888,7 @@ app.post('/siginfo/search', async (req, res) => {
     // Return the result:
     if (req.accepts('html')) {
       res.render(
-        'siginfo.ejs',
+        'siginfofull.ejs',
         { data: signatures, siteSearchArg: searchArgObject },
         (err, str) => {
           if (err) {

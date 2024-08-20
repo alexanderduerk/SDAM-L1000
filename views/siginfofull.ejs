@@ -119,12 +119,6 @@ function fullsearch() {
       </div>
     </div>
   </nav>
-  <body>
-  <nav class="navbar">
-  <div class="container">
-    <button type="button" onclick="fullsearch()">Show full Table</button>
-  </div>
-</nav>
  <main>
   <% if (data && data.length > 0) { %>
     <table>
@@ -138,14 +132,29 @@ function fullsearch() {
             <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
           </th>
           <th>Compound</th>
-          <th>Gene Target</th>
+          <th>Connectivity Map Code</th>
           <th>Cells</th>
+          <th>Bead batch</th>
           <th>Perturbation Dose</th>
           <th>Perturbation Time</th>
+          <th>Number of samples</th>
+          <th>cc_q75</th>
           <th>Modulated Genes</th>
           <th>Transcriptional Activity Score</th>
+          <th>pct_self_rank_q25</th>
+          <th>wt</th>
+          <th>median_recall_rank_spearman</th>
+          <th>median_recall_rank_wtcs_50</th>
+          <th>median_recall_score_spearman</th>
+          <th>median_recall_score_wtcs_50</th>
+          <th>batch_effect_tstat</th>
+          <th>batch_effect_tstat_pct</th>
           <th>High Quality Data</th>
           <th>Quality Control passed</th>
+          <th>det_wells</th>
+          <th>det_plates</th>
+          <th>distil_ids</th>
+          <th>project_code</th>
         </tr>
         <tr class="tooltip-row">
           <th>
@@ -155,10 +164,13 @@ function fullsearch() {
             <span class="tooltip">ⓘ<span class="tooltiptext">This is the name of the compound used to perturbate.</span></span>
           </th>
           <th>
-            <span class="tooltip">ⓘ<span class="tooltiptext">The gene that the compound targets.</span></span>
+            <span class="tooltip">ⓘ<span class="tooltiptext">The internal (CMap-designated) name of a perturbagen. By convention, for genetic perturbations CMap uses the HUGO gene symbol.</span></span>
           </th>
           <th>
             <span class="tooltip">ⓘ<span class="tooltiptext">The cell type used in the experiment.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">One instantiation of a complete set of beads, which have been coupled to probes at one time, under the same conditions.</span></span>
           </th>
           <th>
             <span class="tooltip">ⓘ<span class="tooltiptext">The dose of the compound applied.</span></span>
@@ -167,16 +179,60 @@ function fullsearch() {
             <span class="tooltip">ⓘ<span class="tooltiptext">The duration for which the cells were exposed to the compound.</span></span>
           </th>
           <th>
-            <span class="tooltip">ⓘ<span class="tooltiptext"> Number of Genes that were differentially expressed in response to the compound.</span></span>
+            <span class="tooltip">ⓘ<span class="tooltiptext">Number of individual replicate profiles (level 4 / z-score) that were used to create the signature (level 5 / aggregate z-score).</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">75th quantile of pairwise spearman correlations in landmark space of replicate level 4 profiles.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">
+             Number of Genes that were differentially expressed in response to the compound.
+            </span></span>
           </th>
           <th>
             <span class="tooltip">ⓘ<span class="tooltiptext">Score representing the transcriptional activity.</span></span>
           </th>
           <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">Self connectivity of replicates expressed as a percentage of total instances in a replicate set.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">Comma-delimited list of the replicate weightings used to collapse into the level 5 signature. These will sum to 1.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">The median pairwise recall rank by spearman correlation between replicate level 4 profiles.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">The median pairwise recall rank by weighted connectivity score between replicate level 4 profiles.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">The median pairwise spearman correlation between replicate level 4 profiles.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">The median pairwise weighted connectiity score between replicate level 4 profiles.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">The result of a one-sample t-test comparing the median correlation between signatures from the same plate to 0. Higher values indicate higher correlations between such signatures, and hence potentially a batch effect.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">The percentile of batch_effect_tstat relative to all other signatures.</span></span>
+          </th>
+          <th>
             <span class="tooltip">ⓘ<span class="tooltiptext">Binary indicating whether the given signature was of high techincal and functional quality. Specific requirements are qc pass = 1 AND (median_recall_rank_spearman <= 5 OR median_recall_rank_wtcs_50 <= 5)</span></span>
           </th>
           <th>
-            <span class="tooltip">ⓘ<span class="tooltiptext">Binary indicating whether the given signature had at least 50% of its replicates flagged as qc_pass.</span></span>
+            <span class="tooltip">ⓘ<span class="tooltiptext"> Binary indicating whether the given signature had at least 50% of its replicates flagged as qc_pass.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">Pipe-delimited list of detection wells, which refers to each well of the detection plate in which an L1000 experiment is conducted.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">Pipe-delimited list of detection plates, the plate of L1000 experiments that, at the end of the assay pipeline, is put through the Luminex scanners to detect the levels of landmark gene amplicons.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">Pipe-delmited list of IDs of individual replicate profiles, referred to as level 4 / z-score data, that is used in creating the signature from replicates assayed together on an L1000 plate. The signature is referred to as level 5 / aggregated z-score data.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext">An internal code identifying the project to which a signature belongs.</span></span>
           </th>
         </tr>
       </thead>

@@ -189,10 +189,13 @@ function fullsearch() {
       <thead>
         <tr>
           <th>
-            Signature Name
-            <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">↑</button>
-            <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">
-            </button>
+            <div class="th-container">
+              <span class="th-text">Signature Name</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">➧</button>
+                </div>
+            </div>
           </th>
           <th>Compound</th>
           <th>Gene Target</th>

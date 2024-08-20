@@ -121,3 +121,56 @@ td img:hover {
   padding: 0;
   vertical-align: bottom;
 }
+
+/* Container to hold the header text and buttons */
+.th-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+
+/* Container for buttons */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  position: absolute;
+  align-items: center;
+  top: 50%; /* Center vertically */
+  right: 0;
+  transform: translateY(-50%); /* Adjust alignment */
+}
+
+/* Style the buttons to remove default appearance */
+
+.btn-top {
+  /* Turn button 90 degrees */
+  transform: rotate(90deg) scaleX(-1);
+  background: transparent; /* Removes the default grey background */
+  margin: 0; /* Removes default margins */
+  text-align: center;
+  padding: 0;
+  border: 0;
+  font-size: 22px; /* Sets font size */
+  color: white;
+  cursor: pointer; /* Changes cursor to pointer on hover */
+  outline: none; /* Removes default outline */
+}
+
+.btn-bottom {
+  /* Turn button 90 degrees */
+  transform: rotate(90deg);
+  background: transparent; /* Removes the default grey background */
+  margin: 0; /* Removes default margins */
+  text-align: center;
+  padding: 0;
+  border: 0;
+  font-size: 22px; /* Sets font size */
+  color: white;
+  cursor: pointer; /* Changes cursor to pointer on hover */
+  outline: none; /* Removes default outline */
+}

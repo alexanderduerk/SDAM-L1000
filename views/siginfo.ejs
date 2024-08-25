@@ -160,6 +160,11 @@ function fullsearch() {
   searchArgField.value = JSON.stringify(searchArg);
   document.getElementById('searchFormFull').submit();
 }
+function PlotCells() {
+  const searchArgField = document.getElementById('searchArgPlots');
+  let searchArg = JSON.parse(searchArgField.value);
+  document.getElementById('plotCells').submit();
+}
   </script>
   <script 
   src="http://hyphenator.googlecode.com/svn/tags/Version%204.0.0/Hyphenator.js">
@@ -189,6 +194,7 @@ function fullsearch() {
   <body>
   <div class="container">
     <button type="button" onclick="fullsearch()">Show full Table</button>
+    <button type="button" onclick="PlotCells()">Show Plots</button>
   </div>
  <main>
   <% if (data && data.length > 0) { %>
@@ -429,7 +435,6 @@ function fullsearch() {
 <form id="plotCells" action="/plots" method="post">
   <input type="hidden" id="searchArgPlots" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
 </form>
-<button id="plotButton" onclick="plotCells()">Plot Cells</button>
     <script
 src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
 </script>

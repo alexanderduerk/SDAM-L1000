@@ -49,23 +49,24 @@ app.get('/contact', (req, res) => {
  */
 app.post('/cells', async (req, res) => {
   let db;
+  // Connect to the Database
   try {
     db = await sqlite.open({
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
     console.log('Connected successfully');
-    // Log the request body to check its contents
-    console.log('Request Body:', req.body);
     // Create a new instance of the Cell class
     const CellInfo = new Cells(req.body);
     // Call Create One on the instance
     const newCell = await CellInfo.createOne(db);
-    console.log(`Created new Cell record:\n${newCell}`);
+    // send the newly created Cell as JSON
     res.json(newCell);
+    // catch errors and return 400 when any error occurs
   } catch (err) {
     console.log(err);
     res.status(400).send('Internal server error');
+    // close the db connection if it was opened
   } finally {
     if (db) {
       await db.close();
@@ -78,19 +79,21 @@ app.post('/cells', async (req, res) => {
  */
 app.post('/cells/search', async (req, res) => {
   let db;
-  // Retrieve the searchArg JSON string from the request body
+  // Retrieve the searchArg JSON from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
+  // check if the searchArg is a string for UI parsing
   if (searchArgString && typeof searchArgString === 'string') {
+    // use middleware to parse the searchArg and convert from string to object
     try {
       searchArg = JSON.parse(searchArgString);
+      // catch errors and return 400 when any error occurs
     } catch (e) {
       console.error('Error parsing searchArg:', e);
       return res.status(400).send('Invalid searchArg format.');
     }
+    // else use the searchArg as an object directly
   } else {
     searchArg = searchArgString;
   }
@@ -98,18 +101,7 @@ app.post('/cells/search', async (req, res) => {
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
-
-  const searchArgObject = {
-    field,
-    op,
-    val,
-    limit: parseInt(limit, 10) || 10, // Convert to number with a default value
-    offset: parseInt(offset, 10) || 0, // Convert to number with a default value
-    order,
-    orderfield,
-    descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
-  };
-
+  // try to connect to the db
   try {
     // Connect to db
     db = await sqlite.open({
@@ -117,20 +109,19 @@ app.post('/cells/search', async (req, res) => {
       driver: sqlite3.Database,
     });
 
-    // Query the db
+    // use the search Arg to query the db
     const cells = await Cells.search(
       searchArg,
       searchArg.limit,
       searchArg.offset,
       db
     );
-
-    console.log(`Found Cells:`);
-    console.log(cells.length);
     // Return the result:
     if (req.accepts('html')) {
+      // render the table if the request accepts HTML
       res.render(
         'cellstable.ejs',
+        // hand data and searchArg to the ejs file
         { data: cells, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
@@ -139,6 +130,7 @@ app.post('/cells/search', async (req, res) => {
           res.send(str);
         }
       );
+      // return the data as JSON if the request accepts JSON
     } else if (req.accepts('json')) {
       res.json(cells);
     }
@@ -163,13 +155,17 @@ app.post('/cells/searchUI', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
+  // check if the searchArg is a string for UI parsing
   if (searchArgString && typeof searchArgString === 'string') {
     try {
+      // use middleware to parse the searchArg and convert from string to object
       searchArg = JSON.parse(searchArgString);
+      // catch errors and return 400 when any error occurs
     } catch (e) {
       console.error('Error parsing searchArg:', e);
       return res.status(400).send('Invalid searchArg format.');
     }
+    // else use the searchArg as an object directly
   } else {
     searchArg = searchArgString;
   }
@@ -178,17 +174,6 @@ app.post('/cells/searchUI', async (req, res) => {
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
 
-  const searchArgObject = {
-    field,
-    op,
-    val,
-    limit: parseInt(limit, 10) || 10, // Convert to number with a default value
-    offset: parseInt(offset, 10) || 0, // Convert to number with a default value
-    order,
-    orderfield,
-    descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
-  };
-
   try {
     // Connect to db
     db = await sqlite.open({
@@ -196,20 +181,19 @@ app.post('/cells/searchUI', async (req, res) => {
       driver: sqlite3.Database,
     });
 
-    // Query the db
+    // Query the db with the searchArg
     const cells = await Cells.searchUI(
       searchArg,
       searchArg.limit,
       searchArg.offset,
       db
     );
-
-    console.log(`Found Cells:`);
-    console.log(cells.length);
     // Return the result:
     if (req.accepts('html')) {
+      // render the table if the request accepts HTML
       res.render(
         'cellstable.ejs',
+        // hand data and searchArg to the ejs file
         { data: cells, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
@@ -218,9 +202,11 @@ app.post('/cells/searchUI', async (req, res) => {
           res.send(str);
         }
       );
+      // return the data as JSON if the request accepts JSON
     } else if (req.accepts('json')) {
       res.json(cells);
     }
+    // catch errors and return 500 when any error occurs
   } catch (e) {
     console.error(e);
     res.status(500);
@@ -235,7 +221,8 @@ app.post('/cells/searchUI', async (req, res) => {
  * Delete Request for Cellinfos table
  */
 // Route to handle DELETE requests to /cells/:name
-app.delete('/cells/:name', async (req, res) => {
+app.delete('/cells/:id', async (req, res) => {
+  // Connect to the Database
   let db;
   try {
     // Connect to the Database
@@ -245,16 +232,18 @@ app.delete('/cells/:name', async (req, res) => {
     });
 
     // Extract the cell name from the request parameters
-    const celliname = req.params.name;
+    const cellid = req.params.id;
 
     // Call the deleteOne method from the Cellinfos class
-    await Cells.deleteOne(db, celliname);
+    await Cells.deleteOne(db, cellid);
 
     // Send a success response
-    res.status(200).send(`Cell with ${celliname} was deleted`);
+    res.status(200).send(`Cell with ${cellid} was deleted`);
   } catch (error) {
     console.error(error);
+    // Send an error response
     res.status(500).send('Internal Server Error');
+    // Close the database connection if it was opened
   } finally {
     if (db) {
       await db.close(); // Close the database connection if it was opened
@@ -266,6 +255,7 @@ app.delete('/cells/:name', async (req, res) => {
  * UpdateOne for the cells table
  */
 app.patch('/cells', async (req, res) => {
+  // Connect to the Database
   let db;
   try {
     // Connect to the Database
@@ -273,44 +263,17 @@ app.patch('/cells', async (req, res) => {
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Extract the required parameters from the request parameters
     const { cellid, columnname, newvalue } = req.body;
     // Call the updateOne function from the cells class
     const updatedCell = await Cells.updateOne(db, cellid, columnname, newvalue);
-    console.log(`Updated Cell record:`);
-    console.log(updatedCell);
+    // Send the updated cell record
     res.json(updatedCell);
+    // catch errors and return 500 when any error occurs
   } catch (err) {
     console.log(err);
     res.status(400).send('Internal server error');
-  } finally {
-    if (db) {
-      await db.close();
-    }
-  }
-});
-
-// Genes
-app.post('/genes', async (req, res) => {
-  let db;
-  try {
-    db = await sqlite.open({
-      filename: './l1000.db',
-      driver: sqlite3.Database,
-    });
-    console.log('Connected successfully');
-    // Log the request body to check its contents
-    console.log('Request Body:', req.body);
-    // Create a new instance of the Cell class
-    const GeneInstance = new Genes(req.body);
-    // Call Create One on the instance
-    const newGene = await GeneInstance.createOne(db);
-    console.log(`Created new Cell record:\n${newGene}`);
-    res.json(newGene);
-  } catch (err) {
-    console.log(err);
-    res.status(400).send('Internal server error');
+    // close the db connection if it was opened
   } finally {
     if (db) {
       await db.close();
@@ -319,27 +282,58 @@ app.post('/genes', async (req, res) => {
 });
 
 /**
- * Search Request for the Cellinfos table
+ * Post Function for the genes table
+ */
+app.post('/genes', async (req, res) => {
+  // Connect to the Database
+  let db;
+  // Connect to the Database
+  try {
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+    // Create a new instance of the Cell class
+    const GeneInstance = new Genes(req.body);
+    // Call Create One on the instance
+    const newGene = await GeneInstance.createOne(db);
+    // send the newly created Cell as JSON
+    res.json(newGene);
+    // catch errors and return 400 when any error occurs
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+    // close the db connection if it was opened
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+/**
+ * Search Request for the genes table
  */
 app.post('/genes/search', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
+  // check if the searchArg is a string for UI parsing
   if (searchArgString && typeof searchArgString === 'string') {
+    // use middleware to parse the searchArg and convert from string to object
     try {
       searchArg = JSON.parse(searchArgString);
+      // throw an error if the searchArg cannot be parsed
     } catch (e) {
       console.error('Error parsing searchArg:', e);
       return res.status(400).send('Invalid searchArg format.');
     }
+    // if the searchArg is an object, use it as is
   } else {
     searchArg = searchArgString;
   }
-
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
@@ -349,21 +343,18 @@ app.post('/genes/search', async (req, res) => {
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
-    // Query the db
+    // Query the db with the searchArg
     const genes = await Genes.search(
       searchArg,
       searchArg.limit,
       searchArg.offset,
       db
     );
-
-    console.log(`Found Genes:`);
-    console.log(genes);
-    // Return the result:
+    // render the table if the request accepts html
     if (req.accepts('html')) {
       res.render(
         'cellstable.ejs',
+        // pass the data to the ejs template
         { data: genes, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
@@ -372,12 +363,15 @@ app.post('/genes/search', async (req, res) => {
           res.send(str);
         }
       );
+      // render the table if the request accepts json
     } else if (req.accepts('json')) {
       res.json(genes);
     }
+    // catch errors and return 500 when any error occurs
   } catch (e) {
     console.error(e);
     res.status(500);
+    // close the db connection if it was opened
   } finally {
     if (db) {
       await db.close();
@@ -392,21 +386,21 @@ app.post('/genes/searchUI', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
   if (searchArgString && typeof searchArgString === 'string') {
+    // use middleware to parse the searchArg and convert from string to object
     try {
       searchArg = JSON.parse(searchArgString);
+      // throw an error if the searchArg cannot be parsed
     } catch (e) {
       console.error('Error parsing searchArg:', e);
       return res.status(400).send('Invalid searchArg format.');
     }
+    // if the searchArg is an object, use it as is
   } else {
     searchArg = searchArgString;
   }
-
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
@@ -416,7 +410,6 @@ app.post('/genes/searchUI', async (req, res) => {
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Query the db
     const genes = await Genes.searchUI(
       searchArg,
@@ -424,13 +417,11 @@ app.post('/genes/searchUI', async (req, res) => {
       searchArg.offset,
       db
     );
-
-    console.log(`Found Genes:`);
-    console.log(genes);
     // Return the result:
     if (req.accepts('html')) {
       res.render(
         'genes.ejs',
+        // hand data and searchArg to the ejs file
         { data: genes, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
@@ -439,12 +430,15 @@ app.post('/genes/searchUI', async (req, res) => {
           res.send(str);
         }
       );
+      // return the data as JSON if the request accepts JSON
     } else if (req.accepts('json')) {
       res.json(genes);
     }
+    // catch errors and return 500 when any error occurs
   } catch (e) {
     console.error(e);
     res.status(500);
+    // close the db connection if it was opened
   } finally {
     if (db) {
       await db.close();
@@ -457,6 +451,7 @@ app.post('/genes/searchUI', async (req, res) => {
  */
 // Route to handle DELETE requests to /cells/:name
 app.delete('/genes/:id', async (req, res) => {
+  // Initialize the db variable
   let db;
   try {
     // Connect to the Database
@@ -464,18 +459,17 @@ app.delete('/genes/:id', async (req, res) => {
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Extract the cell name from the request parameters
-    const genesId = req.params.name;
-
+    const genesId = req.params.id;
     // Call the deleteOne method from the Cellinfos class
     await Cells.deleteOne(db, genesId);
-
     // Send a success response
     res.status(200).send(`Cell with ${genesId} was deleted`);
+    // Catch any errors and send an error response
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
+    // Close the database connection if it was opened
   } finally {
     if (db) {
       await db.close(); // Close the database connection if it was opened
@@ -484,7 +478,7 @@ app.delete('/genes/:id', async (req, res) => {
 });
 
 /**
- * UpdateOne for the cells table
+ * UpdateOne for the genes table
  */
 app.patch('/genes', async (req, res) => {
   let db;
@@ -499,12 +493,13 @@ app.patch('/genes', async (req, res) => {
     const { geneid, columnname, newvalue } = req.body;
     // Call the updateOne function from the cells class
     const updatedGene = await Cells.updateOne(db, geneid, columnname, newvalue);
-    console.log(`Updated Cell record:`);
-    console.log(updatedGene);
+    // Send the updated gene as a response
     res.json(updatedGene);
   } catch (err) {
+    // Catch any errors and send an error response
     console.log(err);
     res.status(400).send('Internal server error');
+    // Close the database connection if it was opened
   } finally {
     if (db) {
       await db.close();
@@ -520,19 +515,17 @@ app.post('/perturbations', async (req, res) => {
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-    console.log('Connected successfully');
-    // Log the request body to check its contents
-    console.log('Request Body:', req.body);
     // Create a new instance of the Pertubagens class
     const Perturbagensinstance = new Perturbagens(req.body);
     // Call Create One on the instance
     const newperdid = await Perturbagensinstance.createOne(db);
-    console.log(`Created new Perturbagens record:`);
-    console.log(newperdid);
+    // Send the newly created pert_id as a response
     res.json(newperdid);
+    // Catch any errors and send an error response
   } catch (err) {
     console.log(err);
     res.status(400).send('Internal server error');
+    // Close the database connection if it was opened
   } finally {
     if (db) {
       await db.close();
@@ -547,28 +540,25 @@ app.post('/perturbations/search', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
   try {
+    // use middleware to parse the searchArg and convert from string to object
     searchArg = JSON.parse(searchArgString);
   } catch (e) {
+    // throw an error if the searchArg cannot be parsed
     console.error('Error parsing searchArg:', e);
     return res.status(400).send('Invalid searchArg format.');
   }
-
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
-
   try {
     // Connect to db
     db = await sqlite.open({
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Query the db
     const compounds = await Perturbagens.search(
       searchArg,
@@ -576,14 +566,12 @@ app.post('/perturbations/search', async (req, res) => {
       searchArg.offset,
       db
     );
-
-    console.log(`Found compounds:`);
-    console.log(compounds);
-    // Return the result:
+    // Render the table if the request accepts html
     if (req.accepts('html')) {
       ejs.renderFile(
         './views/perts.ejs',
-        { data: compounds },
+        // hand data and searchArg to the ejs file
+        { data: compounds, currentSearchArg: searchArg },
         {},
         (err, str) => {
           if (err) {
@@ -592,12 +580,15 @@ app.post('/perturbations/search', async (req, res) => {
           res.send(str);
         }
       );
+      // Hand JSON data if the request accepts json
     } else if (req.accepts('json')) {
       res.json(compounds);
     }
+    // Catch any errors and send an error response
   } catch (e) {
     console.error(e);
     res.status(500);
+    // Close the database connection if it was opened
   } finally {
     if (db) {
       await db.close();
@@ -612,8 +603,6 @@ app.post('/perturbations/searchUI', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
   try {
@@ -622,18 +611,15 @@ app.post('/perturbations/searchUI', async (req, res) => {
     console.error('Error parsing searchArg:', e);
     return res.status(400).send('Invalid searchArg format.');
   }
-
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
-
   try {
     // Connect to db
     db = await sqlite.open({
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Query the db
     const compounds = await Perturbagens.searchUI(
       searchArg,
@@ -641,9 +627,6 @@ app.post('/perturbations/searchUI', async (req, res) => {
       searchArg.offset,
       db
     );
-
-    console.log(`Found compounds:`);
-    console.log(compounds);
     // Return the result:
     if (req.accepts('html')) {
       ejs.renderFile(
@@ -671,25 +654,17 @@ app.post('/perturbations/searchUI', async (req, res) => {
 });
 
 // Delete Pertubations
-app.delete('/pertubations', async (req, res) => {
+app.delete('/perturbations/:id', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-    console.log('Connected successfully');
-
     // Extract the pert_id from the request body
-    const { pertid } = req.body;
-    console.log('Request Body:', req.body);
-
-    // Create a new instance of the Perturbagens class (if needed for any purpose)
-    // const Pertubagensinstance = new Perturbagens(req.body);
-
+    const pertid = req.params.id;
     // Call deleteOne function
     await Perturbagens.deleteOne(db, pertid);
-    console.log(`Deleted Pertubagens record with pert_id: ${pertid}`);
     res.status(200).send(`Deleted Pertubagens record with pert_id: ${pertid}`);
   } catch (err) {
     console.log(err);
@@ -700,25 +675,16 @@ app.delete('/pertubations', async (req, res) => {
     }
   }
 });
-
 // Patch pertubations
-app.patch('/pertubations', async (req, res) => {
+app.patch('/perturbations', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({
       filename: `./l1000.db`,
       driver: sqlite3.Database,
     });
-    console.log(`Connected successfully`);
-
     // Extract the pert_id to be updated from request body
     const { pertid, column, newvalue } = req.body;
-
-    // Validate input
-    if (!pertid || !column || newvalue === undefined) {
-      return res.status(400).send('Bad request: Missing fields');
-    }
-
     const updatedPerturbagens = Perturbagens.updateOne(
       db,
       pertid,
@@ -726,9 +692,6 @@ app.patch('/pertubations', async (req, res) => {
       newvalue
     );
     // Send a success response
-    res.status(200).send(`Updated pertubagens record with pert_id: ${pertid}`);
-    console.log('Updated Pert record:');
-    console.log(updatedPerturbagens);
     res.json(updatedPerturbagens);
   } catch (err) {
     console.error(err);
@@ -739,7 +702,6 @@ app.patch('/pertubations', async (req, res) => {
     }
   }
 });
-
 // Post Function sig_info
 app.post('/siginfo', async (req, res) => {
   let db;
@@ -748,15 +710,10 @@ app.post('/siginfo', async (req, res) => {
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-    console.log('Connected successfully');
-    // Log the request body to check its contents
-    console.log('Request Body:', req.body);
     // Create a new instance of the signature_infos class
     const Signatureinstance = new Signatureinfo(req.body);
     // Call Create One on the instance
     const newsigid = await Signatureinstance.createOne(db);
-    console.log(`Created new Signature record:`);
-    console.log(newsigid);
     res.json(newsigid);
   } catch (err) {
     console.log(err);
@@ -767,13 +724,13 @@ app.post('/siginfo', async (req, res) => {
     }
   }
 });
-
+/*
+ * Search Request for the sig_info table
+ */
 app.post('/siginfo/searchUI', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
   if (searchArgString && typeof searchArgString === 'string') {
@@ -786,11 +743,9 @@ app.post('/siginfo/searchUI', async (req, res) => {
   } else {
     searchArg = searchArgString;
   }
-
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
-
   const searchArgObject = {
     field,
     op,
@@ -801,21 +756,12 @@ app.post('/siginfo/searchUI', async (req, res) => {
     orderfield,
     descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
   };
-
-  // Handle pagination and sorting parameters
-  // searchArgObject.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
-  // searchArgObject.offset = req.body.offset
-  //   ? parseInt(req.body.offset)
-  //   : undefined;
-  // searchArgObject.order = req.body.order || undefined;
-  // console.log(searchArgObject);
   try {
     // Connect to db
     db = await sqlite.open({
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Query the db
     const signatures = await Signatureinfo.searchUI(
       searchArgObject,
@@ -823,9 +769,6 @@ app.post('/siginfo/searchUI', async (req, res) => {
       searchArg.offset,
       db
     );
-
-    console.log(`Found signatures:`);
-    console.log(signatures);
     // Return the result:
     if (req.accepts('html')) {
       res.render(
@@ -850,13 +793,13 @@ app.post('/siginfo/searchUI', async (req, res) => {
     }
   }
 });
-
+/*
+ * Search Request for the sig_info table
+ */
 app.post('/siginfo/search', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
   if (searchArgString && typeof searchArgString === 'string') {
@@ -869,11 +812,9 @@ app.post('/siginfo/search', async (req, res) => {
   } else {
     searchArg = searchArgString;
   }
-
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
-
   const searchArgObject = {
     field,
     op,
@@ -884,21 +825,12 @@ app.post('/siginfo/search', async (req, res) => {
     orderfield,
     descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
   };
-
-  // Handle pagination and sorting parameters
-  // searchArgObject.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
-  // searchArgObject.offset = req.body.offset
-  //   ? parseInt(req.body.offset)
-  //   : undefined;
-  // searchArgObject.order = req.body.order || undefined;
-  // console.log(searchArgObject);
   try {
     // Connect to db
     db = await sqlite.open({
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Query the db
     const signatures = await Signatureinfo.search(
       searchArgObject,
@@ -906,9 +838,6 @@ app.post('/siginfo/search', async (req, res) => {
       searchArg.offset,
       db
     );
-
-    console.log(`Found signatures:`);
-    // console.log(signatures);
     // Return the result:
     if (req.accepts('html')) {
       res.render(
@@ -933,9 +862,8 @@ app.post('/siginfo/search', async (req, res) => {
     }
   }
 });
-
 // Delete Pertubations
-app.delete('/siginfo', async (req, res) => {
+app.delete('/siginfo/:id', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({
@@ -945,18 +873,10 @@ app.delete('/siginfo', async (req, res) => {
     console.log('Connected successfully');
 
     // Extract the pert_id from the request body
-    const { sig_name } = req.body;
-    console.log('Request Body:', req.body);
-
-    // Create a new instance of the Perturbagens class (if needed for any purpose)
-    // const Pertubagensinstance = new Perturbagens(req.body);
-
+    const sigid = req.params;
     // Call deleteOne function
-    await Signatureinfo.deleteOne(db, sig_name);
-    console.log(`Deleted Pertubagens record with pert_id: ${sig_name}`);
-    res
-      .status(200)
-      .send(`Deleted Pertubagens record with pert_id: ${sig_name}`);
+    await Signatureinfo.deleteOne(db, sigid);
+    res.status(200).send(`Deleted Pertubagens record with pert_id: ${sigid}`);
   } catch (err) {
     console.log(err);
     res.status(400).send('Internal server error');
@@ -966,7 +886,6 @@ app.delete('/siginfo', async (req, res) => {
     }
   }
 });
-
 // Patch Signatures
 app.patch(`/siginfo`, async (req, res) => {
   let db;
@@ -975,16 +894,9 @@ app.patch(`/siginfo`, async (req, res) => {
       filename: `./l1000.db`,
       driver: sqlite3.Database,
     });
-    console.log(`Connected successfully`);
-
     // Extract the pert_id to be updated from request body
     const { sig_name, column, newvalue } = req.body;
-
-    // Validate input
-    if (!sig_name || !column || newvalue === undefined) {
-      return res.status(400).send('Bad request: Missing fields');
-    }
-
+    // Call updateOne function
     const updatedSignatureinfo = Signatureinfo.updateOne(
       db,
       sig_name,
@@ -992,11 +904,6 @@ app.patch(`/siginfo`, async (req, res) => {
       newvalue
     );
     // Send a success response
-    res
-      .status(200)
-      .send(`Updated signature record with sig_namme: ${sig_name}`);
-    console.log('Updated Signature record:');
-    console.log(updatedSignatureinfo);
     res.json(updatedSignatureinfo);
   } catch (err) {
     console.error(err);
@@ -1007,13 +914,13 @@ app.patch(`/siginfo`, async (req, res) => {
     }
   }
 });
-
+/*
+ * Search Request for the genetargets table
+ */
 app.post('/genetargets', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
   const searchArgString = req.body.searchArg;
-  console.log('Request Body:', searchArgString);
-
   // Parse the JSON string into an object
   let searchArg;
   if (searchArgString && typeof searchArgString === 'string') {
@@ -1026,11 +933,9 @@ app.post('/genetargets', async (req, res) => {
   } else {
     searchArg = searchArgString;
   }
-
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
-
   const searchArgObject = {
     field,
     op,
@@ -1041,21 +946,12 @@ app.post('/genetargets', async (req, res) => {
     orderfield,
     descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
   };
-
-  //Handle pagination and sorting parameters
-  //searchArgObject.limit = req.body.limit ? parseInt(req.body.limit) : undefined;
-  //searchArgObject.offset = req.body.offset
-  //  ? parseInt(req.body.offset)
-  //  : undefined;
-  //searchArgObject.order = req.body.order || undefined;
-  //console.log(searchArgObject);
   try {
     // Connect to db
     db = await sqlite.open({
       filename: './l1000.db',
       driver: sqlite3.Database,
     });
-
     // Query the db
     const signatures = await Signatureinfo.searchcompounds(
       searchArgObject,
@@ -1063,8 +959,6 @@ app.post('/genetargets', async (req, res) => {
       searchArg.offset,
       db
     );
-    console.log(`Found signatures:`);
-    console.log(signatures);
     // Return the result:
     if (req.accepts('html')) {
       res.render(
@@ -1078,7 +972,7 @@ app.post('/genetargets', async (req, res) => {
         }
       );
     } else if (req.accepts('json')) {
-      // res.json(signatures);
+      res.json(signatures);
     }
   } catch (e) {
     console.error(e);
@@ -1089,7 +983,6 @@ app.post('/genetargets', async (req, res) => {
     }
   }
 });
-
 const {
   server: { port },
 } = require('./config');

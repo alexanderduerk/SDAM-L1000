@@ -54,47 +54,31 @@ $response = Invoke-RestMethod -Method Patch -Uri $apiUrl -ContentType "applicati
 $apiUrl = "http://127.0.0.1:3000/cells/$cell_id"
 $response = Invoke-RestMethod -Method Delete -Uri $apiUrl
 
-# Complex search argument with descriptive variable names
+# Define the searchArg object as a hashtable
 $searchArg = @{
-    descendants = @(
-        @{
-            field = "growth_pattern"
-            op = "="
-            val = "adherent"
-        },
-        @{
-            descendants = @(
-                @{
-                    field = "donor_age"
-                    op = "<"
-                    val = 20
-                },
-                @{
-                    descendants = @(
-                        @{
-                            field = "donor_ethnicity"
-                            op = "="
-                            val = "Asian"
-                        }
-                    )
-                    op = "AND"
-                }
-            )
-            op = "OR"
-        }
-    )
-    op = "AND"
+    limit = 10
+    offset = 0
+    order = "asc"
+    descendants = $false
+    field = "gene_symbol"
+    op = "contains"
+    val = "A"
+    orderfield = "gene_symbol"
 }
 
-# Convert the search argument to a JSON string
-$jsonBody = $searchArg | ConvertTo-Json -Depth 10
+# Convert the hashtable to a JSON string
+$searchArgJson = $searchArg | ConvertTo-Json -Compress
 
-# Output the JSON to verify
-Write-Output $jsonBody
+# Define the URL of the server route
+$url = "http://127.0.0.1:3000/genes/search"
 
-$apiUrl = "http://127.0.0.1:3000/cells/search"
-$headers = @{
-    "Content-Type" = "application/json"
-}
+# Create the body of the POST request
+$body = @{
+    searchArg = $searchArgJson
+} | ConvertTo-Json -Compress
 
-Invoke-RestMethod -Uri $apiUrl -Method Post -Headers $headers -Body $jsonBody
+# Make the POST request
+$response = Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{ Accept = "application/json" }
+
+# Output the response
+$response

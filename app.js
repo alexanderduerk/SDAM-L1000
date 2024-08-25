@@ -690,7 +690,7 @@ app.delete('/pertubations', async (req, res) => {
 });
 
 // Patch pertubations
-app.patch(`/pertubations`, async (req, res) => {
+app.patch('/pertubations', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({

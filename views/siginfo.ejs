@@ -155,9 +155,10 @@ function forwardLink(value, column_name, searchForm, searchArgID) {
   document.getElementById(searchForm).submit();
 }
 function fullsearch() {
-  const searchArgField = document.getElementById('searchArg');
+  const searchArgField = document.getElementById('searchArgFull');
   let searchArg = JSON.parse(searchArgField.value);
-  document.getElementById('searchForm').submit();
+  searchArgField.value = JSON.stringify(searchArg);
+  document.getElementById('searchFormFull').submit();
 }
   </script>
   <script 
@@ -404,6 +405,13 @@ function fullsearch() {
       method="post"
     >
       <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+    </form>
+    <form
+      id="searchFormFull"
+      action="/siginfo/search"
+      method="post"
+    >
+      <input type="hidden" id="searchArgFull" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
     </form>
     <form id="searchFormCells" action="/cells/searchUI" method="post">
       <input type="hidden" id="searchArgCells" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">

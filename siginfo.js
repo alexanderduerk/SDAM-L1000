@@ -193,6 +193,15 @@ class Signatureinfo {
     // console.log(dbResult);
     return dbResult;
   }
+  // Read by ID
+
+  static async readById(id, dbconnection) {
+    console.log(id);
+    const sql = 'SELECT * FROM signature_infos WHERE sig_id = ?';
+    const dbres = await dbconnection.get(sql, id);
+    console.log(dbres);
+    return dbres;
+  }
 }
 
 module.exports = Signatureinfo;

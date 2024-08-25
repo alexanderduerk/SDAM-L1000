@@ -145,6 +145,15 @@ class Cells {
     console.log(dbResult);
     return dbResult;
   }
+  // Read by ID
+
+  static async readById(id, dbconnection) {
+    console.log(id);
+    const sql = 'SELECT * FROM cells WHERE cell_id = ?';
+    const dbres = await dbconnection.get(sql, id);
+    console.log(dbres);
+    return dbres;
+  }
 }
 
 module.exports = Cells;

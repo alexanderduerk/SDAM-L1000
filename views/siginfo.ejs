@@ -96,6 +96,13 @@ function forwardLink(value, column_name, searchForm, searchArgID) {
   searchArgField.value = JSON.stringify(searchArg);
   document.getElementById(searchForm).submit();
 }
+function plotCells() {
+  const searchArgField = document.getElementById("searchArgPlots");
+  let searchArg = JSON.parse(searchArgField.value);
+  searchArg.limit = "100";
+  searchArgField.value = JSON.stringify(searchArg);
+  document.getElementById("plotCells").submit()
+}
   </script>
 </head>
 <body>
@@ -234,76 +241,12 @@ function forwardLink(value, column_name, searchForm, searchArgID) {
     </form>
   </main>
 </body>
+<!-- Button for Cells plotting-->
+<form id="plotCells" action="/plots" method="post">
+  <input type="hidden" id="searchArgPlots" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
 </form>
- <!-- Creating plots.js connection for reconstructed searcharg -->
-   <main>
-    <% if (data && data.length > 0) { %>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Cellosaurus ID</th>
-            <th>Donor Age
-              <form
-    action="/cells/plots"
-    method="post"
-    enctype="application/x-www-form-urlencoded"
-  >
-  <!--
-    <label for="limitInput">Limit:</label>
-    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
-    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
-    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
-    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
-    <input type="hidden" name="order"  id="order" value="<%= currentSearchArg.order %>" />
-    <input type="hidden" name="orderfield" id="orderinput" value="<%= currentSearchArg.orderfield %>">
-    <input type="hidden" id="limitInput" name="limit" value="<%= currentSearchArg.limit %>">
-    <button type="submit" onclick="changeOrder('ASC', 'donor_age')">ASC
-    </button>
-    <button type="submit" onclick="changeOrder('DESC', 'donor_age')">DESC
-    </button>-->
-
-    <!-- which data from which th is needed from db l1000? -->
-  </form>
-            </th>
-            <th>Celltype</th>
-            <th>Cell lineage</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% for (const row of data) { %>
-            <tr>
-              <% for (const value of Object.values(row)) { %>
-                <td><%= value %></td>
-              <% } %>
-            </tr>
-          <% } %>
-        </tbody>
-      </table>
-    <% } else { %>
-      <p>No data available</p>
-    <% } %>
-    <!--overhanding searchArg-->
-    <form
-    action="/cells/plots"
-    method="post"
-    enctype="application/x-www-form-urlencoded"
-  ><!--Hidden input fields for searchArg values
-    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
-    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
-    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
-    <input type="hidden" id="limit" name="limit" value="<%= currentSearchArg.limit %>" />
-    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
-    <input type="hidden" name="order" value="<%= currentSearchArg.order %>" />
-    --><!--Button functionality
-    <input type="hidden" id="orderinput" name="orderfield" value="<%= currentSearchArg.orderfield %>">
-    <button type="submit" onclick="adjustOffset(-1)">Prev.</button>
-    <button type="submit" onclick="adjustOffset(1)">Next.</button>-->
-
-
-    <!-- Link to Chart.js library -->
+<button id="plotButton" onclick="plotCells()">Plot Cells</button>
     <script
 src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
 </script>
-    </form>
 </html>

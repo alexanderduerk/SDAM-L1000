@@ -128,6 +128,15 @@ class Perturbagens {
     console.log(dbResult);
     return dbResult;
   }
+  // get by ID
+
+  static async readById(id, dbconnection) {
+    console.log(id);
+    const sql = 'SELECT * FROM perturbagens WHERE pert_id = ?';
+    const dbres = await dbconnection.get(sql, id);
+    console.log(dbres);
+    return dbres;
+  }
 }
 
 module.exports = Perturbagens;

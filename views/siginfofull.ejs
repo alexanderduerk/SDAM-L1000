@@ -123,19 +123,88 @@ function fullsearch() {
   <% if (data && data.length > 0) { %>
     <table>
       <thead>
-        <tr>
+        <tr class="header-row">
           <th>
-            Signature Name
-            <button type="button" onclick="changeOrder('ASC', 'sig_name', 'change_order_signaturename')">ASC</button>
-            <button type="button" onclick="changeOrder('DESC', 'sig_name', 'change_order_signaturename')">DESC</button>
-            <input type="text" id="descendants_value" name="descendants_value" value="">
-            <button type="button" onclick="addDescendant('contains', 'descendants_value', 'sig_name', 'descendants')">Search</button>
+            <div class="th-container">
+              <span class="th-text hyphenate">Signature Name</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'sig_name')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'sig_name')">➧</button>
+                </div>
+            </div>
           </th>
-          <th>Compound</th>
-          <th>Connectivity Map Code</th>
-          <th>Cells</th>
-          <th>Bead batch</th>
-          <th>Perturbation Dose</th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">Compound</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'pert_name')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'pert_name')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">Connectivity Map Code</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'cmap_name')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'cmap_name')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">Cells</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'cell_name')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'cell_name')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">Bead batch</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'bead_batch')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'bead_batch')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">Pertubation Dose</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'pert_dose')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'pert_dose')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">Pertubation Time</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'pert_time')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'pert_time')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">Number of samples</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'nsamples')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'nsamples')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
+              <span class="th-text hyphenate">cc_q75</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'sig_name')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'sig_name')">➧</button>
+                </div>
+            </div>
+          </th>
           <th>Perturbation Time</th>
           <th>Number of samples</th>
           <th>cc_q75</th>

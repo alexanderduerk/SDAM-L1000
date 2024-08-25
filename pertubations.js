@@ -96,6 +96,7 @@ class Perturbagens {
       'SELECT * FROM perturbagens WHERE pert_id = ?',
       pertid
     );
+    console.log(updatedPerturbagens);
     return updatedPerturbagens;
   }
 

@@ -235,7 +235,7 @@ app.post('/cells/searchUI', async (req, res) => {
  * Delete Request for Cellinfos table
  */
 // Route to handle DELETE requests to /cells/:name
-app.delete('/cells/:name', async (req, res) => {
+app.delete('/cells/:id', async (req, res) => {
   let db;
   try {
     // Connect to the Database
@@ -245,13 +245,13 @@ app.delete('/cells/:name', async (req, res) => {
     });
 
     // Extract the cell name from the request parameters
-    const celliname = req.params.name;
+    const cellid = req.params.id;
 
     // Call the deleteOne method from the Cellinfos class
-    await Cells.deleteOne(db, celliname);
+    await Cells.deleteOne(db, cellid);
 
     // Send a success response
-    res.status(200).send(`Cell with ${celliname} was deleted`);
+    res.status(200).send(`Cell with ${cellid} was deleted`);
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
@@ -551,11 +551,15 @@ app.post('/perturbations/search', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -616,11 +620,15 @@ app.post('/perturbations/searchUI', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -671,7 +679,7 @@ app.post('/perturbations/searchUI', async (req, res) => {
 });
 
 // Delete Pertubations
-app.delete('/pertubations', async (req, res) => {
+app.delete('/perturbations/:id', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({
@@ -681,8 +689,7 @@ app.delete('/pertubations', async (req, res) => {
     console.log('Connected successfully');
 
     // Extract the pert_id from the request body
-    const { pertid } = req.body;
-    console.log('Request Body:', req.body);
+    const pertid = req.params.id;
 
     // Create a new instance of the Perturbagens class (if needed for any purpose)
     // const Pertubagensinstance = new Perturbagens(req.body);
@@ -701,39 +708,34 @@ app.delete('/pertubations', async (req, res) => {
   }
 });
 
-// Patch pertubations
-app.patch('/pertubations', async (req, res) => {
+app.patch('/perturbations', async (req, res) => {
   let db;
   try {
+    // Connect to the SQLite database
     db = await sqlite.open({
       filename: `./l1000.db`,
       driver: sqlite3.Database,
     });
     console.log(`Connected successfully`);
 
-    // Extract the pert_id to be updated from request body
+    // Extract the pert_id, column, and new value from request body
     const { pertid, column, newvalue } = req.body;
 
-    // Validate input
-    if (!pertid || !column || newvalue === undefined) {
-      return res.status(400).send('Bad request: Missing fields');
-    }
-
-    const updatedPerturbagens = Perturbagens.updateOne(
+    // Await the update operation
+    const updatedPerturbagens = await Perturbagens.updateOne(
       db,
       pertid,
       column,
       newvalue
     );
-    // Send a success response
-    res.status(200).send(`Updated pertubagens record with pert_id: ${pertid}`);
-    console.log('Updated Pert record:');
-    console.log(updatedPerturbagens);
+
+    // Send the updated result back to the client
     res.json(updatedPerturbagens);
   } catch (err) {
     console.error(err);
     res.status(500).send('Internal server error');
   } finally {
+    // Ensure the database connection is closed properly
     if (db) {
       await db.close();
     }

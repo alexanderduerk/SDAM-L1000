@@ -212,4 +212,3 @@ echo "Sucessfully searched with descendants: $updated_cellcomplex"
 deleted_cellentry=$(curl -s -X DELETE "$cells_url/$cell_id")
 echo "Sucessfully deleted: $deleted_cellentry"
 
-

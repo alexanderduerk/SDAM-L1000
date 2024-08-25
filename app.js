@@ -84,11 +84,15 @@ app.post('/cells/search', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -159,11 +163,15 @@ app.post('/cells/searchUI', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -321,11 +329,15 @@ app.post('/genes/search', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -384,11 +396,15 @@ app.post('/genes/searchUI', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -686,7 +702,7 @@ app.delete('/pertubations', async (req, res) => {
 });
 
 // Patch pertubations
-app.patch(`/pertubations`, async (req, res) => {
+app.patch('/pertubations', async (req, res) => {
   let db;
   try {
     db = await sqlite.open({
@@ -760,11 +776,15 @@ app.post('/siginfo/searchUI', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -839,11 +859,15 @@ app.post('/siginfo/search', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -992,11 +1016,15 @@ app.post('/genetargets', async (req, res) => {
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object

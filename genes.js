@@ -140,6 +140,15 @@ class Genes {
     console.log(dbResult);
     return dbResult;
   }
+  // get by ID
+
+  static async readById(id, dbconnection) {
+    console.log(id);
+    const sql = 'SELECT * FROM genes WHERE gene_id = ?';
+    const dbres = await dbconnection.get(sql, id);
+    console.log(dbres);
+    return dbres;
+  }
 }
 
 module.exports = Genes;

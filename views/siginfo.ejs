@@ -417,4 +417,12 @@ function fullsearch() {
   </div>
   </main>
 </body>
+<!-- Button for Cells plotting-->
+<form id="plotCells" action="/plots" method="post">
+  <input type="hidden" id="searchArgPlots" name="searchArg" value="<%= JSON.stringify(siteSearchArg) %>">
+</form>
+<button id="plotButton" onclick="plotCells()">Plot Cells</button>
+    <script
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+</script>
 </html>

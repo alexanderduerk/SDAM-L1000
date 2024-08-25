@@ -1,9 +1,9 @@
 const searchArg = require('./searchargs');
 
 /**
- * Checks the type of a value against an expected type.
+ * Checks if the type of a given value matches the expected type.
  *
- * @param {any} value - The value to check.
+ * @param {any} value - The value to be checked.
  * @param {string} expectedType - The expected type of the value.
  * @throws {TypeError} If the type of the value does not match the expected type.
  */
@@ -14,13 +14,13 @@ function checkType(value, expectedType) {
   }
 }
 
+/**
+ * Initializes a new instance of the Genes class with the given key-value pairs.
+ *
+ * @param {Object} keyValuePairs - An object containing key-value pairs representing the attributes and their values.
+ * @throws {TypeError} If the type of a value does not match the expected type.
+ */
 class Genes {
-  /**
-   * Constructor for the Genes class.
-   *
-   * @param {Object} keyValuePairs - An object containing key-value pairs representing the attributes and their values.
-   * @throws {TypeError} If the type of a value does not match the expected type.
-   */
   constructor(keyValuePairs) {
     const expectedTypes = {
       entrez_id: 'number',

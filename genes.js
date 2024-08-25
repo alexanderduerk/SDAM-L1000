@@ -57,8 +57,8 @@ class Genes {
     const dbres = await dbconnection.run(sql, ...values);
     // return the newly inserted cell
     const newcell = await dbconnection.get(
-      'SELECT * FROM genes WHERE cell_name = ?',
-      this.cell_name
+      'SELECT * FROM genes WHERE gene_symbol = ?',
+      this.gene_symbol
     );
     return newcell;
   }
@@ -74,7 +74,7 @@ class Genes {
     const sql = 'DELETE FROM genes WHERE gene_id = ?';
     const dbres = await dbconnection.run(sql, `${geneid}`);
     // return a console.log that the given cell was deleted
-    console.log(`Cell with cell_id: ${geneid} was deleted`);
+    console.log(`Gene with gene_id: ${geneid} was deleted`);
   }
 
   /**
@@ -91,7 +91,7 @@ class Genes {
     const dbres = await dbconnection.run(sql, newvalue);
     // return the newly updated Row
     const updatedCell = await dbconnection.get(
-      'SELECT * FROM genes WHERE cell_id = ?',
+      'SELECT * FROM genes WHERE gene_id = ?',
       id
     );
     return updatedCell;

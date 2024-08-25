@@ -298,7 +298,7 @@ app.post('/genes', async (req, res) => {
     const GeneInstance = new Genes(req.body);
     // Call Create One on the instance
     const newGene = await GeneInstance.createOne(db);
-    console.log(`Created new Cell record:\n${newGene}`);
+    console.log(`Created new Gene record:\n${newGene}`);
     res.json(newGene);
   } catch (err) {
     console.log(err);
@@ -316,16 +316,20 @@ app.post('/genes', async (req, res) => {
 app.post('/genes/search', async (req, res) => {
   let db;
   // Retrieve the searchArg JSON string from the request body
-  const searchArgString = req.body.searchArg;
+  let searchArgString = req.body.searchArg;
   console.log('Request Body:', searchArgString);
 
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  if (searchArgString && typeof searchArgString === 'string') {
+    try {
+      searchArg = JSON.parse(searchArgString);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+  } else {
+    searchArg = searchArgString;
   }
 
   // Construct the searchArg object
@@ -450,13 +454,13 @@ app.delete('/genes/:id', async (req, res) => {
     });
 
     // Extract the cell name from the request parameters
-    const genesId = req.params.name;
+    const genesId = req.params.id;
 
     // Call the deleteOne method from the Cellinfos class
-    await Cells.deleteOne(db, genesId);
+    await Genes.deleteOne(db, genesId);
 
     // Send a success response
-    res.status(200).send(`Cell with ${genesId} was deleted`);
+    res.status(200).send(`Gene deleted with ID: ${genesId}`);
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
@@ -482,8 +486,8 @@ app.patch('/genes', async (req, res) => {
     // Extract the required parameters from the request parameters
     const { geneid, columnname, newvalue } = req.body;
     // Call the updateOne function from the cells class
-    const updatedGene = await Cells.updateOne(db, geneid, columnname, newvalue);
-    console.log(`Updated Cell record:`);
+    const updatedGene = await Genes.updateOne(db, geneid, columnname, newvalue);
+    console.log(`Updated Genes record:`);
     console.log(updatedGene);
     res.json(updatedGene);
   } catch (err) {

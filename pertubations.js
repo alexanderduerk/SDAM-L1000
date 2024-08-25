@@ -122,6 +122,24 @@ class Perturbagens {
     console.log(
       `SQL generated to search Compounds:\n${JSON.stringify(searchSql)}`
     );
+    console.log(
+      `SQL generated to search Compounds:\n${JSON.stringify(searchSql)}`
+    );
+    // Query the database
+    const dbResult = await dbconnection.all(searchSql);
+    // Done
+    console.log(dbResult);
+    return dbResult;
+  }
+
+  static async searchUI(searcharg, limit, offset, dbconnection) {
+    const searchSql =
+      searcharg !== undefined && searcharg !== null
+        ? searchArg.translateToSQL(searcharg, 'perturbagensUI')
+        : 'SELECT * FROM perturbagens';
+    console.log(
+      `SQL generated to search Compounds:\n${JSON.stringify(searchSql)}`
+    );
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
     // Done

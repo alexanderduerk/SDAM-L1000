@@ -1,44 +1,84 @@
 <!doctype html>
 <html>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  <!-- L1000 bar -->
+  <head>
+    <!-- L1000 title -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L1000</title>
+    <!-- Chartjs library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+  <!-- link to stylesheet for div -->
+
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
   <body>
-    <!-- NEW -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="stylesheet" href="public/css/plots.css" />
-    <div id="GridLayout">
-      <div class="chart-container">
-        <canvas id="myChart1" class="Chart"></canvas>
-        <button
-          class="chart-button"
-          onclick="downloadData(myChart1, xValues1, yValues1)"
-        >
-          Download Data
-        </button>
-        <a id="download-link1" download="chart1.csv" style="display: none"></a>
-        <button class="download-image">Download Chart</button>
+       <!-- L1000 Style -->
+      </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="/" class="logo">L1000</a>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+        <div class="menu-toggle">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
       </div>
-      <div class="chart-container">
-        <canvas id="myChart2" class="Chart"></canvas>
-        <button class="chart-button" onclick="downloadData(xValues2, yValues2)">
-          Download Data
-        </button>
-        <a id="download-link2" download="chart2.csv" style="display: none"></a>
-        <button class="download-image" onclick="downloadChart()">
-          Download Chart
-        </button>
-      </div>
-      <div class="chart-container">
-        <canvas id="myChart3" class="Chart"></canvas>
-        <button class="chart-button" onclick="downloadData(xValues3, yValues3)">
-          Download Data
-        </button>
-        <a id="download-link3" download="chart3.csv" style="display: none"></a>
-        <button class="download-image">Download Chart</button>
-      </div>
+    </nav>
+    <!-- First myChart1-->
+  <div class = "chart-container">
+    <canvas id="myChart1" class="Chart"></canvas>
+    <div class = "chart-buttons">
+    <button
+      class="chart-button"
+      onclick="downloadData(myChart1, xValues1, yValues1)"
+    >
+      <!-- Download function for csv file chart1-->
+      Download Data
+    </button>
+    <!-- Download function for Chartimage-->
+    <button id="download-image" onclick="DownloadChart(myChart1)">
+      Download Chart
+    </button>
     </div>
+    <div class= "chart-text">
+      <p>This Chart provides information about the siginfo name and the correlating tas values (Contains all limit hits)</p>
+    </div>
+  </div>
 
+
+
+
+
+    <!-- Second myChart2 -->
+  <div class = "chart-container">
+    <canvas id="myChart2" class="Chart"></canvas>
+    <div class = "chart-buttons">
+    <button class="chart-button" onclick="downloadData(myChart2, xValues2, yValues2)"
+    >
+    Download Data
+      
+    <!-- Dowload chart as image mychart2-->
+    <button id="download-image" onclick="DownloadChart(myChart2)">
+        Download Chart
+    </button>
+    </div>
+    <div class= "chart-text">
+      <p>This Chart provides information about the siginfo name and the number of genes which are changed (Contains all limit hits)</p>
+    </div>
+  </div>
+
+
+
+  
     <form>
       <!-- Multiple Canvas / Charts which will be displayed -->
       <input type="hidden" id="data1" value="<%= JSON.stringify(data) %>" />
@@ -61,31 +101,40 @@
         yValues1.push(row.tas); // Keeping tas as y-axis values
       }
 
-      new Chart('myChart1', {
-        type: 'bar',
-        data: {
-          labels: xValues1, // X-axis labels from sig_name array
-          datasets: [
-            {
-              label: 'TAS',
-              data: yValues1, // Y-axis data from tas array
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-              borderColor: 'rgba(255, 99, 132, 1)',
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            x: {
-              type: 'category', // X-axis is categorical
-            },
-            y: {
-              beginAtZero: true, // Start y-axis at 0
+      let myChart1 = new Chart(
+        document.getElementById('myChart1').getContext('2d'),
+        {
+          type: 'bar',
+          data: {
+            labels: xValues1, // X-axis labels from sig_name array
+            datasets: [
+              {
+                label: 'TAS',
+                data: yValues1, // Y-axis data from tas array
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'category', // X-axis is categorical
+              },
+              y: {
+                beginAtZero: true, // Start y-axis at 0
+                // Get a download function for this plot from chartjs in browser
+                animation: {
+                  onComplete: function () {
+                    console.log(myChart.toBase64Image());
+                  },
+                },
+              },
             },
           },
-        },
-      });
+        }
+      );
 
       // Second chart data
       const rawData2 = document.getElementById('data2').value;
@@ -102,7 +151,8 @@
       }
 
       // Create the second chart
-      new Chart('myChart2', {
+      let myChart2 = new Chart(document.getElementById('myChart2').getContext('2d'), 
+      {
         type: 'bar',
         data: {
           labels: xValues2,
@@ -118,48 +168,22 @@
         },
         options: {
           scales: {
-            x: { type: 'category' },
-            y: { beginAtZero: true },
-          },
-        },
-      });
-
-      // NEW THIRD CHART
-      const rawData3 = document.getElementById('data3').value;
-      const data3 = JSON.parse(rawData3);
-
-      const xValues3 = [];
-      const yValues3 = [];
-
-      // Sort and populate data for the third chart
-      data3.sort((a, b) => a.pert_dose - b.pert_dose);
-      for (const row of data3) {
-        xValues3.push(row.pert_dose);
-        yValues3.push(row.tas);
-      }
-
-      // Create the third chart
-      new Chart('myChart3', {
-        type: 'bar',
-        data: {
-          labels: xValues3,
-          datasets: [
-            {
-              label: 'tas',
-              data: yValues3,
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 1,
+            x: { 
+              type: 'category' 
             },
-          ],
-        },
-        options: {
-          scales: {
-            x: { type: 'category' },
-            y: { beginAtZero: true },
+            y: {
+               beginAtZero: true, 
+               animation: {
+                onComplete: function () {
+                  console.log(myChart.toBase64Image());
+                },
+               }, 
+              },
           },
         },
       });
+
+      
       const charts = document.querySelectorAll('canvas');
 
       charts.forEach((chart) => {
@@ -176,8 +200,37 @@
           chart.style.height = '50%'; // Reset height to 100% on mouse leave
         });
       });
-      // Button function chart
-      const buttons = document.querySelectorAll('.chart-button');
+
+      function DownloadChart(ChartId) {
+        // create a pseudo link
+        let a = document.createElement('a');
+        // set href of corresponding plot to href
+        a.href = ChartId.toBase64Image();
+        // define a download name
+        a.download = 'Chart.png';
+        // Trigger the download
+        a.click();
+      }
+
+      // NEW GET THE .CSV FILE 
+      function downloadData(chartId, xValues, yValues) {
+        // Prepare CSV content
+        let csvContent = "data:text/csv;charset=utf-8,";
+        // Add headers
+        csvContent += "Label,Value\n";
+        // Add data rows
+        for (let i = 0; i < xValues.length; i++) {
+          csvContent += `${xValues[i]},${yValues[i]}\n`;
+        }
+        // Create a pseudo link
+        let a = document.createElement('a');
+        // Encode CSV content and set as link href
+        a.href = encodeURI(csvContent);
+        // Define the download name based on chartId
+        a.download = `${chartId.id}_data.csv`;
+        // Trigger the download
+        a.click();
+      }
     </script>
   </body>
 </html>

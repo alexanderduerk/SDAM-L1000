@@ -1,78 +1,60 @@
-This README tries to explain the toughts while programming and how myself was able to solve problems and think about certain challenges. It therefore should show what part of the project i was working on and what ideas led to the decision making.
+# Project Overview
 
-# Initialization of the Repository
+This README documents the thought processes and problem-solving approaches I employed throughout the project. It highlights my contributions, the challenges faced, and the rationale behind key decisions.
 
-For proper collaboration with my coworkers i initially started a GitHub Repository, including a License as well as the predefined .getignore template for JavaScript.  
-I then went for the initialization of **npm** for all modules that will be used within the project.  
-For a cleaner User experience and a more homogeneous codingstyle i set up **eslint** together with **Prettier** allowing us to use the **airBnB** rules in our linter as well as some formatting options.  
-I also created a config.json and .js file which would allow every Coworker to use their own ports and routes to the database.
+## Repository Initialization
 
-# SQL Tables
+To facilitate collaboration, I established a GitHub repository, complete with a license and a `.gitignore` template configured for JavaScript. I initialized the project with **npm**, ensuring all necessary modules were included. To maintain a consistent coding style and enhance user experience, I integrated **eslint** with **Prettier**, adhering to the **Airbnb** style guide. Additionally, I created a `config.json` and a `.js` file, enabling team members to customize their ports and database routes.
 
-We started by looking at the data and deciding what way could be appropriate to store them in a relational database. Our first approach contained following tables:
+## SQL Table Design
 
-1. MainViews (This would be a table beeing searched the most on our website, containing Pertubated Cell, Pertubagens, Targeted Gene and the Fold-Change, with the ID beeing a combination of Cell, Pertubagens and Gene)
-2. Cellinfos (This would store all corresponding data to the Cell in it and would have the Cell_iname as a primary key)
-3. Pertubagens (Contains all information about the Pertubagens and would be connected to the MainViews Table throught the Column specifying the partubagens name)
-4. Geneinfo (Containing every info for the targeted Gene by this Pertubagens)
+### Initial Approach
 
-This wasnt the right approach initially. The first reason for this conclusion is the greater amount of storage space we need for storing a MainViews Table instead of joining on Ids and column names. The second reason is the loss of flexibility in what we could show by limiting us to only the columns from the MainViews. So we decided to change the structure up a bit.
+We began by analyzing the dataset to determine the optimal structure for a relational database. Our initial schema included the following tables:
 
-We again looked at all Data available to us and decided to create new Tables which would provide more flexibility. The following is the structure we came up with:
+1. **MainViews**: Designed to be the most frequently queried table, it included columns for Perturbed Cell, Perturbagens, Targeted Gene, and Fold-Change, with a composite key formed by the Cell, Perturbagens, and Gene.
+2. **CellInfos**: Stored all related data for each cell, using `Cell_iname` as the primary key.
+3. **Perturbagens**: Contained information on perturbagens, linked to the `MainViews` table via the perturbagens' name.
+4. **GeneInfo**: Held data for each targeted gene affected by the perturbagens.
 
-- Assayinformation:
-  - This contains several infos about the conducted experiment and contains measure values like foldchanges. It would also contain **FOREIGN KEYS** to the IDs of the other tables (see below). The primary key would in this case be an autoincrementing Integer.
-- Cells:
-  - Would contain the information about a cell. The relations for a cell would be **One-To-One** to a conducted Assay and **Many-To-Many** to used Pertubagens
-  - We would also opt here for an autoincrementing Integer Key here
-- Pertubations:
-  - Contains Pertubations information. Has the One-to-One relation to the Assayinformation, the Many-to-Many to the Cells and a Many-to-One relationship to Genes.
-- Genes:
-  - Contains infos about each Gene
+### Revised Approach
 
-## Cells Table
+We realized the initial design had limitations, particularly in terms of storage efficiency and query flexibility. To address these issues, we restructured the database as follows:
 
-I created the cells table in the [l1000.sql file](l1000.sql), with guidance of the given metadata to the cellinfos csv file within the dataset. An in my eyes important approach was to not set a unique constrain to the cell_name column. This would prevent different media adaptions and growth pattern adaptions to be inserted in the database. But to still prevent duplicates a UNIQUE constrain is created based on cell_name, cell_type and growth_pattern, which were columns that didnt contained None values in the initial dataset. This allows for a control of duplicates and also the flexibility of cell adaptions.
+- **AssayInformation**: Contains experimental data, such as fold changes, with foreign keys linking to other tables. The primary key is an auto-incrementing integer.
+- **Cells**: Stores cell information, with a one-to-one relationship with `AssayInformation` and many-to-many relationships with `Perturbations`. The primary key is an auto-incrementing integer.
+- **Perturbations**: Contains data on perturbations, with a one-to-one relationship to `AssayInformation`, many-to-many relationships with `Cells`, and a many-to-one relationship with `Genes`.
+- **Genes**: Stores information about each gene.
 
-### Cells class
+### Cells Table Implementation
 
-#### createOne
+I created the `Cells` table in the [l1000.sql](l1000.sql) file, using metadata from the `cellinfos` CSV file. A key decision was to avoid setting a unique constraint on the `cell_name` column to accommodate different media adaptations and growth patterns. Instead, I implemented a unique constraint based on `cell_name`, `cell_type`, and `growth_pattern` to prevent duplicates while allowing flexibility.
 
-The creation of the [Cells class](cells.js) followed the given [code from the lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js) with some smaller adjustments. I did not use the static decorator for the function and instead used the instance to create an entry for the DB. To reduce the code and make it more accesible i opted for an approach which would at the beginning get all keys from the instance with:
+## Cells Class Implementation
 
-```js
-const columns = Object.keys(this);
-```
+### `createOne` Method
 
-The same approach then can be used to get the values of the instance
+The `createOne` method in the [Cells class](cells.js) is based on the provided [lecture code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js) with modifications. I opted not to use the `static` decorator, allowing the instance to handle database entries. The method uses `Object.keys(this)` and `Object.values(this)` to dynamically generate SQL statements, reducing code complexity.
 
-```js
-const values = Object.values(this);
-```
+### `deleteOne` Method
 
-I then define the _?_ placeholders for the sql statement with map and create the statement later with the columns and those placeholder values.The statement then gets runned and the values get unpacked using
+This method directly follows the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). For testing purposes, it logs the ID of the deleted cell.
 
-```js
-...values
-```
+### `updateOne` Method
 
-#### deleteOne
+Similarly, the `updateOne` method is derived from the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). It returns the updated cell for verification within the server environment.
 
-Completly follows the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). For testing purposes it will log the ID of the cell that was deleted.
+### `search` Method with Arguments
 
-#### updateOne
-
-Also follows the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). It returns the updatedCell to control within the server environment.
-
-#### search (with Args)
-
-The search function within the class is completly copied from the [GitHub](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). But uses an adjusted [searchArg](searchargs.js). For the searchArg i defined a cellinoftypes, which can be used to check the types of the columns and escape values if they are text using escapeValue and isTextField:
+The `search` function is also based on the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js), with adjustments made to the [searchArg](searchargs.js) function. I introduced a `cellinfotypes` object to validate column types and escape text values. The `translateSearchTripletToSQL` function was enhanced to support operators like `contains`, `startswith`, and `endswith`.
 
 ```js
 function isTextField(field) {
-  // Checks if the field is type text
-  const fieldType = cellinfotypes[field];
-  return fieldType === 'text';
+  return cellinfotypes[field] === 'text';
+}
+
+function escapeValue(value, isText) {
+  return isText ? `'${value}'` : value;
 }
 
 function escapeValue(value, isText) {

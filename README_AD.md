@@ -21,7 +21,7 @@ We began by analyzing the dataset to determine the optimal structure for a relat
 
 We realized the initial design had limitations, particularly in terms of storage efficiency and query flexibility. To address these issues, we restructured the database as follows:
 
-- **AssayInformation**: Contains experimental data, such as fold changes, with foreign keys linking to other tables. The primary key is an auto-incrementing integer.
+- **Signature Information (SigInfo)**: Contains experimental data, such as fold changes, with foreign keys linking to other tables. The primary key is an auto-incrementing integer.
 - **Cells**: Stores cell information, with a one-to-one relationship with `AssayInformation` and many-to-many relationships with `Perturbations`. The primary key is an auto-incrementing integer.
 - **Perturbations**: Contains data on perturbations, with a one-to-one relationship to `AssayInformation`, many-to-many relationships with `Cells`, and a many-to-one relationship with `Genes`.
 - **Genes**: Stores information about each gene.

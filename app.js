@@ -851,7 +851,7 @@ app.post('/siginfo/search', async (req, res) => {
         }
       );
     } else if (req.accepts('json')) {
-      // res.json(signatures);
+      res.json(signatures);
     }
   } catch (e) {
     console.error(e);
@@ -873,7 +873,7 @@ app.delete('/siginfo/:id', async (req, res) => {
     console.log('Connected successfully');
 
     // Extract the pert_id from the request body
-    const sigid = req.params;
+    const sigid = req.params.id;
     // Call deleteOne function
     await Signatureinfo.deleteOne(db, sigid);
     res.status(200).send(`Deleted Pertubagens record with pert_id: ${sigid}`);
@@ -897,7 +897,7 @@ app.patch(`/siginfo`, async (req, res) => {
     // Extract the pert_id to be updated from request body
     const { sig_name, column, newvalue } = req.body;
     // Call updateOne function
-    const updatedSignatureinfo = Signatureinfo.updateOne(
+    const updatedSignatureinfo = await Signatureinfo.updateOne(
       db,
       sig_name,
       column,

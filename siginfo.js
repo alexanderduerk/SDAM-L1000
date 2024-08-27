@@ -126,9 +126,9 @@ class Signatureinfo {
    * @param {string} signame - The name of the signature info to delete.
    * @return {void}
    */
-  static async deleteOne(dbconnection, signame) {
-    const sql = `DELETE FROM signature_infos WHERE sig_name = ?`;
-    const dbres = await dbconnection.run(sql, `${signame}`);
+  static async deleteOne(dbconnection, sigid) {
+    const sql = `DELETE FROM signature_infos WHERE sig_id = ?`;
+    const dbres = await dbconnection.run(sql, `${sigid}`);
   }
 
   /**
@@ -140,13 +140,13 @@ class Signatureinfo {
    * @param {any} newvalue - The new value to set.
    * @return {object} The updated signature info object.
    */
-  static async updateOne(dbconnection, signame, column, newvalue) {
-    const sql = `UPDATE signature_infos SET ${column} = ? WHERE sig_name = ${signame}`;
+  static async updateOne(dbconnection, sigid, column, newvalue) {
+    const sql = `UPDATE signature_infos SET ${column} = ? WHERE sig_id = ${sigid}`;
     const dbres = await dbconnection.run(sql, newvalue);
     // return a console.log that the given pertubagens was updated
     const updatedSignatureinfo = await dbconnection.get(
-      'SELECT * FROM signature_infos WHERE sig_name = ?',
-      signame
+      'SELECT * FROM signature_infos WHERE sig_id = ?',
+      sigid
     );
     return updatedSignatureinfo;
   }

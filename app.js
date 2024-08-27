@@ -983,6 +983,171 @@ app.post('/genetargets', async (req, res) => {
     }
   }
 });
+
+app.post('/plots', async (req, res) => {
+  let db;
+  // Retrieve the searchArg JSON string from the request body
+  const searchArgString = req.body.searchArg;
+  console.log('Request Body:', searchArgString);
+
+  // Parse the JSON string into an object
+  let searchArg;
+  try {
+    searchArg = JSON.parse(searchArgString);
+  } catch (e) {
+    console.error('Error parsing searchArg:', e);
+    return res.status(400).send('Invalid searchArg format.');
+  }
+
+  // Construct the searchArg object
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    searchArg;
+
+  const searchArgObject = {
+    field,
+    op,
+    val,
+    limit: parseInt(limit, 10) || 10, // Convert to number with a default value
+    offset: parseInt(offset, 10) || 0, // Convert to number with a default value
+    order,
+    orderfield,
+    descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
+  };
+
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Query the db
+    const signatures = await Signatureinfo.searchUI(
+      searchArgObject,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
+
+    console.log(`Found signatures:`);
+    console.log(signatures);
+    // Return the result:
+    if (req.accepts('html')) {
+      res.render(
+        'plots.ejs',
+        { data: signatures, siteSearchArg: searchArgObject },
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+    } else if (req.accepts('json')) {
+      // res.json(signatures);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+// Cells Get ID function
+app.get('/cells', async (req, res) => {
+  let db;
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    const cellId = req.query.id; // Extract the cell ID from the URL
+    const cell = await Cells.readById(cellId, db); // Call the readById function
+    res.json(cell);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error retrieving cell');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+// siginfo Get ID function
+app.get('/siginfo', async (req, res) => {
+  let db;
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    const sigID = req.query.id; // Extract the isg ID from the URL
+    const signature = await Signatureinfo.readById(sigID, db); // Call the readById function
+    res.json(signature);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error retrieving siginfo');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+// Compounds Get function
+app.get('/pertubations', async (req, res) => {
+  let db;
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    const pertid = req.query.id; // Extract the isg ID from the URL
+    const perturbagen = await Perturbagens.readById(pertid, db); // Call the readById function
+    res.json(perturbagen);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error retrieving compound');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
+// Compounds Get function
+app.get('/genes', async (req, res) => {
+  let db;
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    const geneid = req.query.id; // Extract the isg ID from the URL
+    const gene = await Genes.readById(geneid, db); // Call the readById function
+    res.json(gene);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error retrieving gene');
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+
 const {
   server: { port },
 } = require('./config');

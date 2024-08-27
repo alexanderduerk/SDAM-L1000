@@ -289,7 +289,11 @@ Beyond this adjustment, the implementation of the Genes class remains consistent
 
 ## Construction and translation of SearchArgs
 
-To be able to use searchArgs within the API as well the GUI i had to adjust the lecture code a bit. Initially the idea was to convert a searchTriplet to a SQL command. Therefore the basic idea is that the searchArg would contain field, val and op. The construction of the SQL statement then is allowed by a switch which would return a different SQL query based on the operator within the searchArg. Within those basic queries the field is used to sepcify the column and the val for the searched value. To allow more complex searches with descendants i decided to try to cover most of operators which could be handy for any complexer searches.
+To enable the use of searchArgs within both the API and GUI, I modified the code provided in our lecture. Originally, the goal was to convert a searchTriplet (a combination of field, value, and operator) into an SQL command. The core idea is that the searchArg object contains field, val, and op properties, with the field specifying the database column, the val representing the search value, and the op defining the logical operator to be applied.
+
+The SQL statement is dynamically constructed using a switch statement, which returns different SQL queries based on the operator provided in the searchArg. The basic queries are constructed by substituting the appropriate field and value into the SQL template.
+
+To support more complex searches involving descendants and to increase flexibility, I expanded the range of supported operators. This approach allows the function to handle a broader set of search conditions, which is crucial for more advanced querying.
 
 ```js
 /**
@@ -334,7 +338,7 @@ function translateSearchTripletToSQL(triplet) {
 }
 ```
 
-The function is assisted by two other function - _isTextField_ and _escapeValue_ - Those will make sure that values that are represented as strings are properly escaped in '-ticks, by using a typemapper defined at the beginning and using ist True/False state, to properly check if the value needs to be escaped, which would happen within escapeValue:
+This function is supported by two auxiliary functions, isTextField and escapeValue, which ensure that values represented as strings are correctly escaped using single quotes. The isTextField function uses a typemapper defined at the beginning of the script to determine whether a field is of type text. The escapeValue function then applies the appropriate escaping based on this determination:
 
 ```js
 /**
@@ -365,8 +369,168 @@ function escapeValue(value, isText) {
 }
 ```
 
-To construct a full SQL query based on the full searchArg a proper header based on the table used needs to be created, which would define what table needs to be searched and what columns what be selected. I therefore included UI searches as well as API searches which return all columns from the table to not restrict the programmatical access. I also use the order and the limit values of the searchArg to construct a full query using the header, the searchSql as well as the order and limit to allow for sort of pagination and sorting.
+The translateToSQL function is designed to convert a search argument into an SQL query string tailored to different database tables. It dynamically generates the appropriate SQL header based on the table being queried, ensuring that the resulting SQL query is both contextually relevant and syntactically correct.
 
 ```js
+/**
+ * Translates a search argument into an SQL query string.
+ *
+ * @param {Object} searchArg - The search argument to translate.
+ * @param {string} table - The table to search in.
+ * @return {string} The SQL query string.
+ */
+function translateToSQL(searchArg, table) {
+  let header;
+  // Create a header (for every cellname the same)
+  if (table === 'cells') {
+    header = `SELECT * FROM ${table} WHERE `;
+    typemapper = cellinfotypes;
+  }
+  if (table === 'cellsUI') {
+    header = `SELECT cell_name, donor_age, doubling_time, growth_medium, donor_ethnicity, donor_sex, donor_tumor_phase, primary_disease, growth_pattern FROM cells WHERE `;
+    typemapper = cellinfotypes;
+  }
+  if (table === 'perturbagens') {
+    header = `SELECT * FROM ${table} WHERE `;
+    typemapper = perturbagentypes;
+  }
+  if (table === 'perturbagensUI') {
+    header = `SELECT pert_name, gene_target, moa, canonical_smiles, compound_aliases FROM perturbagens WHERE `;
+    typemapper = perturbagentypes;
+  }
+  if (table === 'genes') {
+    header = `SELECT * FROM ${table} WHERE `;
+    typemapper = genetypes;
+  }
+  if (table === 'genesUI') {
+    header = `SELECT gene_symbol, ensembl_id, gene_title, gene_type, src, 
+    feature_space FROM genes WHERE `;
+    typemapper = genetypes;
+  }
 
+  if (table === 'signature_infos') {
+    header = `SELECT * FROM ${table} WHERE `;
+    typemapper = siginfotypes;
+  }
+  if (table === 'signature_infosUI') {
+    header = `SELECT  si.sig_name,
+                      si.pert_name,
+                      at.gene_target,
+                      si.cell_name,
+                      si.pert_dose, 
+                      si.pert_time,
+                      si.ss_ngene,
+                      si.tas,
+                      si.is_hiq,
+                      si.qc_pass
+              FROM signature_infos si LEFT JOIN
+              perturbagens at ON si.pert_name = at.pert_name
+              WHERE `;
+    typemapper = geneinfotypes;
+  }
+
+  if (table === 'genetargets') {
+    header = `SELECT si.sig_name AS 'Signature Name',
+                     at.gene_target AS 'Targeted Gene',
+                     at.pert_name AS 'Compound',
+                     si.cmap_name AS 'Connectivity Map',
+                     si.cell_name AS 'Cells',
+                     si.bead_batch AS 'Batch Nr.',
+                     si.pert_dose AS 'Dosage',
+                     si.pert_time AS 'Perturbation Period',
+                     si.nsamples AS 'Number of Samples',
+                     si.cc_q75 AS 'Landmark Space',
+                     si.ss_ngene AS 'Number of Genes',
+                     si.tas AS 'Transcriptional Activity Score',
+                     si.pct_self_rank_q25 AS 'Self Connectivity',
+                     si.wt AS 'Weight List',
+                     si.median_recall_rank_spearman AS 'MRR1',
+                     si.median_recall_rank_wtcs_50 AS 'MRR50',
+                     si.median_recall_score_spearman AS 'MRS1',
+                     si.median_recall_score_wtcs_50 AS 'MRS50',
+                     si.batch_effect_tstat AS 'Batch Effect',
+                     si.batch_effect_tstat_pct AS 'Batch Effect %',
+                     si.is_hiq AS 'High Quality',
+                     si.qc_pass AS 'Quality Control Pass',
+                     si.det_wells AS 'Detection Wells',
+                     si.det_plates AS 'Detected Plates',
+                     si.distil_ids AS 'Replicate IDs',
+                     si.project_code AS 'Project Code'
+              FROM signature_infos si
+              LEFT JOIN perturbagens at
+              ON si.pert_name = at.pert_name
+              WHERE`;
+    typemapper = geneinfotypes;
+  }
+
+  // Use translateToSQLRecursive to handle nested queries
+  const searchSql = translateToSQLRecursive(searchArg);
+  let orderClause = '';
+  orderClause = ` ORDER BY ${searchArg.orderfield} ${searchArg.order || 'ASC'}`;
+  // Allow for pagination args if provided in the search
+  if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
+    return `${header} ${searchSql}${orderClause} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
+  }
+
+  // Combine both
+  return `${header} ${searchSql} ${orderClause}`;
+}
+```
+
+This function begins by selecting the appropriate SQL header based on the table specified in the table parameter. It sets up the header string with the necessary SQL SELECT statement and defines the fields to be retrieved. The typemapper is also assigned based on the table to ensure the correct mapping of field types for later use.
+
+For complex queries involving nested search arguments, the translateToSQLRecursive function is invoked to translate these arguments into the corresponding SQL conditions.
+
+An ORDER BY clause is appended to the SQL string, determined by the orderfield and order properties of searchArg, defaulting to ascending order if unspecified.
+
+If pagination is required, the function incorporates the LIMIT and OFFSET clauses based on the limit and offset values provided in searchArg. Finally, the constructed SQL query string, combining the header, search conditions, and optional pagination, is returned.
+
+To enable the execution of more complex search queries involving nested conditions, the translateToSQLRecursive function was developed. This function facilitates the construction of advanced SQL queries by processing descendants—nested search arguments that encapsulate multiple full searchArg objects within each other. These nested structures can be combined using logical operators, allowing for the formulation of highly precise and intricate search conditions. This approach enables querying across multiple columns or values, ensuring that users can retrieve results that meet their specific criteria with a high degree of accuracy.
+
+```js
+/**
+ * Recursively translates a search argument to SQL.
+ *
+ * @param {object} searchArg - The search argument to translate.
+ * @return {string} The translated SQL string.
+ */
+function translateToSQLRecursive(searchArg) {
+  console.log('Received searchArg:', JSON.stringify(searchArg)); // Log to check structure
+
+  // Check if searchArg.descendants is an array
+  if (
+    Array.isArray(searchArg.descendants) &&
+    searchArg.descendants.length > 0
+  ) {
+    const descSqlArr = searchArg.descendants.map((descendant) => {
+      console.log('Processing descendant:', JSON.stringify(descendant)); // Log each descendant
+
+      if (Array.isArray(descendant.descendants)) {
+        return translateToSQLRecursive(descendant);
+      }
+
+      if (
+        descendant.field &&
+        descendant.op &&
+        (descendant.value || descendant.val)
+      ) {
+        return translateSearchTripletToSQL(descendant);
+      } else {
+        console.error('Invalid descendant:', descendant);
+        return ''; // Handle invalid descendant
+      }
+    });
+
+    // Join the SQL parts with the operator specified in searchArg
+    return `( ${descSqlArr.filter(Boolean).join(` ${searchArg.op || 'AND'} `)} )`;
+  }
+
+  // Check if searchArg is a valid search triplet
+  if (searchArg.field && searchArg.op && (searchArg.value || searchArg.val)) {
+    return translateSearchTripletToSQL(searchArg);
+  }
+
+  console.error('Invalid search argument:', searchArg);
+  return ''; // Or throw an error
+}
 ```

@@ -101,6 +101,12 @@ const geneinfotypes = {
   project_code: 'text',
 };
 
+/**
+ * Determines if a field is of type text.
+ *
+ * @param {string} field - The field to check.
+ * @return {boolean} - True if the field is of type text, false otherwise.
+ */
 function isTextField(field) {
   const fieldType = typemapper[field];
   console.log(typemapper[field]);
@@ -115,6 +121,16 @@ function escapeValue(value, isText) {
   return value;
 }
 
+/**
+ * Translates a search triplet to SQL.
+ *
+ * @param {Object} triplet - The search triplet containing field, op, and val.
+ * @param {string} triplet.field - The field to search on.
+ * @param {string} triplet.op - The operator to use for the search.
+ * @param {string} triplet.val - The value to search for.
+ * @return {string} The SQL query string.
+ * @throws {Error} If the operator is unsupported.
+ */
 function translateSearchTripletToSQL(triplet) {
   const isText = isTextField(triplet.field);
   const escapedVal = escapeValue(triplet.val, isText);

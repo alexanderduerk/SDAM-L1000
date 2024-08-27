@@ -97,7 +97,7 @@ constructor(keyValuePairs) {
 
 ##### createOne
 
-The createOne function was designed as an instance method, diverging from the static method approach illustrated in our lecture. By implementing it as an instance method, I leveraged the ability to call the constructor and directly use the resulting instance to insert its entire set of attributes into the database.
+The createOne function was designed as an instance method, diverging from the static method approach illustrated in our [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). By implementing it as an instance method, I leveraged the ability to call the constructor and directly use the resulting instance to insert its entire set of attributes into the database.
 
 Initially, I hardcoded the SQL statement with fixed placeholders (?) for each column, which required full knowledge of the table structure at the time of writing. However, to enhance flexibility and maintainability, I refactored the method to dynamically map each column to a placeholder. This was achieved by iterating over the instance's keys and generating the corresponding placeholders, which are then joined by commas. This approach allows the SQL statement to be adaptable, accommodating changes in the instance structure without requiring extensive modifications to the code.
 
@@ -126,7 +126,7 @@ async createOne(dbconnection) {
 
 #### deleteOne
 
-The deleteOne function was implemented in accordance with the foundational principles provided in our lecture materials. The design and execution were straightforward, presenting no significant challenges. The SQL statement is hardcoded to ensure the deletion of the correct record based on the provided cellid.
+The deleteOne function was implemented in accordance with the foundational principles provided in our [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js) materials. The design and execution were straightforward, presenting no significant challenges. The SQL statement is hardcoded to ensure the deletion of the correct record based on the provided cellid.
 
 ```js
 /**
@@ -142,91 +142,166 @@ static async deleteOne(dbconnection, cellid) {
 }
 ```
 
-Method: deleteOne(dbconnection, cellid)
-Purpose: This method deletes a specific cell record based on its ID.
-Challenges: My main challenge here was to ensure that the method reliably deletes the correct record without affecting others, especially when dealing with a large dataset.
-Solution: I used a prepared SQL statement with a placeholder for the cell ID. This way, the method safely deletes only the intended record. Additionally, I added a console log to confirm the deletion, which helps with debugging and verification during testing.
-Method: updateOne(dbconnection, id, column, newvalue)
-Purpose: This method updates a specific column of a cell record.
-Challenges: Handling dynamic column updates posed a challenge, especially when ensuring that the SQL query remained safe and effective.
-Solution: I approached this by using a combination of template literals and placeholders. The template literals allowed me to dynamically insert the column name into the SQL query, while the placeholder handled the new value securely. This method not only updates the database correctly but also protects against potential injection attacks.
-Method: search(searcharg, limit, offset, dbconnection)
-Purpose: This method searches for cell records based on provided parameters.
-Challenges: Translating the search arguments into an SQL query was complex due to the need for flexibility in handling different types of search conditions.
-Solution: I leveraged a utility function, searchArg.translateToSQL, to dynamically generate the SQL query based on the search arguments. This function was particularly useful because it abstracted much of the complexity, allowing me to focus on ensuring that the query was correctly executed and returned the desired results.
-Method: searchUI(searcharg, limit, offset, dbconnection)
-Purpose: Similar to search, but tailored for user interface-specific queries.
-Challenges: I needed to adapt the search logic for UI-specific needs while reusing as much of the existing code as possible to maintain consistency and reduce redundancy.
-Solution: I modified the search method slightly to meet the UI's requirements while keeping the core logic intact. This allowed me to maintain a consistent approach across different search scenarios.
-Method: readById(id, dbconnection)
-Purpose: Retrieves a cell record by its ID.
-Challenges: I needed to ensure that the method correctly handles cases where the ID might not exist in the database, returning useful feedback or results.
-Solution: I wrote a simple yet effective SQL query using a placeholder for the ID, which ensures that the method safely and accurately retrieves the correct record. To aid in debugging, I included console logs that output the retrieved data.
-Installation and Usage
-Installation: Clone the repository and run npm install to install dependencies.
-Usage: Import the Cells class into your project and use its methods to interact with the cells table in your database.
-Example Usage
-javascript
-Code kopieren
-const Cells = require('./Cells');
-const db = require('./dbconnection');
+#### updateOne
 
-// Create a new cell record
-const newCell = new Cells({
-cell_name: 'HepG2',
-cellosaurus_id: 'CVCL_0027',
-donor_age: 15,
-doubling_time: '48 hours',
-growth_medium: 'DMEM',
-cell_type: 'Hepatocyte',
-donor_ethnicity: 'Caucasian',
-donor_sex: 'Female',
-donor_tumor_phase: 'Stage I',
-cell_lineage: 'Hepatic',
-primary_disease: 'Liver Cancer',
-subtype_disease: 'Hepatocellular carcinoma',
-provider_name: 'ATCC',
-growth_pattern: 'Adherent',
-});
+The updateOne function was implemented following the guidelines provided in our [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). The SQL statement is structured to require a cell_id, which identifies the specific row to be updated. The column and newvalue parameters are utilized to target a specific cell within the identified row, facilitating the update of its value.
 
-await newCell.createOne(db);
-Conclusion
-Working on the Cells class was both challenging and rewarding. By focusing on type safety and dynamic SQL generation, I was able to create a flexible and secure model for managing cell line data. Each challenge provided an opportunity to deepen my understanding of both JavaScript and SQL, leading to a more robust final product.
-
-The `createOne` method in the [Cells class](cells.js) is based on the provided [lecture code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js) with modifications. I opted not to use the `static` decorator, allowing the instance to handle database entries. The method uses `Object.keys(this)` and `Object.values(this)` to dynamically generate SQL statements, reducing code complexity.
-
-### `deleteOne` Method
-
-This method directly follows the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). For testing purposes, it logs the ID of the deleted cell.
-
-### `updateOne` Method
-
-Similarly, the `updateOne` method is derived from the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). It returns the updated cell for verification within the server environment.
-
-### `search` Method with Arguments
-
-The `search` function is also based on the [provided code](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js), with adjustments made to the [searchArg](searchargs.js) function. I introduced a `cellinfotypes` object to validate column types and escape text values. The `translateSearchTripletToSQL` function was enhanced to support operators like `contains`, `startswith`, and `endswith`.
+To provide immediate feedback to the user, the function performs a subsequent query after the update operation, retrieving and returning the modified entry. This approach ensures that the user is informed of the successful update and can verify the changes made.
 
 ```js
-function isTextField(field) {
-  return cellinfotypes[field] === 'text';
-}
-
-function escapeValue(value, isText) {
-  return isText ? `'${value}'` : value;
-}
-
-function escapeValue(value, isText) {
-  if (isText) {
-    // Escape the values if they are text
-    return `'${value}'`;
-  }
+/**
+ * Updates a single row in the "cells" table with the given id, column, and new value.
+ *
+ * @param {object} dbconnection - The database connection object.
+ * @param {number} id - The id of the row to update.
+ * @param {string} column - The column to update.
+ * @param {any} newvalue - The new value to set.
+ * @return {Promise<object>} - A Promise that resolves to the updated row.
+ */
+static async updateOne(dbconnection, id, column, newvalue) {
+  const sql = `UPDATE cells SET ${column} = ? WHERE cell_id = ${id}`;
+  const dbres = await dbconnection.run(sql, newvalue);
+  // return the newly updated Row
+  const updatedCell = await dbconnection.get(
+    'SELECT * FROM cells WHERE cell_id = ?',
+    id
+  );
+  return updatedCell;
 }
 ```
 
-Additionaly the [translateSearchTripletToSQL](searchargs.js) function was adjusted to allow implementation of _contains, startswith_ and _endswith_. This is easily donw with different return statements based on the operator we use.
+#### search
+
+The search function closely mirrors the approach discussed in our [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js), utilizing a searcharg parameter, which is a JSON object structured as follows:
 
 ```js
+searchArg = {
+  field: columnname,
+  val: searchvalue,
+  op: logicOperator,
+  orderfield: columnForOrdering,
+  order: ASC_or_DESC,
+  offset: pageOffset,
+  limit: maxResults,
+  descendants: [],
+};
+```
+
+This structured format enables flexible and dynamic querying, accommodating complex search conditions. The descendants array allows for the combination of multiple search conditions using logical operators (e.g., AND, OR), thereby refining the search results to meet specific criteria.
+
+The function converts the searcharg into an SQL query using the [translateToSQL](searchargs.js) method, which generates the appropriate SQL statement for the cells table. If no searcharg is provided, a default query is executed to return all records. The resulting SQL is logged for transparency and debugging purposes. Finally, the database is queried, and the function returns the resulting array of cell records that match the specified search criteria.
+
+```js
+/**
+ * Reads cellrecord from the database based on the provided search parameters.
+ *
+ * @param {object} searcharg - The search parameters to filter the results.
+ * @param {object} dbconnection - The database connection object.
+ * @return {Promise<Array>} - A Promise that resolves to an array of cell records that match the search criteria.
+ */
+static async search(searcharg, dbconnection) {
+  const searchSql =
+    searcharg !== undefined && searcharg !== null
+      ? searchArg.translateToSQL(searcharg, 'cells')
+      : 'SELECT * FROM cells';
+  console.log(`SQL generated to search Cells:\n${JSON.stringify(searchSql)}`);
+  // Query the database
+  const dbResult = await dbconnection.all(searchSql);
+  // Done
+  console.log(dbResult);
+  return dbResult;
+}
+```
+
+#### readById
+
+The readById function is implemented as per the standard code provided in the [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). It is designed to retrieve a complete record from the cells table based on the cell_id provided as a parameter. The function constructs an SQL query to select all columns associated with the specified cell_id, then executes the query to return the corresponding database entry.
+
+```js
+/**
+ * Reads a single cell record from the database based on the provided cell_id.
+ *
+ * @param {number} id - The id of the cell record to retrieve.
+ * @param {object} dbconnection - The database connection object.
+ * @return {Promise<object>} - A Promise that resolves to the retrieved cell record.
+ */
+static async readById(id, dbconnection) {
+  console.log(id);
+  const sql = 'SELECT * FROM cells WHERE cell_id = ?';
+  const dbres = await dbconnection.get(sql, id);
+  console.log(dbres);
+  return dbres;
+}
+```
+
+#### searchUI
+
+This function provides no real benefit for the programmatic API usage, but uses a different basic SQL query created by [translateToSQL](searchargs.js). This will return a more stripped version of the full _siginfos_ table, which was rendered in our GUI.
+
+```js
+/**
+ * Reads cellrecord from the database based on the provided search parameters.
+ *
+ * @param {object} searcharg - The search parameters to filter the results.
+ * @param {string} orderarg - The order in which to sort the results.
+ * @param {object} paginationarg - The pagination parameters for the results.
+ * @param {object} dbconnection - The database connection object.
+ * @return {Promise<Array>} - A Promise that resolves to an array of cell records that match the search criteria.
+ */
+static async searchUI(searcharg, limit, offset, dbconnection) {
+  const searchSql =
+    searcharg !== undefined && searcharg !== null
+      ? searchArg.translateToSQL(searcharg, 'cellsUI')
+      : 'SELECT * FROM cells';
+  console.log(`SQL generated to search Cells:\n${JSON.stringify(searchSql)}`);
+  // Query the database
+  const dbResult = await dbconnection.all(searchSql);
+  // Done
+  console.log(dbResult);
+  return dbResult;
+}
+```
+
+### Genes class
+
+The Genes class was designed following the same structural principles as the Cells class, which served as a foundational blueprint. The constructor was modified to include a new expectedTypes HashMap specific to the Genes class:
+
+```js
+constructor(keyValuePairs) {
+  const expectedTypes = {
+    entrez_id: 'number',
+    gene_symbol: 'string',
+    ensembl_id: 'string',
+    gene_title: 'string',
+    gene_type: 'string',
+    src: 'string',
+    feature_space: 'string',
+  };
+  // use a dynamic constructor approach
+  Object.keys(keyValuePairs).forEach((key) => {
+    checkType(keyValuePairs[key], expectedTypes[key]);
+    this[key] = keyValuePairs[key];
+  });
+}
+```
+
+Beyond this adjustment, the implementation of the Genes class remains consistent with the approach used in the [Cells class](cells.js), ensuring a uniform coding standard across both classes.
+
+## Construction and translation of SearchArgs
+
+To be able to use searchArgs within the API as well the GUI i had to adjust the lecture code a bit. Initially the idea was to convert a searchTriplet to a SQL command. Therefore the basic idea is that the searchArg would contain field, val and op. The construction of the SQL statement then is allowed by a switch which would return a different SQL query based on the operator within the searchArg. Within those basic queries the field is used to sepcify the column and the val for the searched value. To allow more complex searches with descendants i decided to try to cover most of operators which could be handy for any complexer searches.
+
+```js
+/**
+ * Translates a search triplet to SQL.
+ *
+ * @param {Object} triplet - The search triplet containing field, op, and val.
+ * @param {string} triplet.field - The field to search on.
+ * @param {string} triplet.op - The operator to use for the search.
+ * @param {string} triplet.val - The value to search for.
+ * @return {string} The SQL query string.
+ * @throws {Error} If the operator is unsupported.
+ */
 function translateSearchTripletToSQL(triplet) {
   const isText = isTextField(triplet.field);
   const escapedVal = escapeValue(triplet.val, isText);
@@ -259,4 +334,39 @@ function translateSearchTripletToSQL(triplet) {
 }
 ```
 
-The [translateToSQL](searchargs.js) is also adjusted. To make it way more flexible i decided to include table in the parameters. Then a if check can be used to check the table name and to create a table specific **SELECT** statement, which also would rename the columns for better Readability within the Webpage. Then again if statements were used for different order args and different offset or limits that can be used to get a better handling for the View of the Data.
+The function is assisted by two other function - _isTextField_ and _escapeValue_ - Those will make sure that values that are represented as strings are properly escaped in '-ticks, by using a typemapper defined at the beginning and using ist True/False state, to properly check if the value needs to be escaped, which would happen within escapeValue:
+
+```js
+/**
+ * Determines if a field is of type text.
+ *
+ * @param {string} field - The field to check.
+ * @return {boolean} - True if the field is of type text, false otherwise.
+ */
+function isTextField(field) {
+  const fieldType = typemapper[field];
+  console.log(typemapper[field]);
+  return fieldType === 'text';
+}
+
+/**
+ * Escapes a value for SQL based on its type.
+ *
+ * @param {any} value - The value to escape.
+ * @param {boolean} isText - True if the value is of type text, false otherwise.
+ * @return {string} - The escaped value.
+ */
+function escapeValue(value, isText) {
+  if (isText) {
+    // Implement proper escaping for text values
+    return `'${value}'`;
+  }
+  return value;
+}
+```
+
+To construct a full SQL query based on the full searchArg a proper header based on the table used needs to be created, which would define what table needs to be searched and what columns what be selected. I therefore included UI searches as well as API searches which return all columns from the table to not restrict the programmatical access. I also use the order and the limit values of the searchArg to construct a full query using the header, the searchSql as well as the order and limit to allow for sort of pagination and sorting.
+
+```js
+
+```

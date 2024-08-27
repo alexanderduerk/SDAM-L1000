@@ -11,11 +11,7 @@ This repository contains a RESTful API built on Node.js using the Express framew
   - [Database Setup](#database-setup)
   - [Running the API](#running-the-api)
 - [API Endpoints](#api-endpoints)
-  - [Cells](#cells)
-  - [Genes](#genes)
-  - [Perturbations](#perturbations)
-- [Usage](#usage)
-  - [Example Requests](#example-requests)
+- [GUI-Guide](#gui-guide)
 - [License](#license)
 
 ## Overview
@@ -48,101 +44,58 @@ Before you begin, ensure you have the following installed on your machine:
 
 The API interacts with an SQLite database named l1000.db. Ensure this database is correctly set up and contains the necessary tables. For this you can run the delivered [SQL-File](l1000.sql).
 
-sql
-Code kopieren
--- Example schema for the cells table
-CREATE TABLE cells (
-cell_id TEXT PRIMARY KEY,
-cell_name TEXT,
-organism TEXT,
-tissue TEXT,
-cell_type TEXT
-);
+### Running the API
 
--- Similar schemas would be required for `genes` and `perturbations` tables
-Running the API
 To start the API server, run the following command:
 
-bash
-Code kopieren
+```bash
 node app.js
+```
+
 The server will start on http://localhost:3000.
 
-API Endpoints
-Cells
-Create a new cell record
+## API Endpoints
 
-POST /cells
-Request Body: JSON containing cell_id, cell_name, organism, tissue, and cell_type.
-Search cell records
+### Cells
 
-POST /cells/search
-Request Body: JSON with search parameters (e.g., field, op, val, limit, offset, orderfield, descendants).
-Update a cell record
+#### Create a new cell record
 
-PATCH /cells
-Request Body: JSON containing cell_id, columnname, and newvalue.
-Delete a cell record
+```bash
+TODO
+```
 
-DELETE /cells/:name
-URL Parameter: name (the identifier for the cell to be deleted).
-Genes
-Create a new gene record
+#### Search cell records
 
-POST /genes
-Request Body: JSON containing gene information fields.
-Search gene records
+Can be done either by searching for an ID or with a more complex searchArg allowing for descendants as well.
 
-POST /genes/search
-Request Body: JSON with search parameters.
-Update a gene record
+```bash
+SearchById
+```
 
-PATCH /genes
-Request Body: JSON containing gene_id, columnname, and newvalue.
-Delete a gene record
+```bash
+Search with Desc
+```
 
-DELETE /genes/:id
-URL Parameter: id (the identifier for the gene to be deleted).
-Perturbations
-Create a new perturbation record
+#### Update cell records
 
-POST /perturbations
-Request Body: JSON containing perturbation information fields.
-Search perturbation records
+Request Body: JSON containing cell_id, columnname and newvalue. Uses Set to update a value within the SQL database.
 
-POST /perturbations/search
-Request Body: JSON with search parameters.
-Update a perturbation record
+```bash
+UPDATE
+```
 
-PATCH /perturbations
-Request Body: JSON containing pert_id, columnname, and newvalue.
-Delete a perturbation record
+#### Delete a cell record
 
-DELETE /perturbations/:id
-URL Parameter: id (the identifier for the perturbation to be deleted).
-Usage
-Example Requests
-Below are some example curl commands to interact with the API:
+URL Parameter within the route: /cells/:name
 
-Create a new cell
+```bash
+DELETE
+```
 
-bash
-Code kopieren
-curl -X POST http://localhost:3000/cells -H "Content-Type: application/json" -d '{"cell_id":"C123", "cell_name":"A549", "organism":"Human", "tissue":"Lung", "cell_type":"Carcinoma"}'
-Search for cells
+# GUI-Guide
 
-bash
-Code kopieren
-curl -X POST http://localhost:3000/cells/search -H "Content-Type: application/json" -d '{"field":"cell_name", "op":"LIKE", "val":"A%", "limit":10}'
-Update a cell record
+Our GUI allows a user friendly experience looking for Data within L1000 data. Therefore three different search fields are given, to search the database for a used cell, compound or targeted gene. The rendered table can be further customized. Using the buttons within the header column would allow for changing between Ascending and Descending order for the given column. Hovering over the i's will show more information for the data within the column. The search fields will allow to further adjust the searchArg. For the text based columns the operator will be set to contains for every text searched for. The value based columns allow for >, <, <= and >=. Those descendants need to be used after each other with each step needing a confirmation by clicking Search or using enter. At the bottom of the page the limit can be changed as well as the Page/Offset. The Show Full Table button at the top can be used to render the full information within the siginfo table without our prefiltering. The plot button will lead to a new page, which would contain two plots, which can be downloaded, as well as the corresponding data. For those plots the current searchArg is used with the current set limit.
 
-bash
-Code kopieren
-curl -X PATCH http://localhost:3000/cells -H "Content-Type: application/json" -d '{"cell_id":"C123", "columnname":"cell_type", "newvalue":"Epithelial"}'
-Delete a cell
+# License
 
-bash
-Code kopieren
-curl -X DELETE http://localhost:3000/cells/C123
-License
 This project is licensed under the MIT License. See the LICENSE file for details.

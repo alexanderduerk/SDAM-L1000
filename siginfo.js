@@ -1,27 +1,30 @@
 const searchArg = require('./searchargs');
 
-/** Typechecking functino to detect type errors early
- * @param {string, number, boolean}
- * @param {string, number, boolean}
+/**
+ * Checks if the type of a value is the expected type.
+ *
+ * @param {*} value - The value to check the type of.
+ * @param {string} expectedType - The expected type of the value.
+ * @throws {TypeError} If the type of the value is not the expected type.
+ * @return {void}
  */
 function checkType(value, expectedType) {
   if (typeof value !== expectedType) {
-    //throw a type error
+    // throw a type error
     throw new TypeError(`Expected ${expectedType}, got ${typeof value}`);
   }
 }
-
 /**
  * Datamodel defines all data for the signature table
- */
-/**
  * Represents a signature with various attributes
  */
-
 class Signatureinfo {
   /**
-   * Constructor for the cellinfos class
-   * @param {HashMap} keyValuePairs - Attributes and their values
+   * Constructs a new instance of the Signatureinfo class.
+   *
+   * @param {Object} keyValuePairs - An object containing key-value pairs to initialize the instance.
+   * @throws {TypeError} If the type of a value does not match the expected type.
+   * @return {void}
    */
   constructor(keyValuePairs) {
     const expectedTypes = {
@@ -60,10 +63,13 @@ class Signatureinfo {
   }
 
   /**
-   * Type checking function to validate data types
+   * Type checking function to validate data types and throw a TypeError if the type does not match the expected type.
+   *
    * @param {string} key - The key name of the value being checked
    * @param {*} value - The value to check
    * @param {string} expectedType - The expected data type as a string
+   * @throws {TypeError} If the type of a value does not match the expected type
+   * @return {void}
    */
   checkType(key, value, expectedType) {
     if (expectedType === 'number') {
@@ -89,10 +95,11 @@ class Signatureinfo {
   }
 
   /**
-   * Write Function for inserting the instance into the db
-   * @param {instance}
+   * Creates a new signature info in the database.
+   *
+   * @param {object} dbconnection - The database connection object.
+   * @return {object} The newly inserted signature info object.
    */
-
   async createOne(dbconnection) {
     // get all columns
     const columns = Object.keys(this);
@@ -113,84 +120,91 @@ class Signatureinfo {
   }
 
   /**
-   * Delete Function for the pert_id table
-   * @param {dbconnection, signature_infos}
-   */
-  // sql statement
-  static async deleteOne(dbconnection, signame) {
-    const sql = `DELETE FROM signature_infos WHERE sig_name = ?`;
-    const dbres = await dbconnection.run(sql, `${signame}`);
-    // return a console.log that the given pertubagens was deleted
-    console.log(`signature_infos with sig_name: ${signame} was deleted`);
-  }
-  /**
-   * Updates a single row in the "compound" table with the given id, column, and new value
+   * Deletes a signature info from the database.
    *
    * @param {object} dbconnection - The database connection object.
-   * @param {number} id - The id of the row to update.
-   * @param {string} column - The column to update.
-   * @param {any} newvalue - The new value to set.
-   * @return {Promise<object>} - A Promise that resolves to the updated row.
+   * @param {string} signame - The name of the signature info to delete.
+   * @return {void}
    */
+  static async deleteOne(dbconnection, sigid) {
+    const sql = `DELETE FROM signature_infos WHERE sig_id = ?`;
+    const dbres = await dbconnection.run(sql, `${sigid}`);
+  }
 
   /**
-   * Update/Patch Function for pert_id table
-   * @param {dbconnection, signature_infos, column, newvalue}
+   * Updates a single row in the "signature_infos" table with the given signature name, column, and new value.
+   *
+   * @param {object} dbconnection - The database connection object.
+   * @param {string} signame - The name of the signature info to update.
+   * @param {string} column - The column to update.
+   * @param {any} newvalue - The new value to set.
+   * @return {object} The updated signature info object.
    */
-  static async updateOne(dbconnection, signame, column, newvalue) {
-    const sql = `UPDATE signature_infos SET ${column} = ? WHERE sig_name = ${signame}`;
+  static async updateOne(dbconnection, sigid, column, newvalue) {
+    const sql = `UPDATE signature_infos SET ${column} = ? WHERE sig_id = ${sigid}`;
     const dbres = await dbconnection.run(sql, newvalue);
     // return a console.log that the given pertubagens was updated
-    console.log(`Signature_info with ${signame} was updated`);
     const updatedSignatureinfo = await dbconnection.get(
-      'SELECT * FROM signature_infos WHERE sig_name = ?',
-      signame
+      'SELECT * FROM signature_infos WHERE sig_id = ?',
+      sigid
     );
     return updatedSignatureinfo;
   }
 
+  /**
+   * Searches for signature information in the database based on the provided search argument.
+   *
+   * @param {object} searcharg - The search argument to use for the query.
+   * @param {number} limit - The maximum number of results to return.
+   * @param {number} offset - The offset from which to start returning results.
+   * @param {object} dbconnection - The database connection object.
+   * @return {array} An array of search results.
+   */
   static async search(searcharg, limit, offset, dbconnection) {
     const searchSql =
       searcharg !== undefined && searcharg !== null
         ? searchArg.translateToSQL(searcharg, 'signature_infos')
         : 'SELECT * FROM signature_infos';
-    console.log(
-      `SQL generated to search Compounds:\n${JSON.stringify(searchSql)}`
-    );
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
-    // Done
-    // console.log(dbResult);
     return dbResult;
   }
 
+  /**
+   * Searches for compounds in the database based on the provided search argument.
+   *
+   * @param {object} searcharg - The search argument to use for the query.
+   * @param {number} limit - The maximum number of results to return.
+   * @param {number} offset - The offset from which to start returning results.
+   * @param {object} dbconnection - The database connection object.
+   * @return {array} An array of search results.
+   */
   static async searchcompounds(searcharg, limit, offset, dbconnection) {
     const searchSql =
       searcharg !== undefined && searcharg !== null
         ? searchArg.translateToSQL(searcharg, 'genetargets')
         : 'SELECT * FROM signature_infos';
-    console.log(
-      `SQL generated to search Compounds:\n${JSON.stringify(searchSql)}`
-    );
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
-    // Done
-    // console.log(dbResult);
     return dbResult;
   }
 
+  /**
+   * Searches for signature information in the database based on the provided search argument.
+   *
+   * @param {object} searcharg - The search argument to use for the query.
+   * @param {number} limit - The maximum number of results to return.
+   * @param {number} offset - The offset from which to start returning results.
+   * @param {object} dbconnection - The database connection object.
+   * @return {array} An array of search results.
+   */
   static async searchUI(searcharg, limit, offset, dbconnection) {
     const searchSql =
       searcharg !== undefined && searcharg !== null
         ? searchArg.translateToSQL(searcharg, 'signature_infosUI')
         : 'SELECT * FROM signature_infos';
-    console.log(
-      `SQL generated to search Compounds:\n${JSON.stringify(searchSql)}`
-    );
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
-    // Done
-    // console.log(dbResult);
     return dbResult;
   }
   // Read by ID

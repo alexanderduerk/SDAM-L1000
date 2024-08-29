@@ -6,11 +6,44 @@ This README documents the thought processes and problem-solving approaches I emp
 
 - [Repository Initialization](#repository-initialization)
 - [SQL Table Design](#sql-table-design)
-  - []
+  - [Initial Approach](#initial-approach)
+  - [Revised Approach](#revised-approach)
+  - [Cells Table Implementation](#cells-table-implementation)
+  - [Genes Table Implementation](#genes-table-implementation)
+- [Class Representation of the data models](#class-representation-of-the-data-models)
+  - [Cells Class](#cells-class)
+    - [Overview](#overview)
+    - [Features](#features)
+      - [Type Checking](#type-checking)
+      - [Database Operations](#database-operations)
+    - [Class Structure](#class-structure)
+      - [Constructor](#constructor)
+      - [createOne](#create-one)
+      - [deleteOne](#deleteone)
+      - [updateOne](#updateone)
+      - [search](#search)
+      - [readById](#readbyid)
+      - [searchUI](#searchui)
+  - [Genes class](#genes-class)
+- [Construction and translation of SearchArgs](#construction-and-translation-of-searchargs)
+- [Server Implementation](#server-implementation)
+  - [Route construction](#route-construction)
+    - [Create One](#create-one)
+    - [search](#search-1)
+    - [deleteOne](#deleteone-1)
+    - [updateOne](#updateone-1)
+- [EJS Files and Functions](#ejs-files-and-functions)
+  - [Genes and Cells ejs](#genes-and-cells-ejs)
+  - [siginfo ejs](#siginfo-ejs)
+    - [adjustOffset](#adjustoffset)
+    - [changeLimit](#changelimit)
+    - [changeOrder](#changeorder)
+    - [addDescendant](#adddescendant)
+- [CSS and Visualization](#css-and-visualization)
 
 ## Repository Initialization
 
-To facilitate collaboration, I established a GitHub repository, complete with a license and a `.gitignore` template configured for JavaScript. I initialized the project with **npm**, ensuring all necessary modules were included. To maintain a consistent coding style and enhance user experience, I integrated **eslint** with **Prettier**, adhering to the **Airbnb** style guide. Additionally, I created a `config.json` and a `.js` file, enabling team members to customize their ports and database routes.
+To facilitate collaboration, I established a GitHub repository, complete with a license and a .*gitignore* template configured for JavaScript. I initialized the project with **npm**, ensuring all necessary modules were included. To maintain a consistent coding style and enhance user experience, I integrated **eslint** with **Prettier**, adhering to the **Airbnb** style guide. Additionally, I created a *config.json* and a *.js* file, enabling team members to customize their ports and database routes.
 
 ## SQL Table Design
 
@@ -19,8 +52,8 @@ To facilitate collaboration, I established a GitHub repository, complete with a 
 We began by analyzing the dataset to determine the optimal structure for a relational database. Our initial schema included the following tables:
 
 1. **MainViews**: Designed to be the most frequently queried table, it included columns for Perturbed Cell, Perturbagens, Targeted Gene, and Fold-Change, with a composite key formed by the Cell, Perturbagens, and Gene.
-2. **CellInfos**: Stored all related data for each cell, using `Cell_iname` as the primary key.
-3. **Perturbagens**: Contained information on perturbagens, linked to the `MainViews` table via the perturbagens' name.
+2. **CellInfos**: Stored all related data for each cell, using *Cell_iname* as the primary key.
+3. **Perturbagens**: Contained information on perturbagens, linked to the *MainViews* table via the perturbagens' name.
 4. **GeneInfo**: Held data for each targeted gene affected by the perturbagens.
 
 ### Revised Approach
@@ -38,6 +71,8 @@ We realized the initial design had limitations, particularly in terms of storage
 ### Cells Table Implementation
 
 I created the _cells_ table in the [l1000.sql](l1000.sql) file, using metadata from cellinfos.csv. A key decision was to avoid setting a unique constraint on the _cell_name_ column to accommodate different media adaptations and growth patterns. Instead, I implemented a unique constraint based on _cell_name_, _cell_type_, and _growth_pattern_ to prevent duplicates while allowing flexibility.
+
+
 
 ### Genes Table Implementation
 
@@ -124,7 +159,7 @@ async createOne(dbconnection) {
   }
 ```
 
-#### deleteOne
+##### deleteOne
 
 The deleteOne function was implemented in accordance with the foundational principles provided in our [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js) materials. The design and execution were straightforward, presenting no significant challenges. The SQL statement is hardcoded to ensure the deletion of the correct record based on the provided cellid.
 
@@ -142,7 +177,7 @@ static async deleteOne(dbconnection, cellid) {
 }
 ```
 
-#### updateOne
+##### updateOne
 
 The updateOne function was implemented following the guidelines provided in our [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). The SQL statement is structured to require a cell_id, which identifies the specific row to be updated. The column and newvalue parameters are utilized to target a specific cell within the identified row, facilitating the update of its value.
 
@@ -170,7 +205,7 @@ static async updateOne(dbconnection, id, column, newvalue) {
 }
 ```
 
-#### search
+##### search
 
 The search function closely mirrors the approach discussed in our [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js), utilizing a searcharg parameter, which is a JSON object structured as follows:
 
@@ -213,7 +248,7 @@ static async search(searcharg, dbconnection) {
 }
 ```
 
-#### readById
+##### readById
 
 The readById function is implemented as per the standard code provided in the [lecture](https://github.com/asishallab-group/SDAM_06_and_07_Data_Model_and_Server_Programming/blob/main/city.js). It is designed to retrieve a complete record from the cells table based on the cell_id provided as a parameter. The function constructs an SQL query to select all columns associated with the specified cell_id, then executes the query to return the corresponding database entry.
 
@@ -234,7 +269,7 @@ static async readById(id, dbconnection) {
 }
 ```
 
-#### searchUI
+##### searchUI
 
 This function provides no real benefit for the programmatic API usage, but uses a different basic SQL query created by [translateToSQL](searchargs.js). This will return a more stripped version of the full _siginfos_ table, which was rendered in our GUI.
 
@@ -534,3 +569,375 @@ function translateToSQLRecursive(searchArg) {
   return ''; // Or throw an error
 }
 ```
+
+## Server Implementation
+
+Prior to initiating route creation within the server, I configured the necessary framework using Express. Leveraging the code provided in our lectures as a foundational blueprint, I incorporated functionality to serve static files and integrated middleware such as body-parser, which facilitates the handling of JSON objects within EJS templates.
+
+```js
+// Specify the directory where your EJS templates are located
+app.set('views', path.join(__dirname, 'views'));
+
+// allow static file useage
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Enable parsing of JSON-formatted request bodies
+app.use(express.json());
+
+// Middleware to parse URL-encoded form data
+app.use(bodyParser.urlencoded({ extended: true }));
+```
+
+### Route construction
+
+All server routes were constructed with a consistent approach, specifically tailored to the two classes implemented.
+
+#### Create one
+
+The createOne function is designed to process incoming data accompanying HTTP requests. To facilitate the transmission of this data, the HTTP POST method is employed. The route for this operation is defined at /cells. While the lecture code served as a boilerplate, I introduced modifications, notably closing the database connection, rather than deleteing the variable.
+
+```js
+/**
+ * All Routes connected to the cellinfos table
+ * This will include Update, Delete and Search
+ */
+app.post('/cells', async (req, res) => {
+  let db;
+  // Connect to the Database
+  try {
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+    console.log('Connected successfully');
+    // Create a new instance of the Cell class
+    const CellInfo = new Cells(req.body);
+    // Call Create One on the instance
+    const newCell = await CellInfo.createOne(db);
+    // send the newly created Cell as JSON
+    res.json(newCell);
+    // catch errors and return 400 when any error occurs
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+    // close the db connection if it was opened
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+```
+
+#### search
+
+The implementation of the search functionality diverges significantly from the code provided in the lectures. I opted to use the POST method instead of GET, allowing the HTTP request to transmit a searchArg as a JSON object. This approach eliminates the need for constructing complex URLs/URIs, which are subject to length limitations. Initially, the searchArg was directly extracted and passed to the search function, which worked effectively with curl HTTP requests. However, limitations arose when integrating this method with the graphical user interface (GUI), as the GUI required the JSON objects to be stringified.
+
+To address this, I implemented middleware that converts the stringified JSON back into a JSON object, ensuring compatibility with the existing search function. Consequently, this change required curl requests to also send a stringified searchArg. To minimize this additional requirement, I incorporated a type check to determine if the searchArg is a string. If it is, the parser middleware is invoked; otherwise, the JSON object is used directly. For rendering the search results, I utilized the res.render method to render an EJS file. Initially, only the retrieved database entries were passed as parameters to the EJS file, but I later included the searchArg to facilitate further modifications within the template.
+
+```js
+/**
+ * Search Request for the Cellinfos table
+ */
+app.post('/cells/search', async (req, res) => {
+  let db;
+  // Retrieve the searchArg JSON from the request body
+  const searchArgString = req.body.searchArg;
+  // Parse the JSON string into an object
+  let searchArg;
+  // check if the searchArg is a string for UI parsing
+  if (searchArgString && typeof searchArgString === 'string') {
+    // use middleware to parse the searchArg and convert from string to object
+    try {
+      searchArg = JSON.parse(searchArgString);
+      // catch errors and return 400 when any error occurs
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+    // else use the searchArg as an object directly
+  } else {
+    searchArg = searchArgString;
+  }
+
+  // Construct the searchArg object
+  const { limit, offset, order, descendants, field, op, val, orderfield } =
+    searchArg;
+  // try to connect to the db
+  try {
+    // Connect to db
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // use the search Arg to query the db
+    const cells = await Cells.search(searchArg, db);
+    // Return the result:
+    if (req.accepts('html')) {
+      // render the table if the request accepts HTML
+      res.render(
+        'cellstable.ejs',
+        // hand data and searchArg to the ejs file
+        { data: cells, currentSearchArg: searchArg },
+        (err, str) => {
+          if (err) {
+            throw err;
+          }
+          res.send(str);
+        }
+      );
+      // return the data as JSON if the request accepts JSON
+    } else if (req.accepts('json')) {
+      res.json(cells);
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500);
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+```
+
+The same approach was employed to create the searchUI route, which is specifically designed for the GUI. This variant of the search function returns only preselected columns tailored for the user interface.
+
+#### deleteOne
+
+The deleteOne route is implemented using the HTTP DELETE method. Although the DELETE method can accept a request body, the route was designed to align closely with the structure provided in our lecture code. The /:id parameter embedded in the URL is accessed via req.params.id and subsequently passed to the deleteOne function.
+
+```js
+/**
+ * Delete Request for Cellinfos table
+ */
+// Route to handle DELETE requests to /cells/:name
+app.delete('/cells/:id', async (req, res) => {
+  // Connect to the Database
+  let db;
+  try {
+    // Connect to the Database
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+
+    // Extract the cell name from the request parameters
+    const cellid = req.params.id;
+
+    // Call the deleteOne method from the Cellinfos class
+    await Cells.deleteOne(db, cellid);
+
+    // Send a success response
+    res.status(200).send(`Cell with ${cellid} was deleted`);
+  } catch (error) {
+    console.error(error);
+    // Send an error response
+    res.status(500).send('Internal Server Error');
+    // Close the database connection if it was opened
+  } finally {
+    if (db) {
+      await db.close(); // Close the database connection if it was opened
+    }
+  }
+});
+```
+
+#### updateOne
+
+The updateOne route within the server utilizes the HTTP PATCH method rather than PUT. This decision was made following research and discussions, supported by insights from [stackoverflow](https://stackoverflow.com/questions/28459418/use-of-put-vs-patch-methods-in-rest-api-real-life-scenarios). In summary, PATCH was chosen because it allows for partial updates, requiring only the specific entry or value that needs to be modified, rather than the entire data record.
+
+For the update operation, the request body is structured to include the id of the record to be updated, the columnName representing the specific field to be changed, and the newValue that will replace the existing value. The updated record is then returned to the client as a JSON object.
+
+```js
+/**
+ * UpdateOne for the cells table
+ */
+app.patch('/cells', async (req, res) => {
+  // Connect to the Database
+  let db;
+  try {
+    // Connect to the Database
+    db = await sqlite.open({
+      filename: './l1000.db',
+      driver: sqlite3.Database,
+    });
+    // Extract the required parameters from the request parameters
+    const { cellid, columnname, newvalue } = req.body;
+    // Call the updateOne function from the cells class
+    const updatedCell = await Cells.updateOne(db, cellid, columnname, newvalue);
+    // Send the updated cell record
+    res.json(updatedCell);
+    // catch errors and return 500 when any error occurs
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Internal server error');
+    // close the db connection if it was opened
+  } finally {
+    if (db) {
+      await db.close();
+    }
+  }
+});
+```
+
+The implementation of the Genes class within the express server is done as described above.
+
+
+## EJS Files and Functions
+
+### Genes and Cells ejs
+
+The Cells and Genes EJS files are designed with a straightforward structure, primarily serving to display the data passed to them. Given the design of our graphical user interface (GUI), we did not implement features to modify the searchArg or adjust the data limit. This decision was based on the observation that these templates typically display a maximum of five data entries at a time. Consequently, the EJS files closely resemble the templates provided in our lectures. The genes.ejs file follows a similar structure.
+
+### siginfo ejs
+
+The siginfo EJS file serves as the primary GUI for our searchable table, and it is the interface returned to the user for most operations. Over time, several functionalities were incorporated to enhance its usability. Initially, the idea was to manage each searchArg key that needed modification through separate forms, each tied to different functions. However, this approach significantly increased the codebase and reduced readability.
+
+To optimize the design, I consolidated these operations into a single form. This form contains the searchArg initially used to render the page, encapsulated within a hidden input field as a stringified JSON object. When the user interacts with the form, it triggers the siginfo/search route, where the searchArg is modified, overwritten, and the page is re-rendered with the newly constructed searchArg. This approach simplifies the code while maintaining the flexibility to modify the search parameters dynamically.
+
+#### adjustOffset
+
+To adjust the offset, the offset needed to be changed within the searchArg. For this the function would read in the value of the hidden input field and convert it to a JSON object. To make the function display the proper "site" the offset was calculated using:
+
+Offset + (1 or -1 * limit)
+
+which would ensure proper pagination. This modified searchArg could then again be written to the value of the hidden input field and afterwards the searchForm can be submitted.
+
+```js
+function adjustOffset(amount) {
+    // Get the hidden input field for searchArg
+    const searchArgField = document.getElementById('searchArg');
+    // Decode and parse the JSON string from the hidden field
+    let searchArg;
+    try {
+      searchArg = JSON.parse(searchArgField.value);
+      console.log(`searchArg: ${JSON.stringify(searchArg)}`);
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return;
+    }
+    // Update offset and limit values
+    const currentOffset = parseInt(searchArg.offset, 10) || 0;
+    const limit = parseInt(searchArg.limit, 10) || 10;
+    // Adjust offset
+    searchArg.offset = currentOffset + (amount * limit);
+    searchArg.offset = Math.max(searchArg.offset, 0);
+    searchArg.limit = limit;
+    // Update the hidden input field with the new searchArg
+    searchArgField.value = JSON.stringify(searchArg);
+    // Submit the form
+    document.getElementById('searchForm').submit();
+  }
+```
+
+#### changeLimit
+
+The adjustOffset function is designed to modify the offset within the searchArg parameter to enable proper pagination of search results. The function begins by retrieving the value of the hidden input field containing the searchArg and converting this value from a JSON string into a JSON object.
+
+To determine the correct page of results to display, the offset is adjusted using the following formula:
+
+$$ 
+Offset = CurrentOffset + (amount × limit)
+$$
+
+This ensures that the offset is correctly incremented or decremented by the specified amount, allowing for seamless pagination. The updated searchArg is then re-encoded as a JSON string and written back to the hidden input field. Finally, the search form is automatically submitted to render the updated results.
+
+```js
+function changeLimit(newLimit) {
+  const searchArgField = document.getElementById('searchArg');
+  const searchArg = JSON.parse(searchArgField.value);
+  searchArg.limit = newLimit;
+  console.log(JSON.stringify(searchArg.limit));
+  searchArgField.value = JSON.stringify(searchArg);
+  document.getElementById('searchForm').submit();
+}
+```
+
+#### changeOrder
+
+The changeOrder function was implemented to allow dynamic sorting of table data by different columns. This functionality is straightforward and is designed such that each column in the table is associated with two clickable buttons. These buttons enable the user to change both the orderfield (the column by which the data is sorted) and the order (the direction of the sort, e.g., ascending or descending).
+
+```js
+function changeOrder(order, column) {
+  const searchArgField = document.getElementById('searchArg');
+  const searchArg = JSON.parse(searchArgField.value);
+  searchArg.order = order;
+  searchArg.orderfield = column;
+  searchArgField.value = JSON.stringify(searchArg);
+  document.getElementById('searchForm').submit();
+}
+```
+
+#### addDescendant
+
+The addDescendant function is designed to extend the search capabilities by allowing users to add additional search criteria (descendants) to the existing search parameters. This function enables the combination of multiple search conditions within different columns, currently supporting the use of the logical AND operator. The logical OR operator is not yet implemented.
+
+To avoid losing the original search parameters, the function first saves these parameters in an originalSearch object. This object captures the current operation (op), value (val), and field (field). The new descendant search criteria are then created, with support limited to the "contains" operator for text fields. Both the original search and the new descendant are added to the descendants list, which is then used to update the search criteria.
+
+A similar function is implemented for numeric fields, allowing for various comparison operators (e.g., <, >, <=, >=).
+
+```js
+function addNumberDescendant(valueInputId, field, formId) {
+  const inputValue = document.getElementById(valueInputId).value.trim();
+
+  // Regular expression to extract operator and value
+  const operatorValueRegex = /^(<=|>=|<|>)?\s*(.+)$/;
+  const match = inputValue.match(operatorValueRegex);
+
+  // Extract operator and value from the input
+  let operator = '';
+  let value = '';
+
+  if (match) {
+    operator = match[1] || ''; // Capture the operator if present, default to empty string if not
+    value = match[2]; // Capture the value
+  }
+
+  console.log(operator);
+  console.log(value);
+
+  // Fetch the searchArg field and parse its value as JSON
+  const searchArgField = document.getElementById('searchArg');
+  let searchArg = JSON.parse(searchArgField.value);
+
+  // Ensure descendants array exists
+  searchArg.descendants = searchArg.descendants || [];
+
+  // Store the original search parameters
+  const originalSearch = {
+    op: searchArg.op,
+    val: searchArg.val,
+    field: searchArg.field
+  };
+
+  // Reset the main search parameters to empty
+  searchArg.op = '';
+  searchArg.val = '';
+  searchArg.field = '';
+
+  // Create a new descendant with the parsed operator, value, and field
+  const newDescendant = {
+    op: operator,
+    val: value,
+    field: field
+  };
+
+  // Push both the original search and the new descendant into descendants
+  searchArg.descendants.push(originalSearch, newDescendant);
+
+  // Set the main operator to AND, implying both conditions should be met
+  searchArg.op = 'AND';
+
+  // Update the hidden searchArg field with the new search argument structure
+  searchArgField.value = JSON.stringify(searchArg);
+
+  // Submit the form
+  document.getElementById(formId).submit();
+}
+```
+
+## CSS and Visualization
+
+The CSS and Visualization was done by trial and error trying to get a look our group liked for our GUI. A thing to mention in this context is the try to include a hyphenator, which would ensure that column names can wordbreak within the table to construct a viewwidth table with proper text

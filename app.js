@@ -542,13 +542,19 @@ app.post('/perturbations/search', async (req, res) => {
   const searchArgString = req.body.searchArg;
   // Parse the JSON string into an object
   let searchArg;
-  try {
+  // check if the searchArg is a string for UI parsing
+  if (searchArgString && typeof searchArgString === 'string') {
     // use middleware to parse the searchArg and convert from string to object
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    // throw an error if the searchArg cannot be parsed
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+    try {
+      searchArg = JSON.parse(searchArgString);
+      // catch errors and return 400 when any error occurs
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+    // else use the searchArg as an object directly
+  } else {
+    searchArg = searchArgString;
   }
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
@@ -605,11 +611,19 @@ app.post('/perturbations/searchUI', async (req, res) => {
   const searchArgString = req.body.searchArg;
   // Parse the JSON string into an object
   let searchArg;
-  try {
-    searchArg = JSON.parse(searchArgString);
-  } catch (e) {
-    console.error('Error parsing searchArg:', e);
-    return res.status(400).send('Invalid searchArg format.');
+  // check if the searchArg is a string for UI parsing
+  if (searchArgString && typeof searchArgString === 'string') {
+    // use middleware to parse the searchArg and convert from string to object
+    try {
+      searchArg = JSON.parse(searchArgString);
+      // catch errors and return 400 when any error occurs
+    } catch (e) {
+      console.error('Error parsing searchArg:', e);
+      return res.status(400).send('Invalid searchArg format.');
+    }
+    // else use the searchArg as an object directly
+  } else {
+    searchArg = searchArgString;
   }
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =

@@ -110,7 +110,12 @@ app.post('/cells/search', async (req, res) => {
     });
 
     // use the search Arg to query the db
-    const cells = await Cells.search(searchArg, db);
+    const cells = await Cells.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
     // Return the result:
     if (req.accepts('html')) {
       // render the table if the request accepts HTML
@@ -833,9 +838,10 @@ app.post('/siginfo/search', async (req, res) => {
     );
     // Return the result:
     if (req.accepts('html')) {
-      res.render(
-        'siginfofull.ejs',
+      ejs.renderFile(
+        './views/siginfofull.ejs',
         { data: signatures, siteSearchArg: searchArg },
+        {},
         (err, str) => {
           if (err) {
             throw err;

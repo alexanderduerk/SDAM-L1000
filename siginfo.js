@@ -167,6 +167,7 @@ class Signatureinfo {
         : 'SELECT * FROM signature_infos';
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
+    console.log(JSON.stringify(dbResult));
     return dbResult;
   }
 
@@ -186,6 +187,7 @@ class Signatureinfo {
         : 'SELECT * FROM signature_infos';
     // Query the database
     const dbResult = await dbconnection.all(searchSql);
+    console.log(dbResult);
     return dbResult;
   }
 

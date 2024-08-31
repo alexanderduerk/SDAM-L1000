@@ -960,8 +960,8 @@ app.post('/genetargets', async (req, res) => {
     );
     // Return the result:
     if (req.accepts('html')) {
-      res.render(
-        'siginfo.ejs',
+      ejs.renderFile(
+        './views/siginfofull.ejs',
         { data: signatures, siteSearchArg: searchArgObject },
         (err, str) => {
           if (err) {

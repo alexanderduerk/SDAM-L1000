@@ -111,7 +111,7 @@ class Cells {
    * @param {object} dbconnection - The database connection object.
    * @return {Promise<Array>} - A Promise that resolves to an array of cell records that match the search criteria.
    */
-  static async search(searcharg, limit, offset, dbconnection) {
+  static async search(searcharg, dbconnection) {
     const searchSql =
       searcharg !== undefined && searcharg !== null
         ? searchArg.translateToSQL(searcharg, 'cells')
@@ -122,6 +122,21 @@ class Cells {
     // Done
     console.log(dbResult);
     return dbResult;
+  }
+
+  /**
+   * Reads a single cell record from the database based on the provided cell_id.
+   *
+   * @param {number} id - The id of the cell record to retrieve.
+   * @param {object} dbconnection - The database connection object.
+   * @return {Promise<object>} - A Promise that resolves to the retrieved cell record.
+   */
+  static async readById(id, dbconnection) {
+    console.log(id);
+    const sql = 'SELECT * FROM cells WHERE cell_id = ?';
+    const dbres = await dbconnection.get(sql, id);
+    console.log(dbres);
+    return dbres;
   }
 
   /**
@@ -144,15 +159,6 @@ class Cells {
     // Done
     console.log(dbResult);
     return dbResult;
-  }
-  // Read by ID
-
-  static async readById(id, dbconnection) {
-    console.log(id);
-    const sql = 'SELECT * FROM cells WHERE cell_id = ?';
-    const dbres = await dbconnection.get(sql, id);
-    console.log(dbres);
-    return dbres;
   }
 }
 

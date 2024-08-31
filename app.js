@@ -110,12 +110,7 @@ app.post('/cells/search', async (req, res) => {
     });
 
     // use the search Arg to query the db
-    const cells = await Cells.search(
-      searchArg,
-      searchArg.limit,
-      searchArg.offset,
-      db
-    );
+    const cells = await Cells.search(searchArg, db);
     // Return the result:
     if (req.accepts('html')) {
       // render the table if the request accepts HTML
@@ -344,12 +339,7 @@ app.post('/genes/search', async (req, res) => {
       driver: sqlite3.Database,
     });
     // Query the db with the searchArg
-    const genes = await Genes.search(
-      searchArg,
-      searchArg.limit,
-      searchArg.offset,
-      db
-    );
+    const genes = await Genes.search(searchArg, db);
     // render the table if the request accepts html
     if (req.accepts('html')) {
       res.render(
@@ -411,12 +401,7 @@ app.post('/genes/searchUI', async (req, res) => {
       driver: sqlite3.Database,
     });
     // Query the db
-    const genes = await Genes.searchUI(
-      searchArg,
-      searchArg.limit,
-      searchArg.offset,
-      db
-    );
+    const genes = await Genes.searchUI(searchArg, db);
     // Return the result:
     if (req.accepts('html')) {
       res.render(
@@ -645,8 +630,7 @@ app.post('/perturbations/searchUI', async (req, res) => {
     if (req.accepts('html')) {
       ejs.renderFile(
         './views/perts.ejs',
-        { data: compounds },
-        {},
+        { data: compounds, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
             throw err;

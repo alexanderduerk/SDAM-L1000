@@ -82,3 +82,73 @@ $response = Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "a
 
 # Output the response
 $response
+
+# Define the search argument as a complex object
+$searchArg = @{
+    op = "AND"
+    orderfield = "donor_age"
+    order = "asc"
+    limit = 10
+    offset = 0
+    descendants = @(
+        @{
+            op = "OR"  # Combine donor_age > 30 OR donor_ethnicity = 'Asian'
+            descendants = @(
+                @{
+                    field = "donor_age"
+                    op = ">"
+                    val = 30
+                },
+                @{
+                    field = "donor_ethnicity"
+                    op = "="
+                    val = "Asian"
+                }
+            )
+        },
+        @{
+            field = "growth_pattern"
+            op = "="
+            val = "adherent"
+        }
+    )
+}
+
+# Define the search argument as a complex object
+$searchArg = @{
+    orderfield = "donor_age"
+    order = "asc"
+    limit = 10
+    offset = 0
+    descendants = @(
+        @{
+            op = "OR"  # Combine donor_age > 30 OR donor_ethnicity = 'Asian'
+            descendants = @(
+                @{
+                    field = "donor_age"
+                    op = ">"
+                    val = 30
+                },
+                @{
+                    field = "donor_ethnicity"
+                    op = "="
+                    val = "Asian"
+                }
+            )
+            }
+    )
+}
+
+# Convert the search argument to JSON for better readability (optional)
+$searchArgJson = $searchArg | ConvertTo-Json -Depth 10
+
+# Define the URL of the server route
+$url = "http://127.0.0.1:3000/cells/search"
+
+# Create the body of the POST request
+$body = @{
+    searchArg = $searchArgJson
+} | ConvertTo-Json -Compress
+
+# Make the POST request
+$response = Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{ Accept = "application/json" }

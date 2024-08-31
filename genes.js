@@ -42,7 +42,7 @@ class Genes {
    * Creates a new record in the 'genes' table of the database with the values from the instance.
    *
    * @param {Object} dbconnection - The connection object to the database.
-   * @return {Promise<Object>} The newly inserted cell object.
+   * @return {Promise<Object>} The newly inserted gene object.
    */
   async createOne(dbconnection) {
     // get all columns
@@ -56,11 +56,11 @@ class Genes {
     // Execute SQL statement with the instanced values
     const dbres = await dbconnection.run(sql, ...values);
     // return the newly inserted cell
-    const newcell = await dbconnection.get(
-      'SELECT * FROM genes WHERE cell_name = ?',
-      this.cell_name
+    const newgene = await dbconnection.get(
+      'SELECT * FROM genes WHERE gene_symbol = ?',
+      this.gene_symbol
     );
-    return newcell;
+    return newgene;
   }
 
   /**
@@ -74,7 +74,7 @@ class Genes {
     const sql = 'DELETE FROM genes WHERE gene_id = ?';
     const dbres = await dbconnection.run(sql, `${geneid}`);
     // return a console.log that the given cell was deleted
-    console.log(`Cell with cell_id: ${geneid} was deleted`);
+    console.log(`Gene with cell_id: ${geneid} was deleted`);
   }
 
   /**
@@ -90,11 +90,11 @@ class Genes {
     const sql = `UPDATE genes SET ${column} = ? WHERE gene_id = ${id}`;
     const dbres = await dbconnection.run(sql, newvalue);
     // return the newly updated Row
-    const updatedCell = await dbconnection.get(
-      'SELECT * FROM genes WHERE cell_id = ?',
+    const updatedGene = await dbconnection.get(
+      'SELECT * FROM genes WHERE gene_id = ?',
       id
     );
-    return updatedCell;
+    return updatedGene;
   }
 
   /**
@@ -106,7 +106,7 @@ class Genes {
    * @param {object} dbconnection - The database connection object.
    * @return {Promise<Array>} An array of database results matching the search criteria.
    */
-  static async search(searcharg, limit, offset, dbconnection) {
+  static async search(searcharg, dbconnection) {
     const searchSql =
       searcharg !== undefined && searcharg !== null
         ? searchArg.translateToSQL(searcharg, 'genes')
@@ -128,7 +128,7 @@ class Genes {
    * @param {object} dbconnection - The database connection object.
    * @return {Promise<Array>} An array of database results matching the search criteria.
    */
-  static async searchUI(searcharg, limit, offset, dbconnection) {
+  static async searchUI(searcharg, dbconnection) {
     const searchSql =
       searcharg !== undefined && searcharg !== null
         ? searchArg.translateToSQL(searcharg, 'genesUI')

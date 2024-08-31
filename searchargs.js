@@ -101,12 +101,25 @@ const geneinfotypes = {
   project_code: 'text',
 };
 
+/**
+ * Determines if a field is of type text.
+ *
+ * @param {string} field - The field to check.
+ * @return {boolean} - True if the field is of type text, false otherwise.
+ */
 function isTextField(field) {
   const fieldType = typemapper[field];
   console.log(typemapper[field]);
   return fieldType === 'text';
 }
 
+/**
+ * Escapes a value for SQL based on its type.
+ *
+ * @param {any} value - The value to escape.
+ * @param {boolean} isText - True if the value is of type text, false otherwise.
+ * @return {string} - The escaped value.
+ */
 function escapeValue(value, isText) {
   if (isText) {
     // Implement proper escaping for text values
@@ -115,6 +128,16 @@ function escapeValue(value, isText) {
   return value;
 }
 
+/**
+ * Translates a search triplet to SQL.
+ *
+ * @param {Object} triplet - The search triplet containing field, op, and val.
+ * @param {string} triplet.field - The field to search on.
+ * @param {string} triplet.op - The operator to use for the search.
+ * @param {string} triplet.val - The value to search for.
+ * @return {string} The SQL query string.
+ * @throws {Error} If the operator is unsupported.
+ */
 function translateSearchTripletToSQL(triplet) {
   const isText = isTextField(triplet.field);
   const escapedVal = escapeValue(triplet.val, isText);
@@ -192,12 +215,18 @@ function translateToSQLRecursive(searchArg) {
   return ''; // Or throw an error
 }
 
-// Translate the search argument to SQL
+/**
+ * Translates a search argument into an SQL query string.
+ *
+ * @param {Object} searchArg - The search argument to translate.
+ * @param {string} table - The table to search in.
+ * @return {string} The SQL query string.
+ */
 function translateToSQL(searchArg, table) {
   let header;
   // Create a header (for every cellname the same)
   if (table === 'cells') {
-    header = `SELECT cell_name AS 'Name', cellosaurus_id AS 'Cellosaurus ID', donor_age AS 'Donor Age', doubling_time AS 'Doubling time', growth_medium AS 'Growth Medium', cell_type AS 'Cell Type', donor_ethnicity AS 'Donor Ethnicity', donor_sex AS 'Donor Sex', donor_tumor_phase AS 'Donor Tumor Phase', cell_lineage AS 'Cell Lineage', primary_disease AS 'Primary Disease', subtype_disease AS 'Subtype Disease', provider_name AS 'Provider Name', growth_pattern AS 'Growth Pattern' FROM ${table} WHERE `;
+    header = `SELECT * FROM ${table} WHERE `;
     typemapper = cellinfotypes;
   }
   if (table === 'cellsUI') {
@@ -205,7 +234,7 @@ function translateToSQL(searchArg, table) {
     typemapper = cellinfotypes;
   }
   if (table === 'perturbagens') {
-    header = `SELECT pert_name AS 'Name', cmap_name AS 'compound', gene_target AS 'Target', moa AS 'mechanism', canonical_smiles AS 'SMILE', inchi_key AS 'identifier', compound_aliases AS 'compound alternative name' FROM ${table} WHERE `;
+    header = `SELECT * FROM ${table} WHERE `;
     typemapper = perturbagentypes;
   }
   if (table === 'perturbagensUI') {
@@ -223,7 +252,36 @@ function translateToSQL(searchArg, table) {
   }
 
   if (table === 'signature_infos') {
-    header = `SELECT sig_name AS 'Signature Name', pert_name AS 'compound', cmap_name AS 'Connectivity Map', cell_name AS 'Cells', bead_batch AS 'Batch Nr.', pert_dose AS 'Dosage', pert_time AS 'Perturbation period', nsamples AS 'Number of Samples', cc_q75 AS 'landmark space', ss_ngene AS 'Number of Genes', tas AS 'Transcriptional activity score', pct_self_rank_q25 AS 'Self connectivity', wt AS 'Wheight list', median_recall_rank_spearman AS 'MRR1', median_recall_rank_wtcs_50 as 'MRR50', median_recall_score_spearman AS 'MRS1', median_recall_score_wtcs_50 as 'MRS50', batch_effect_tstat AS 'Batch effect', batch_effect_tstat_pct AS 'Batch effect %', is_hiq AS 'High Quality', qc_pass AS 'Quality control pass', det_wells AS 'Detection wells', det_plates AS 'Detected plates', distil_ids AS 'Replicate IDs', project_code AS 'Project code' FROM ${table} WHERE `;
+    header = `SELECT si.sig_name AS 'Signature Name',
+                     at.gene_target AS 'Targeted Gene',
+                     at.pert_name AS 'Compound',
+                     si.cmap_name AS 'Connectivity Map',
+                     si.cell_name AS 'Cells',
+                     si.bead_batch AS 'Batch Nr.',
+                     si.pert_dose AS 'Dosage',
+                     si.pert_time AS 'Perturbation Period',
+                     si.nsamples AS 'Number of Samples',
+                     si.cc_q75 AS 'Landmark Space',
+                     si.ss_ngene AS 'Number of Genes',
+                     si.tas AS 'Transcriptional Activity Score',
+                     si.pct_self_rank_q25 AS 'Self Connectivity',
+                     si.wt AS 'Weight List',
+                     si.median_recall_rank_spearman AS 'MRR1',
+                     si.median_recall_rank_wtcs_50 AS 'MRR50',
+                     si.median_recall_score_spearman AS 'MRS1',
+                     si.median_recall_score_wtcs_50 AS 'MRS50',
+                     si.batch_effect_tstat AS 'Batch Effect',
+                     si.batch_effect_tstat_pct AS 'Batch Effect %',
+                     si.is_hiq AS 'High Quality',
+                     si.qc_pass AS 'Quality Control Pass',
+                     si.det_wells AS 'Detection Wells',
+                     si.det_plates AS 'Detected Plates',
+                     si.distil_ids AS 'Replicate IDs',
+                     si.project_code AS 'Project Code'
+              FROM signature_infos si
+              LEFT JOIN perturbagens at
+              ON si.pert_name = at.pert_name
+              WHERE`;
     typemapper = siginfotypes;
   }
   if (table === 'signature_infosUI') {
@@ -279,17 +337,14 @@ function translateToSQL(searchArg, table) {
 
   // Use translateToSQLRecursive to handle nested queries
   const searchSql = translateToSQLRecursive(searchArg);
-
   let orderClause = '';
-  // if (searchArg.field) {
   orderClause = ` ORDER BY ${searchArg.orderfield} ${searchArg.order || 'ASC'}`;
-  // }
   // Allow for pagination args if provided in the search
   if (searchArg.offset !== undefined && searchArg.limit !== undefined) {
     return `${header} ${searchSql}${orderClause} LIMIT ${searchArg.limit} OFFSET ${searchArg.offset}`;
   }
 
   // Combine both
-  return `${header} ${searchSql}${orderClause}`;
+  return `${header} ${searchSql} ${orderClause}`;
 }
 module.exports = { translateToSQL };

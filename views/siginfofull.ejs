@@ -135,6 +135,15 @@ function fullsearch() {
           </th>
           <th>
             <div class="th-container">
+              <span class="th-text hyphenate">Targeted Gene</span>
+                <div class="button-container">
+                  <button class="btn-top" type="button" onclick="changeOrder('ASC', 'gene_target')">➧</button>
+                  <button class="btn-bottom" type="button" onclick="changeOrder('DESC', 'gene_target')">➧</button>
+                </div>
+            </div>
+          </th>
+          <th>
+            <div class="th-container">
               <span class="th-text hyphenate">Compound</span>
                 <div class="button-container">
                   <button class="btn-top" type="button" onclick="changeOrder('ASC', 'pert_name')">➧</button>
@@ -353,6 +362,9 @@ function fullsearch() {
         <tr class="tooltip-row">
           <th>
             <span class="tooltip">ⓘ<span class="tooltiptext">This is the name of the signature.</span></span>
+          </th>
+          <th>
+            <span class="tooltip">ⓘ<span class="tooltiptext hyphenate">The gene that the compound targets.</span></span>
           </th>
           <th>
             <span class="tooltip">ⓘ<span class="tooltiptext">This is the name of the compound used to perturbate.</span></span>

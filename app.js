@@ -339,7 +339,12 @@ app.post('/genes/search', async (req, res) => {
       driver: sqlite3.Database,
     });
     // Query the db with the searchArg
-    const genes = await Genes.search(searchArg, db);
+    const genes = await Genes.search(
+      searchArg,
+      searchArg.limit,
+      searchArg.offset,
+      db
+    );
     // render the table if the request accepts html
     if (req.accepts('html')) {
       res.render(

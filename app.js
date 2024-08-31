@@ -699,7 +699,7 @@ app.patch('/perturbations', async (req, res) => {
     });
     // Extract the pert_id to be updated from request body
     const { pertid, column, newvalue } = req.body;
-    const updatedPerturbagens = Perturbagens.updateOne(
+    const updatedPerturbagens = await Perturbagens.updateOne(
       db,
       pertid,
       column,
@@ -829,16 +829,6 @@ app.post('/siginfo/search', async (req, res) => {
   // Construct the searchArg object
   const { limit, offset, order, descendants, field, op, val, orderfield } =
     searchArg;
-  const searchArgObject = {
-    field,
-    op,
-    val,
-    limit: parseInt(limit, 10) || 10, // Convert to number with a default value
-    offset: parseInt(offset, 10) || 0, // Convert to number with a default value
-    order,
-    orderfield,
-    descendants: Array.isArray(descendants) ? descendants : [], // Ensure descendants is an array
-  };
   try {
     // Connect to db
     db = await sqlite.open({
@@ -847,7 +837,7 @@ app.post('/siginfo/search', async (req, res) => {
     });
     // Query the db
     const signatures = await Signatureinfo.search(
-      searchArgObject,
+      searchArg,
       searchArg.limit,
       searchArg.offset,
       db
@@ -856,7 +846,7 @@ app.post('/siginfo/search', async (req, res) => {
     if (req.accepts('html')) {
       res.render(
         'siginfofull.ejs',
-        { data: signatures, siteSearchArg: searchArgObject },
+        { data: signatures, siteSearchArg: searchArg },
         (err, str) => {
           if (err) {
             throw err;

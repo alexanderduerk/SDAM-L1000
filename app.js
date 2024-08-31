@@ -616,8 +616,7 @@ app.post('/perturbations/searchUI', async (req, res) => {
     if (req.accepts('html')) {
       ejs.renderFile(
         './views/perts.ejs',
-        { data: compounds },
-        {},
+        { data: compounds, currentSearchArg: searchArg },
         (err, str) => {
           if (err) {
             throw err;

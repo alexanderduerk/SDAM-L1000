@@ -10,38 +10,37 @@
 <body>
   <script>
   function adjustOffset(amount) {
-    // Log the action to confirm the function is being called
-    console.log(`Adjusting offset by ${amount}`);
-
-    // Get the current offset value
-    const offsetInput = document.getElementById('offset');
-    let offset = parseInt(offsetInput.value, 10) || 0;
-    const limitInput = document.getElementById('limit');
-    let limit = parseInt(limitInput.value, 10) || 25;
-
-    // Adjust the offset value
-    offset += amount * limit;
-
-    // Update the hidden input with the new offset value
-    offsetInput.value = offset;
-
-    // Log the new offset value
-    console.log(`New offset value: ${offset}`);
-  }
-  // Function for column limit change
-  function changeLimit(newlimit) {
-    const documentlimit = document.getElementById("limitInput");
-    let limit = parseInt(newlimit, 10) || 25;
-    documentlimit.value = limit
-  }
-// Funnction for Changing individual column order
-  function changeOrder(order, column) {
-    console.log(column)
-    const documentorderfield = document.getElementById("orderinput")
-    documentorderfield.value = String(column)
-    const documentorder = document.getElementById("order")
-    documentorder.value = String(order)
-  }
+      // Get the hidden input field for searchArg
+      const searchArgField = document.getElementById('searchArg');
+      // Decode and parse the JSON string from the hidden field
+      let searchArg;
+      try {
+        searchArg = JSON.parse(searchArgField.value);
+        console.log(`searchArg: ${JSON.stringify(searchArg)}`);
+      } catch (e) {
+        console.error('Error parsing searchArg:', e);
+        return;
+      }
+      // Update offset and limit values
+      const currentOffset = parseInt(searchArg.offset, 10) || 0;
+      const limit = parseInt(searchArg.limit, 10) || 10;
+      // Adjust offset
+      searchArg.offset = currentOffset + (amount * limit);
+      searchArg.offset = Math.max(searchArg.offset, 0);
+      searchArg.limit = limit;
+      // Update the hidden input field with the new searchArg
+      searchArgField.value = JSON.stringify(searchArg);
+      // Submit the form
+      document.getElementById('searchForm').submit();
+    }
+    function changeLimit(newLimit) {
+      const searchArgField = document.getElementById('searchArg');
+      const searchArg = JSON.parse(searchArgField.value);
+      searchArg.limit = newLimit;
+      console.log(JSON.stringify(searchArg.limit));
+      searchArgField.value = JSON.stringify(searchArg);
+      document.getElementById('searchForm').submit();
+    }
   </script>
   <nav class="navbar">
     <div class="container">
@@ -64,16 +63,34 @@
     <% if (data && data.length > 0) { %>
       <table>
         <thead>
-          <tr>
-            <th>Cell Name</th>
-            <th>Donor age</th>
-            <th>Growth media</th>
-            <th>Doubling time</th>
-            <th>Donor ethnicity</th>
-            <th>Donor sex</th>
-            <th>Donor tumor phase</th>
-            <th>Primary disease</th>
-            <th>Growth pattern</th>
+          <tr class="header-row">
+            <div class="th-container">
+              <th>Cell Name</th>
+            </div>
+            <div class="th-container">
+              <th>Donor age</th>
+            </div>
+            <div class="th-container">
+              <th>Growth media</th>
+            </div>
+            <div class="th-container">
+              <th>Doubling time</th>
+            </div>
+            <div class="th-container">
+              <th>Donor ethnicity</th>
+            </div>
+            <div class="th-container">
+              <th>Donor sex</th>
+            </div>
+            <div class="th-container">
+              <th>Donor tumor phase</th>
+            </div>
+            <div class="th-container">
+              <th>Primary disease</th>
+            </div>
+            <div class="th-container">
+              <th>Growth pattern</th>
+            </div>
           </tr>
         </thead>
         <tbody>
@@ -90,42 +107,20 @@
       <p>No data available</p>
     <% } %>
     <!--overhanding searchArg-->
+    <div class="Pagination">
+    <button type="button" onclick="adjustOffset(-1, event)">Prev.</button>
+    <button type="button" onclick="adjustOffset(1, event)">Next.</button>
+    <button type="button" onclick="changeLimit(25)">25</button>
+    <button type="button" onclick="changeLimit(50)">50</button>
+    <button type="button" onclick="changeLimit(100)">100</button>
     <form
-    action="/cells/search"
-    method="post"
-    enctype="application/x-www-form-urlencoded"
-  ><!--Hidden input fields for searchArg values-->
-    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
-    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
-    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
-    <input type="hidden" id="limit" name="limit" value="<%= currentSearchArg.limit %>" />
-    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
-    <input type="hidden" name="order" value="<%= currentSearchArg.order %>" /><!--Button functionality-->
-    <input type="hidden" id="orderinput" name="orderfield" value="<%= currentSearchArg.orderfield %>">
-    <button type="submit" onclick="adjustOffset(-1)">Prev.</button>
-    <button type="submit" onclick="adjustOffset(1)">Next.</button>
-  </form>
-  <!-- Hidden input fields & buttons for limit change-->
-  <form
-    action="/cells/search"
-    method="post"
-    enctype="application/x-www-form-urlencoded"
-  >
-    <label for="limitInput">Limit:</label>
-    <input type="hidden" name="val" value="<%= currentSearchArg.val %>" />
-    <input type="hidden" name="field" value="<%= currentSearchArg.field %>" />
-    <input type="hidden" name="op" value="<%= currentSearchArg.op %>" />
-    <input type="hidden" id="offset" name="offset" value="<%= currentSearchArg.offset %>" />
-    <input type="hidden" name="order"  id="order" value="<%= currentSearchArg.order %>" />
-    <input type="hidden" name="orderfield" id="orderinput" value="<%= currentSearchArg.orderfield %>">
-    <input type="hidden" id="limitInput" name="limit" value="<%= currentSearchArg.limit %>">
-    <button type="submit" onclick="changeLimit(50)">50
-    </button>
-    <button type="submit" onclick="changeLimit(100)">100
-    </button>
-    <button type="submit" onclick="changeLimit(150)">150
-    </button>
-  </form>
+      id="searchForm"
+      action="/cells/searchUI"
+      method="post"
+    >
+      <input type="hidden" id="searchArg" name="searchArg" value="<%= JSON.stringify(currentSearchArg) %>">
+    </form>
+  </div>
   </main>
 </body>
 </html>

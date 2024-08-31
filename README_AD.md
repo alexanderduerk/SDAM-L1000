@@ -43,7 +43,7 @@ This README documents the thought processes and problem-solving approaches I emp
 
 ## Repository Initialization
 
-To facilitate collaboration, I established a GitHub repository, complete with a license and a .*gitignore* template configured for JavaScript. I initialized the project with **npm**, ensuring all necessary modules were included. To maintain a consistent coding style and enhance user experience, I integrated **eslint** with **Prettier**, adhering to the **Airbnb** style guide. Additionally, I created a *config.json* and a *.js* file, enabling team members to customize their ports and database routes.
+To facilitate collaboration, I established a GitHub repository, complete with a license and a ._gitignore_ template configured for JavaScript. I initialized the project with **npm**, ensuring all necessary modules were included. To maintain a consistent coding style and enhance user experience, I integrated **eslint** with **Prettier**, adhering to the **Airbnb** style guide. Additionally, I created a _config.json_ and a _.js_ file, enabling team members to customize their ports and database routes.
 
 ## SQL Table Design
 
@@ -52,8 +52,8 @@ To facilitate collaboration, I established a GitHub repository, complete with a 
 We began by analyzing the dataset to determine the optimal structure for a relational database. Our initial schema included the following tables:
 
 1. **MainViews**: Designed to be the most frequently queried table, it included columns for Perturbed Cell, Perturbagens, Targeted Gene, and Fold-Change, with a composite key formed by the Cell, Perturbagens, and Gene.
-2. **CellInfos**: Stored all related data for each cell, using *Cell_iname* as the primary key.
-3. **Perturbagens**: Contained information on perturbagens, linked to the *MainViews* table via the perturbagens' name.
+2. **CellInfos**: Stored all related data for each cell, using _Cell_iname_ as the primary key.
+3. **Perturbagens**: Contained information on perturbagens, linked to the _MainViews_ table via the perturbagens' name.
 4. **GeneInfo**: Held data for each targeted gene affected by the perturbagens.
 
 ### Revised Approach
@@ -70,13 +70,45 @@ We realized the initial design had limitations, particularly in terms of storage
 
 ### Cells Table Implementation
 
-I created the _cells_ table in the [l1000.sql](l1000.sql) file, using metadata from cellinfos.csv. A key decision was to avoid setting a unique constraint on the _cell_name_ column to accommodate different media adaptations and growth patterns. Instead, I implemented a unique constraint based on _cell_name_, _cell_type_, and _growth_pattern_ to prevent duplicates while allowing flexibility.
+I created the _cells_ table in the [l1000.sql](l1000.sql) file, using metadata from cellinfos.csv. A key decision was to avoid setting a unique constraint on the _cell_name_ column to accommodate different media adaptations and growth patterns. Instead, I implemented a unique constraint based on _cell_name_, _cell_type_, and _growth_pattern_ to prevent duplicates while allowing flexibility. The insertion was done without a csv header into a temporate cells table without a PRIMARY AUTOINCREMENT KEY and afterwards inserted those data.
 
-
+```sql
+CREATE TABLE IF NOT EXISTS cells (
+    cell_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- THE PRIMARY KEY SHOULD AUTOINCREMENT A INTEGER FOR EVERY ENTRY
+    cell_name VARCHAR(30) NOT NULL,  -- THE CURATED NAME FOR THE CELLLINE IT SHOULDNT BE LONGER THEN 30 CHARACTERS AND SHOULDNT BE 0 WE WILL NOT ADD A UNIQUE CONSTRAIN BECAUSE DIFERENT ADAPTIONS TO GROWTH MEDIA COULD BE POSSIBLE
+    cellosaurus_id VARCHAR(20), -- THIS WOULD ALLOW TO SEARCH THE CELL WITHIN THE CELLOSAURUS ENCYCLOPEDIA
+    donor_age FLOAT, -- CONTAINS THE AGE OF THE DONOR AS AN FLOAT BECAUSE OF YOUNG DONORS UNDER A YEAR
+    doubling_time VARCHAR(10), -- CONTAINS THE DOUBLING TIME WHICH COULD BE RANGES OR CONNECTED TO AN OPERATOR LIKE > or <
+    growth_medium VARCHAR(60), -- SOME MEDIA COULD HAVE COMPLEX NAMES
+    cell_type VARCHAR(20) NOT NULL, -- CONTAINS HIGH LEVEL INFORMATION OF CELL STATUS FOR EXAMPLE TUMOR
+    donor_ethnicity VARCHAR(20), -- ETHNIC AS STRING COULD BE THOUGHT OF TO BE CHANGED TO A CONSTRAINT INPUT TYPE
+    donor_sex VARCHAR(1), -- DONOR SEX CAN ONLY BE M OR F
+    donor_tumor_phase VARCHAR(20), -- COULD MAYBE ALSO BE CHANGED TO A INTEGER APPROACH TO SAVE SOME SPACE
+    cell_lineage VARCHAR(20), -- GIVES INFORMATION ABOUT THE TISSUE
+    primary_disease VARCHAR(30), -- PRIMARY DISEASE COULD BE BREAST CANCER FOR EXAMPLE
+    subtype_disease VARCHAR(30), -- GIVES MORE INFORMATION ABOUT THE DISEASE E.G. ADENOCARCINOMA
+    provider_name VARCHAR(30), -- A PROVIDER SHOULD BE SAVED EVERY TIME TO ALLOW PROPER RESULT REPRODUCTION BASED ON DATA
+    growth_pattern VARCHAR(20) NOT NULL, -- THIS COULD MAYBE TO CHANGED TO SOME INTEGER APPROACH, IT IS IMPORTANT TO SAVE THE GRWOTH PATTERN BECAUSE THE SAME CELL LINE COULD BE ADAPTED TO DIFFERENT GROWTH CONDITIONS
+    UNIQUE(cell_name, cell_type, growth_pattern) ON CONFLICT IGNORE -- SIMPLE CONSTRAIN TO CHECK IF THE COMBINATION OF THE NOT NULL COLUMNS ALREADY EXISTS IN OUR DATABASE AND IF SO IGNORES THE INCOMING INPUT REQUEST
+)
+```
 
 ### Genes Table Implementation
 
-The creation of the _genes_ was done in a way, so that only cells with available _entrez_id_ and _cell_symbol_ could be included within the database. Also an ignore in cases where those constrains fail, was implemented.
+The creation of the _genes_ was done in a way, so that only cells with available _entrez_id_ and _cell_symbol_ could be included within the database. Also an ignore in cases where those constrains fail, was implemented. For the genes table the same approach with the temporate table.
+
+```sql
+CREATE TABLE IF NOT EXISTS genes (
+    gene_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entrez_id INTEGER UNIQUE NOT NULL ON CONFLICT IGNORE,
+    gene_symbol VARCHAR(30) NOT NULL ON CONFLICT IGNORE,
+    ensembl_id VARCHAR(30),
+    gene_title VARCHAR(30),
+    gene_type VARCHAR(30),
+    src VARCHAR(20),
+    feature_space VARCHAR(30)
+)
+```
 
 ## Class Representation of the data models
 
@@ -91,6 +123,20 @@ When developing the Cells class, my goal was to create a robust and type-safe mo
 ##### Type Checking
 
 I implemented type checking to catch errors early and ensure that all data conforms to expected types.
+
+```js
+/**
+ * Typechecking function to detect type errors early
+ * @param {string, number, boolean}
+ * @param {string, number, boolean}
+ */
+function checkType(value, expectedType) {
+  if (typeof value !== expectedType) {
+    // throw a type error
+    throw new TypeError(`Expected ${expectedType}, got ${typeof value}`);
+  }
+}
+```
 
 ##### Database Operations
 
@@ -784,7 +830,6 @@ app.patch('/cells', async (req, res) => {
 
 The implementation of the Genes class within the express server is done as described above.
 
-
 ## EJS Files and Functions
 
 ### Genes and Cells ejs
@@ -801,35 +846,35 @@ To optimize the design, I consolidated these operations into a single form. This
 
 To adjust the offset, the offset needed to be changed within the searchArg. For this the function would read in the value of the hidden input field and convert it to a JSON object. To make the function display the proper "site" the offset was calculated using:
 
-Offset + (1 or -1 * limit)
+Offset + (1 or -1 \* limit)
 
 which would ensure proper pagination. This modified searchArg could then again be written to the value of the hidden input field and afterwards the searchForm can be submitted.
 
 ```js
 function adjustOffset(amount) {
-    // Get the hidden input field for searchArg
-    const searchArgField = document.getElementById('searchArg');
-    // Decode and parse the JSON string from the hidden field
-    let searchArg;
-    try {
-      searchArg = JSON.parse(searchArgField.value);
-      console.log(`searchArg: ${JSON.stringify(searchArg)}`);
-    } catch (e) {
-      console.error('Error parsing searchArg:', e);
-      return;
-    }
-    // Update offset and limit values
-    const currentOffset = parseInt(searchArg.offset, 10) || 0;
-    const limit = parseInt(searchArg.limit, 10) || 10;
-    // Adjust offset
-    searchArg.offset = currentOffset + (amount * limit);
-    searchArg.offset = Math.max(searchArg.offset, 0);
-    searchArg.limit = limit;
-    // Update the hidden input field with the new searchArg
-    searchArgField.value = JSON.stringify(searchArg);
-    // Submit the form
-    document.getElementById('searchForm').submit();
+  // Get the hidden input field for searchArg
+  const searchArgField = document.getElementById('searchArg');
+  // Decode and parse the JSON string from the hidden field
+  let searchArg;
+  try {
+    searchArg = JSON.parse(searchArgField.value);
+    console.log(`searchArg: ${JSON.stringify(searchArg)}`);
+  } catch (e) {
+    console.error('Error parsing searchArg:', e);
+    return;
   }
+  // Update offset and limit values
+  const currentOffset = parseInt(searchArg.offset, 10) || 0;
+  const limit = parseInt(searchArg.limit, 10) || 10;
+  // Adjust offset
+  searchArg.offset = currentOffset + amount * limit;
+  searchArg.offset = Math.max(searchArg.offset, 0);
+  searchArg.limit = limit;
+  // Update the hidden input field with the new searchArg
+  searchArgField.value = JSON.stringify(searchArg);
+  // Submit the form
+  document.getElementById('searchForm').submit();
+}
 ```
 
 #### changeLimit
@@ -838,7 +883,7 @@ The adjustOffset function is designed to modify the offset within the searchArg 
 
 To determine the correct page of results to display, the offset is adjusted using the following formula:
 
-$$ 
+$$
 Offset = CurrentOffset + (amount × limit)
 $$
 
@@ -909,7 +954,7 @@ function addNumberDescendant(valueInputId, field, formId) {
   const originalSearch = {
     op: searchArg.op,
     val: searchArg.val,
-    field: searchArg.field
+    field: searchArg.field,
   };
 
   // Reset the main search parameters to empty
@@ -921,7 +966,7 @@ function addNumberDescendant(valueInputId, field, formId) {
   const newDescendant = {
     op: operator,
     val: value,
-    field: field
+    field: field,
   };
 
   // Push both the original search and the new descendant into descendants
@@ -940,4 +985,4 @@ function addNumberDescendant(valueInputId, field, formId) {
 
 ## CSS and Visualization
 
-The CSS and Visualization was done by trial and error trying to get a look our group liked for our GUI. A thing to mention in this context is the try to include a hyphenator, which would ensure that column names can wordbreak within the table to construct a viewwidth table with proper text
+The CSS and Visualization was done by trial and error trying to get a look our group liked for our GUI. A thing to mention in this context is the try to include a hyphenator, which would ensure that column names can wordbreak within the table to construct a viewwidth table with proper text.
